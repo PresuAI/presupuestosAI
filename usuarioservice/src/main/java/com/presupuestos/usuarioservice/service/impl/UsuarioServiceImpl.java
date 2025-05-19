@@ -9,6 +9,9 @@ import com.presupuestos.usuarioservice.service.UsuarioService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
 
@@ -28,5 +31,13 @@ public class UsuarioServiceImpl implements UsuarioService {
         Usuario usuario = UsuarioMapper.toEntity(dto);
         Usuario guardado = usuarioRepository.save(usuario);
         return UsuarioMapper.toDto(guardado);
+    }
+
+    @Override
+    public List<UsuarioResponseDto> listarUsuarios() {
+        List<Usuario> usuarios = usuarioRepository.findAll();
+        return usuarios.stream()
+                .map(UsuarioMapper::toDto)
+                .collect(Collectors.toList());
     }
 }
