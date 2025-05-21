@@ -12,14 +12,6 @@ import javax.sql.DataSource;
 public class DatasourceConfig {
 
     @Bean
-    public Dotenv dotenv() {
-        return Dotenv.configure()
-                .filename(".env")
-                .ignoreIfMissing()
-                .load();
-    }
-
-    @Bean
     public DataSource dataSource(Dotenv dotenv) {
         HikariConfig config = new HikariConfig();
 
