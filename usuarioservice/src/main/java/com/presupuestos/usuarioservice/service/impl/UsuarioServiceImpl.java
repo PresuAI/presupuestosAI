@@ -40,4 +40,11 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .map(UsuarioMapper::toDto)
                 .collect(Collectors.toList());
     }
+    @Override
+    public void eliminarUsuario(Long id) {
+        if (!usuarioRepository.existsById(id)) {
+            throw new IllegalArgumentException("Usuario no encontrado.");
+        }
+        usuarioRepository.deleteById(id);
+    }
 }
