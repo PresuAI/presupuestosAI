@@ -31,4 +31,10 @@ public class UsuarioController {
         List<UsuarioResponseDto> usuarios = usuarioService.listarUsuarios();
         return ResponseEntity.ok(usuarios);
     }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarUsuario(@PathVariable Long id) {
+        usuarioService.eliminarUsuario(id);
+        return ResponseEntity.noContent().build(); // 204 No Content
+    }
+
 }
