@@ -3,6 +3,7 @@ package com.presupuestos.usuarioservice.service.impl;
 import com.presupuestos.usuarioservice.dto.request.UsuarioRequestDto;
 import com.presupuestos.usuarioservice.dto.response.UsuarioResponseDto;
 import com.presupuestos.usuarioservice.mapper.UsuarioMapper;
+import com.presupuestos.usuarioservice.model.Rol;
 import com.presupuestos.usuarioservice.model.Usuario;
 import com.presupuestos.usuarioservice.repository.UsuarioRepository;
 import com.presupuestos.usuarioservice.service.UsuarioService;
@@ -46,5 +47,32 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new IllegalArgumentException("Usuario no encontrado.");
         }
         usuarioRepository.deleteById(id);
+    }
+
+    @Override
+    public void actualizarRolDeUsuario(Long id, String nuevoRolTexto, String emailSolicitante) {
+        Usuario solicitante = (Usuario) usuarioRepository.findByEmail(emailSolicitante)
+                .orElseThrow(() -> new RuntimeException("Usuario solicitante no encontrado"));
+
+        if (solicitante.getRol() != Rol.SUPERADMIN) {
+            throw new RuntimeException("No tienes permiso para cambiar roles.");
+        }
+
+        if (solicitante.getId().equals(id)) {
+            throw new RuntimeException("No puedes modificar tu propio rol.");
+        }
+
+        Usuario usuarioObjetivo = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario a modificar no encontrado"));
+
+        Rol nuevoRol;
+        try {
+            nuevoRol = Rol.valueOf(nuevoRolTexto.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Rol inválido: " + nuevoRolTexto);
+        }
+
+        usuarioObjetivo.setRol(nuevoRol);
+        usuarioRepository.save(usuarioObjetivo);
     }
 }

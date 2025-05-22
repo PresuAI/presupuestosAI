@@ -1,11 +1,15 @@
 package com.presupuestos.usuarioservice.controller;
 
+import com.presupuestos.usuarioservice.dto.request.ActualizarRolRequestDto;
 import com.presupuestos.usuarioservice.dto.request.UsuarioRequestDto;
 import com.presupuestos.usuarioservice.dto.response.UsuarioResponseDto;
+import com.presupuestos.usuarioservice.model.Rol;
+import com.presupuestos.usuarioservice.model.Usuario;
 import com.presupuestos.usuarioservice.service.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,6 +39,21 @@ public class UsuarioController {
     public ResponseEntity<Void> eliminarUsuario(@PathVariable Long id) {
         usuarioService.eliminarUsuario(id);
         return ResponseEntity.noContent().build(); // 204 No Content
+    }
+
+    @PutMapping("/{id}/rol")
+    public ResponseEntity<String> actualizarRol(
+            @PathVariable Long id,
+            @RequestBody @Valid ActualizarRolRequestDto request,
+            Authentication authentication
+    ) {
+        String emailActual = (String) authentication.getPrincipal();
+        try {
+            usuarioService.actualizarRolDeUsuario(id, request.getNuevoRol(), emailActual);
+            return ResponseEntity.ok("Rol actualizado correctamente");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        }
     }
 
 }

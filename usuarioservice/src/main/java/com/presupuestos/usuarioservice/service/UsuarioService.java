@@ -9,4 +9,5 @@ public interface UsuarioService {
     UsuarioResponseDto crearUsuario(UsuarioRequestDto dto);
     List<UsuarioResponseDto> listarUsuarios();
     void eliminarUsuario(Long id);
+    void actualizarRolDeUsuario(Long id, String nuevoRolTexto, String emailSolicitante);
 }
