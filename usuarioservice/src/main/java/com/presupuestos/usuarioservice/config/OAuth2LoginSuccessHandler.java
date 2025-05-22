@@ -2,6 +2,8 @@ package com.presupuestos.usuarioservice.config;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.presupuestos.usuarioservice.model.Usuario;
+import com.presupuestos.usuarioservice.repository.UsuarioRepository;
 import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,15 +14,17 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.List;
+import java.util.Optional;
 
 @Component
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private final Dotenv dotenv;
+    private final UsuarioRepository usuarioRepository;
 
-    public OAuth2LoginSuccessHandler(Dotenv dotenv) {
+    public OAuth2LoginSuccessHandler(Dotenv dotenv, UsuarioRepository usuarioRepository) {
         this.dotenv = dotenv;
+        this.usuarioRepository = usuarioRepository;
     }
 
     @Override
@@ -31,8 +35,9 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         DefaultOAuth2User oauthUser = (DefaultOAuth2User) authentication.getPrincipal();
         String email = oauthUser.getAttribute("email");
 
-        List<String> autorizados = List.of(dotenv.get("WHITELIST_EMAILS").split(","));
-        if (!autorizados.contains(email)) {
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByEmailAndActivoTrue(email);
+
+        if (usuarioOpt.isEmpty()) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("Usuario no autorizado");
             return;
