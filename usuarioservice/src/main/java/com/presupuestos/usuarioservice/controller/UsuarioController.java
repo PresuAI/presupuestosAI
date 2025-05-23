@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -44,9 +45,9 @@ public class UsuarioController {
     @PutMapping("/{id}/rol")
     public ResponseEntity<String> actualizarRol(
             @PathVariable Long id,
-            @RequestBody @Valid ActualizarRolRequestDto request,
-            Authentication authentication
+            @RequestBody @Valid ActualizarRolRequestDto request
     ) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String emailActual = (String) authentication.getPrincipal();
         try {
             usuarioService.actualizarRolDeUsuario(id, request.getNuevoRol(), emailActual);

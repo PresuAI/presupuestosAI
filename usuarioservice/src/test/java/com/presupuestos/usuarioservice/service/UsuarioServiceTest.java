@@ -123,4 +123,70 @@ class UsuarioServiceTest {
 
         assertTrue(exception.getMessage().contains("Rol inválido: ROL_INVALIDO"));
     }
+
+    @Test
+    void crearUsuario_emailYaExiste_deberiaLanzarExcepcion() {
+        UsuarioRequestDto dto = new UsuarioRequestDto();
+        dto.setEmail("correo@gmail.com");
+
+        when(usuarioRepository.existsByEmail("correo@gmail.com")).thenReturn(true);
+
+        Exception ex = assertThrows(IllegalArgumentException.class, () ->
+                usuarioService.crearUsuario(dto)
+        );
+
+        assertEquals("Ya existe un usuario con ese email.", ex.getMessage());
+    }
+
+    @Test
+    void eliminarUsuario_usuarioNoExiste_deberiaLanzarExcepcion() {
+        Long id = 99L;
+        when(usuarioRepository.existsById(id)).thenReturn(false);
+
+        Exception ex = assertThrows(IllegalArgumentException.class, () ->
+                usuarioService.eliminarUsuario(id)
+        );
+
+        assertEquals("Usuario no encontrado.", ex.getMessage());
+    }
+
+    @Test
+    void eliminarUsuario_existente_deberiaEliminar() {
+        Long id = 1L;
+        when(usuarioRepository.existsById(id)).thenReturn(true);
+
+        usuarioService.eliminarUsuario(id);
+
+        verify(usuarioRepository).deleteById(id);
+    }
+
+    @Test
+    void cambiarRol_modificarPropioRol_deberiaLanzarExcepcion() {
+        Usuario superAdmin = new Usuario("Super", "super@gmail.com", Rol.SUPERADMIN, true);
+        superAdmin.setId(1L); // El mismo ID del usuario a modificar
+
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(superAdmin));
+        when(usuarioRepository.findByEmail("super@gmail.com")).thenReturn(Optional.of(superAdmin));
+
+        Exception ex = assertThrows(RuntimeException.class, () ->
+                usuarioService.actualizarRolDeUsuario(1L, "ADMIN", "super@gmail.com")
+        );
+
+        assertEquals("No puedes modificar tu propio rol.", ex.getMessage());
+    }
+
+    @Test
+    void cambiarRol_usuarioAModificarNoExiste_deberiaLanzarExcepcion() {
+        Usuario superAdmin = new Usuario("Super", "super@gmail.com", Rol.SUPERADMIN, true);
+        superAdmin.setId(2L);
+
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.empty());
+        when(usuarioRepository.findByEmail("super@gmail.com")).thenReturn(Optional.of(superAdmin));
+
+        Exception ex = assertThrows(RuntimeException.class, () ->
+                usuarioService.actualizarRolDeUsuario(1L, "ADMIN", "super@gmail.com")
+        );
+
+        assertEquals("Usuario a modificar no encontrado", ex.getMessage());
+    }
 }
