@@ -48,7 +48,7 @@ public class UsuarioController {
             @RequestBody @Valid ActualizarRolRequestDto request
     ) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String emailActual = (String) authentication.getPrincipal();
+        String emailActual = authentication.getName();
         try {
             usuarioService.actualizarRolDeUsuario(id, request.getNuevoRol(), emailActual);
             return ResponseEntity.ok("Rol actualizado correctamente");
