@@ -1,6 +1,8 @@
 package com.presupuestos.usuarioservice.integration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.presupuestos.usuarioservice.config.DotenvTestConfig;
+import com.presupuestos.usuarioservice.dto.request.ActualizarRolRequestDto;
 import com.presupuestos.usuarioservice.model.Rol;
 import com.presupuestos.usuarioservice.model.Usuario;
 import com.presupuestos.usuarioservice.repository.UsuarioRepository;
@@ -18,9 +20,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -33,6 +37,9 @@ public class UsuarioIntegrationTest {
     private MockMvc mockMvc;
 
     @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
     private UsuarioRepository usuarioRepository;
 
     @BeforeEach
@@ -40,7 +47,8 @@ public class UsuarioIntegrationTest {
         usuarioRepository.deleteAll();
         Usuario u1 = new Usuario("Manuel", "manuel@gmail.com", Rol.ADMIN, true);
         Usuario u2 = new Usuario("Santiago", "santiago@gmail.com", Rol.USUARIO, true);
-        usuarioRepository.saveAll(List.of(u1, u2));
+        Usuario superadmin = new Usuario("Super", "super@admin.com", Rol.SUPERADMIN, true);
+        usuarioRepository.saveAll(List.of(u1, u2, superadmin));
     }
 
     @Test
@@ -49,7 +57,7 @@ public class UsuarioIntegrationTest {
         mockMvc.perform(get("/api/usuarios")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()", is(2)))
+                .andExpect(jsonPath("$.size()", is(3)))
                 .andExpect(jsonPath("$[0].email", is("manuel@gmail.com")))
                 .andExpect(jsonPath("$[1].rol", is("USUARIO")));
     }
@@ -93,4 +101,39 @@ public class UsuarioIntegrationTest {
                         .content(invalidBody))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    @WithMockUser(username = "super@admin.com", roles = {"SUPERADMIN"})
+    void asignarRol_deberiaActualizarRolYRetornar200() throws Exception {
+        Usuario usuario = new Usuario("Manuel", "manuel@correo.com", Rol.USUARIO, true);
+        usuario = usuarioRepository.save(usuario); // se genera el ID
+
+        ActualizarRolRequestDto requestDto = new ActualizarRolRequestDto();
+        requestDto.setNuevoRol("ADMIN");
+
+        mockMvc.perform(put("/api/usuarios/" + usuario.getId() + "/rol")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Rol actualizado correctamente"));
+
+        Usuario actualizado = usuarioRepository.findById(usuario.getId()).orElseThrow();
+        assertEquals(Rol.ADMIN, actualizado.getRol());
+    }
+
+    @Test
+    @WithMockUser(username = "user@correo.com", roles = {"USUARIO"})
+    void asignarRol_conUsuarioComun_deberiaRetornar403() throws Exception {
+        Usuario usuario = new Usuario("Otro", "otro@correo.com", Rol.USUARIO, true);
+        usuario = usuarioRepository.save(usuario);
+
+        ActualizarRolRequestDto requestDto = new ActualizarRolRequestDto();
+        requestDto.setNuevoRol("ADMIN");
+
+        mockMvc.perform(put("/api/usuarios/" + usuario.getId() + "/rol")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isForbidden());
+    }
+
 }
