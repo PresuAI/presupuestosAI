@@ -12,13 +12,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -51,5 +52,45 @@ public class UsuarioIntegrationTest {
                 .andExpect(jsonPath("$.size()", is(2)))
                 .andExpect(jsonPath("$[0].email", is("manuel@gmail.com")))
                 .andExpect(jsonPath("$[1].rol", is("USUARIO")));
+    }
+
+    @Test
+    @WithMockUser(username = "admin@gmail.com", roles = {"ADMIN"})
+    void crearUsuario_deberiaRetornar201YPersistirUsuario() throws Exception {
+        String requestBody = """
+        {
+            "nombre": "Nuevo Usuario",
+            "email": "nuevo@correo.com",
+            "rol": "USUARIO",
+            "activo": true
+        }
+    """;
+
+        mockMvc.perform(post("/api/usuarios")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.email").value("nuevo@correo.com"));
+
+        List<Usuario> usuarios = usuarioRepository.findAll();
+        assertTrue(usuarios.stream().anyMatch(u -> "nuevo@correo.com".equals(u.getEmail())));
+    }
+
+    @Test
+    @WithMockUser(username = "admin@gmail.com", roles = {"ADMIN"})
+    void crearUsuario_conDatosInvalidos_deberiaRetornar400() throws Exception {
+        String invalidBody = """
+        {
+            "nombre": "",
+            "email": "no-es-un-mail",
+            "rol": "OTRO",
+            "activo": true
+        }
+    """;
+
+        mockMvc.perform(post("/api/usuarios")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidBody))
+                .andExpect(status().isBadRequest());
     }
 }
