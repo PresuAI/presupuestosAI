@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import jakarta.servlet.http.Cookie;
 
 import java.io.IOException;
 import java.util.Date;
@@ -49,7 +50,23 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 .withExpiresAt(new Date(System.currentTimeMillis() + 86400000))
                 .sign(Algorithm.HMAC256(dotenv.get("JWT_SECRET")));
 
-        response.setContentType("application/json");
-        response.getWriter().write("{\"token\": \"" + token + "\"}");
+       /* response.setContentType("application/json");
+        response.getWriter().write("{\"token\": \"" + token + "\"}"); */
+
+        // 🔁 Redirigir con el token en la URL (solo para desarrollo)
+
+
+
+        Cookie cookie = new Cookie("token", token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false); // true si usás HTTPS
+        cookie.setPath("/");
+        cookie.setMaxAge(86400); // 1 día
+
+        response.addCookie(cookie);
+
+        // Redireccionar sin token en la URL
+        response.sendRedirect("http://localhost:4200/login");
+
     }
 }

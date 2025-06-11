@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
 
 import java.util.List;
 
@@ -56,5 +58,19 @@ public class UsuarioController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         }
     }
+
+    @GetMapping("/validar-cookie")
+    public ResponseEntity<Void> validarCookie(Authentication authentication) {
+        if (authentication != null && authentication.isAuthenticated()) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+    @GetMapping("/validar-sesion")
+    public ResponseEntity<?> validarSesion(@AuthenticationPrincipal String email) {
+        return ResponseEntity.ok().body("Sesión válida para: " + email);
+    }
+
 
 }
