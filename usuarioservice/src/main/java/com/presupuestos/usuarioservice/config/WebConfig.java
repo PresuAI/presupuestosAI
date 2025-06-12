@@ -1,4 +1,4 @@
-package com.presupuestos.usuarioservice.config;
+/*package com.presupuestos.usuarioservice.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,8 +17,10 @@ public class WebConfig {
                         .allowedOrigins("http://localhost:4200")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowCredentials(true)
-                        .allowedHeaders("*");
+                        .allowedHeaders("*")
+                        .exposedHeaders("Set-Cookie");
             }
         };
     }
 }
+*/

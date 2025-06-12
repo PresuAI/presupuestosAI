@@ -1,57 +1,75 @@
 .usuarios-container {
+  background-color: #f9f9f9;
+  padding: 2rem;
+  max-width: 900px;
+  margin: 3rem auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.usuarios-header {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  min-height: 100vh;
-  background: #f2f5f8;
-}
-
-.usuarios-card {
-  background: #ffffff;
-  padding: 2rem 2.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  width: 90%;
-  max-width: 800px;
-  text-align: center;
-}
-
-h2 {
   margin-bottom: 1.5rem;
-  font-weight: 600;
+
+  h2 {
+    font-size: 1.8rem;
+    margin: 0;
+  }
+
+  .agregar-btn {
+    background-color: #000;
+    color: #fff;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
 }
 
-.usuarios-table {
+.usuarios-tabla {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 1.5rem;
+  background-color: #fff;
+  border-radius: 6px;
+  overflow: hidden;
 
   th, td {
-    padding: 12px 16px;
-    border-bottom: 1px solid #ddd;
+    padding: 0.8rem 1rem;
     text-align: left;
+    border-bottom: 1px solid #ddd;
   }
 
   th {
     background-color: #f0f0f0;
-    font-weight: 500;
   }
 
-  tr:hover {
-    background-color: #f9f9f9;
+  .editar-btn, .eliminar-btn {
+    margin-right: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .editar-btn {
+    background-color: #007bff;
+    color: white;
+  }
+
+  .eliminar-btn {
+    background-color: #dc3545;
+    color: white;
   }
 }
 
 .logout-btn {
-  background-color: #ff4b4b;
+  margin-top: 1.5rem;
+  background-color: #f44336;
   color: white;
+  padding: 0.6rem 1.4rem;
   border: none;
-  padding: 10px 18px;
   border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.3s;
-
-  &:hover {
-    background-color: #e03939;
-  }
 }

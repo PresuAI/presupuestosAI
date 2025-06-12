@@ -6,6 +6,8 @@ import com.presupuestos.usuarioservice.dto.response.UsuarioResponseDto;
 import com.presupuestos.usuarioservice.model.Rol;
 import com.presupuestos.usuarioservice.model.Usuario;
 import com.presupuestos.usuarioservice.service.UsuarioService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,6 +53,7 @@ public class UsuarioController {
     ) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String emailActual = authentication.getName();
+        System.out.println("Usuario autenticado: " + emailActual);
         try {
             usuarioService.actualizarRolDeUsuario(id, request.getNuevoRol(), emailActual);
             return ResponseEntity.ok("Rol actualizado correctamente");
@@ -59,18 +62,9 @@ public class UsuarioController {
         }
     }
 
-    @GetMapping("/validar-cookie")
-    public ResponseEntity<Void> validarCookie(Authentication authentication) {
-        if (authentication != null && authentication.isAuthenticated()) {
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-    }
     @GetMapping("/validar-sesion")
     public ResponseEntity<?> validarSesion(@AuthenticationPrincipal String email) {
         return ResponseEntity.ok().body("Sesión válida para: " + email);
     }
-
 
 }
