@@ -21,5 +21,16 @@ export class UsuarioService {
     withCredentials: true
   });
 }
+eliminarUsuario(id: number): Observable<void> {
+  return this.http.delete<void>(`http://localhost:8080/api/usuarios/${id}`, {
+    withCredentials: true
+  });
+}
+actualizarRol(id: number, nuevoRol: string): Observable<any> {
+  return this.http.put(`http://localhost:8080/api/usuarios/${id}/rol`, 
+    { nuevoRol }, 
+    { withCredentials: true });
+}
+
 
 }

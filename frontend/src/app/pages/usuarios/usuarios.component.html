@@ -1,28 +1,29 @@
 <div class="usuarios-container">
-  <div class="usuarios-card">
-    <h2>📋 Lista de usuarios</h2>
-
-    <table class="usuarios-table" *ngIf="usuarios.length > 0; else sinUsuarios">
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>Email</th>
-          <th>Rol</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let usuario of usuarios">
-          <td>{{ usuario.nombre }}</td>
-          <td>{{ usuario.email }}</td>
-          <td>{{ usuario.rol }}</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <ng-template #sinUsuarios>
-      <p>No hay usuarios registrados.</p>
-    </ng-template>
-
-    <button class="logout-btn" (click)="cerrarSesion()">Cerrar sesión</button>
+  <div class="usuarios-header">
+    <h2>👤  Lista de Usuarios</h2>
+    <button class="agregar-btn">Agregar usuario</button>
   </div>
+
+  <table class="usuarios-tabla">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Correo electrónico</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+  <tr *ngFor="let usuario of usuarios">
+  <td><i class="fa-solid fa-user"></i> {{ usuario.nombre }}</td>
+  <td>{{ usuario.email }}</td>
+  <td>{{ usuario.rol }}</td>
+  <td>
+    <button (click)="editarRol(usuario)">Editar</button> 
+    <button (click)="eliminarUsuario(usuario.id)">Eliminar</button>
+  </td>
+</tr>
+    </tbody>
+  </table>
+
+  <button class="logout-btn" (click)="cerrarSesion()">Cerrar sesión</button>
 </div>

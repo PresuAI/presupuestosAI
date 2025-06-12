@@ -20,8 +20,8 @@ export class LoginComponent implements OnInit {
     console.log('ngOnInit ejecutado');
 
     // Verificar sesión existente antes de redirigir
-    this.http
-      .get('http://localhost:8080/api/usuarios/validar-cookie', { withCredentials: true })
+    this.
+    http.get('http://localhost:8080/api/auth/validar-cookie', { withCredentials: true })
       .subscribe({
         next: () => {
           console.log('✅ Sesión válida, redirigiendo...');
@@ -35,6 +35,7 @@ export class LoginComponent implements OnInit {
   }
 
   iniciarSesionConGoogle(): void {
-    window.location.href = 'http://localhost:8080/auth/google';
+    window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+
   }
 }
