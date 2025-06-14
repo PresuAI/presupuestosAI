@@ -73,3 +73,43 @@
   border-radius: 6px;
   cursor: pointer;
 }
+.crear-usuario-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.crear-usuario-btn {
+  background-color: #007bff;
+  border: none;
+  color: white;
+  padding: 0.5rem 1.2rem;
+  font-size: 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.crear-usuario-btn:hover {
+  background-color: #0056b3;
+}
+.crear-usuario-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.crear-usuario-btn {
+  background-color: #007bff;
+  border: none;
+  color: white;
+  padding: 0.5rem 1.2rem;
+  font-size: 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.crear-usuario-btn:hover {
+  background-color: #0056b3;
+}

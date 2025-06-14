@@ -75,4 +75,10 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuarioObjetivo.setRol(nuevoRol);
         usuarioRepository.save(usuarioObjetivo);
     }
+    @Override
+    public Usuario obtenerPorEmail(String email) {
+        return usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    }
+
 }
