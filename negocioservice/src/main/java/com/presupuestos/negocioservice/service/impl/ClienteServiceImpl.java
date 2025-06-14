@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,5 +42,15 @@ public class ClienteServiceImpl implements ClienteService {
                 .stream()
                 .map(clienteMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void eliminarCliente(Long id) {
+        if (!clienteRepository.existsById(id)) {
+            throw new NoSuchElementException("Cliente no encontrado con ID: " + id);
+        }
+
+        clienteRepository.deleteById(id);
     }
 }
