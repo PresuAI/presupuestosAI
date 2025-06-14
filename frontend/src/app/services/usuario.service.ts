@@ -31,6 +31,12 @@ actualizarRol(id: number, nuevoRol: string): Observable<any> {
     { nuevoRol }, 
     { withCredentials: true });
 }
+crearUsuario(usuario: any): Observable<any> {
+  return this.http.post('http://localhost:8080/api/usuarios', usuario, {
+    withCredentials: true
+  });
+}
+
 
 
 }
