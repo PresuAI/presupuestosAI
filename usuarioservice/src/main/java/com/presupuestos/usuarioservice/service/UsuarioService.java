@@ -1,5 +1,5 @@
 package com.presupuestos.usuarioservice.service;
-
+import com.presupuestos.usuarioservice.model.Usuario;
 import com.presupuestos.usuarioservice.dto.request.UsuarioRequestDto;
 import com.presupuestos.usuarioservice.dto.response.UsuarioResponseDto;
 
@@ -10,4 +10,5 @@ public interface UsuarioService {
     List<UsuarioResponseDto> listarUsuarios();
     void eliminarUsuario(Long id);
     void actualizarRolDeUsuario(Long id, String nuevoRolTexto, String emailSolicitante);
+    Usuario obtenerPorEmail(String email);
 }

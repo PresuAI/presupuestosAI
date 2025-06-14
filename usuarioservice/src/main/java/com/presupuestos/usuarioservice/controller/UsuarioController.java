@@ -3,6 +3,7 @@ package com.presupuestos.usuarioservice.controller;
 import com.presupuestos.usuarioservice.dto.request.ActualizarRolRequestDto;
 import com.presupuestos.usuarioservice.dto.request.UsuarioRequestDto;
 import com.presupuestos.usuarioservice.dto.response.UsuarioResponseDto;
+import com.presupuestos.usuarioservice.mapper.UsuarioMapper;
 import com.presupuestos.usuarioservice.model.Rol;
 import com.presupuestos.usuarioservice.model.Usuario;
 import com.presupuestos.usuarioservice.service.UsuarioService;
@@ -66,5 +67,13 @@ public class UsuarioController {
     public ResponseEntity<?> validarSesion(@AuthenticationPrincipal String email) {
         return ResponseEntity.ok().body("Sesión válida para: " + email);
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<UsuarioResponseDto> obtenerUsuarioActual(Authentication authentication) {
+        String email = authentication.getName();
+        Usuario usuario = usuarioService.obtenerPorEmail(email);
+        return ResponseEntity.ok(UsuarioMapper.toDto(usuario));
+    }
+
 
 }
