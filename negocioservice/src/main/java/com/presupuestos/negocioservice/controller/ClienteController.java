@@ -7,6 +7,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/clientes")
 public class ClienteController {
@@ -21,5 +23,10 @@ public class ClienteController {
     public ResponseEntity<ClienteResponseDTO> registrarCliente(@RequestBody @Valid ClienteRequestDTO dto) {
         ClienteResponseDTO response = clienteService.registrarCliente(dto);
         return ResponseEntity.status(201).body(response);
+    }
+
+    @GetMapping
+    public List<ClienteResponseDTO> obtenerClientes() {
+        return clienteService.obtenerTodos();
     }
 }

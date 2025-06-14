@@ -9,20 +9,37 @@ import com.presupuestos.negocioservice.service.ClienteService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class ClienteServiceImpl implements ClienteService {
 
     private final ClienteRepository clienteRepository;
+    private final ClienteMapper clienteMapper;
 
-    public ClienteServiceImpl(ClienteRepository clienteRepository) {
+    public ClienteServiceImpl(ClienteRepository clienteRepository, ClienteMapper clienteMapper) {
         this.clienteRepository = clienteRepository;
+        this.clienteMapper = clienteMapper;
     }
 
     @Override
     @Transactional
     public ClienteResponseDTO registrarCliente(ClienteRequestDTO dto) {
+        if (clienteRepository.existsByEmail(dto.getEmail())) {
+            throw new IllegalArgumentException("Ya existe un cliente con ese correo electrónico.");
+        }
+
         Cliente cliente = ClienteMapper.toEntity(dto);
         cliente = clienteRepository.save(cliente);
-        return ClienteMapper.toDTO(cliente);
+        return clienteMapper.toDTO(cliente);
+    }
+
+    @Override
+    public List<ClienteResponseDTO> obtenerTodos() {
+        return clienteRepository.findAll()
+                .stream()
+                .map(clienteMapper::toDTO)
+                .collect(Collectors.toList());
     }
 }
