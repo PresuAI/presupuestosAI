@@ -44,6 +44,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
         }
 
+        if (token == null) {
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                token = authHeader.substring(7); // Sacar "Bearer "
+            }
+        }
+
         if (token != null) {
             try {
                 String email = JWT.require(Algorithm.HMAC256(dotenv.get("JWT_SECRET")))

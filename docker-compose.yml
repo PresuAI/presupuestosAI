@@ -1,4 +1,5 @@
 version: '3.8'
+
 services:
   postgres:
     image: postgres:15
@@ -13,6 +14,18 @@ services:
       - postgres-data:/var/lib/postgresql/data
     restart: always
 
+  usuarioservice:
+    build:
+      context: ./usuarioservice
+      dockerfile: Dockerfile
+    container_name: usuarioservice
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    volumes:
+      - ./usuarioservice/.env:/app/.env
+    restart: always
+
 volumes:
   postgres-data:
-  
