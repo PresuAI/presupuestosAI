@@ -40,4 +40,16 @@ public class ClienteController {
             return ResponseEntity.notFound().build(); // 404
         }
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> actualizarCliente(@PathVariable Long id, @RequestBody @Valid ClienteRequestDTO dto) {
+        try {
+            ClienteResponseDTO actualizado = clienteService.actualizarCliente(id, dto);
+            return ResponseEntity.ok(actualizado); // 200
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.notFound().build(); // 404
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage()); // 400
+        }
+    }
 }
