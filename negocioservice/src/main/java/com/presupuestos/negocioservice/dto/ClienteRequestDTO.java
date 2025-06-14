@@ -8,6 +8,9 @@ public class ClienteRequestDTO {
     @NotBlank
     private String nombre;
 
+    @NotBlank
+    private String rut;
+
     @Email
     @NotBlank
     private String email;
@@ -20,6 +23,14 @@ public class ClienteRequestDTO {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
+    }
+
+    public String getRut() {
+        return rut;
+    }
+
+    public void setRut(String rut) {
+        this.rut = rut;
     }
 
     public String getEmail() {

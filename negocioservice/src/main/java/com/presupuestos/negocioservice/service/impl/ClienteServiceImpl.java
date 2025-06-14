@@ -26,8 +26,8 @@ public class ClienteServiceImpl implements ClienteService {
     @Override
     @Transactional
     public ClienteResponseDTO registrarCliente(ClienteRequestDTO dto) {
-        if (clienteRepository.existsByEmail(dto.getEmail())) {
-            throw new IllegalArgumentException("Ya existe un cliente con ese correo electrónico.");
+        if (clienteRepository.existsByRut(dto.getRut())) {
+            throw new IllegalArgumentException("Ya existe un cliente con ese RUT.");
         }
 
         Cliente cliente = ClienteMapper.toEntity(dto);
