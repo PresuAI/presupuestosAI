@@ -40,5 +40,18 @@ services:
       - ./productoservice/.env:/app/.env
     restart: always
 
+  negocioservice:
+    build:
+      context: ./negocioService
+      dockerfile: Dockerfile
+    container_name: negocioservice
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres
+    volumes:
+      - ./negocioservice/.env:/app/.env
+    restart: always
+
 volumes:
   postgres-data:
