@@ -80,4 +80,12 @@ public class PresupuestoServiceImpl implements PresupuestoService {
         }
         presupuestoRepository.deleteById(id);
     }
+
+    @Override
+    public List<PresupuestoResponseDTO> obtenerPorClienteId(Long clienteId) {
+        List<Presupuesto> presupuestos = presupuestoRepository.findByClienteId(clienteId);
+        return presupuestos.stream()
+                .map(PresupuestoMapper::toDTO)
+                .toList();
+    }
 }

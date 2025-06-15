@@ -10,4 +10,5 @@ public interface PresupuestoService {
     PresupuestoResponseDTO crearPresupuesto(PresupuestoRequestDTO dto);
     PresupuestoResponseDTO actualizarPresupuesto(Long id, PresupuestoRequestDTO dto);
     void eliminarPresupuesto(Long id);
+    List<PresupuestoResponseDTO> obtenerPorClienteId(Long clienteId);
 }
