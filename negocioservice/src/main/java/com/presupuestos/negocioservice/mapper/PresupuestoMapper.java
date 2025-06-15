@@ -37,11 +37,11 @@ public class PresupuestoMapper {
         return presupuesto;
     }
 
-    public PresupuestoResponseDTO toDTO(Presupuesto presupuesto) {
+    public static PresupuestoResponseDTO toDTO(Presupuesto presupuesto) {
         PresupuestoResponseDTO dto = new PresupuestoResponseDTO();
         dto.setId(presupuesto.getId());
         dto.setClienteId(presupuesto.getClienteId());
-        dto.setFechaCreacion(presupuesto.getFechaCreacion().atStartOfDay());
+        dto.setFechaCreacion(presupuesto.getFechaCreacion());
         dto.setEstado(presupuesto.getEstado());
         dto.setTipoEvento(presupuesto.getTipoEvento());
         dto.setComentarios(presupuesto.getComentarios());
@@ -60,5 +60,14 @@ public class PresupuestoMapper {
         }
 
         return dto;
+    }
+
+    public static PresupuestoItem toItemEntity(PresupuestoItemDTO dto) {
+        PresupuestoItem item = new PresupuestoItem();
+        item.setProductoId(dto.getProductoId());
+        item.setCantidad(dto.getCantidad());
+        item.setPrecioUnitario(dto.getPrecioUnitario());
+        item.setTotalItem(dto.getTotalItem());
+        return item;
     }
 }
