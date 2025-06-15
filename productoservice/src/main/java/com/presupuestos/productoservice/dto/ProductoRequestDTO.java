@@ -1,12 +1,17 @@
 package com.presupuestos.productoservice.dto;
+import jakarta.validation.constraints.*;
 
 public class ProductoRequestDTO {
 
+    @NotBlank(message = "El nombre no puede estar vacío")
     private String nombre;
     private String descripcion;
+    @NotBlank(message = "Los ingredientes no pueden estar vacíos")
     private String ingredientes;
     private boolean esVegano;
     private boolean esVegetariano;
+    @NotNull(message = "El precio unitario es obligatorio")
+    @DecimalMin(value = "0.01", message = "El precio debe ser mayor a 0")
     private Double precioUnitario;
     private Double costoUnitario;
 
