@@ -3,6 +3,8 @@ package com.presupuestos.negocioservice.model;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "presupuestos")
@@ -13,6 +15,9 @@ public class Presupuesto {
     private Long id;
 
     private Long clienteId;
+
+    @OneToMany(mappedBy = "presupuesto", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PresupuestoItem> items = new ArrayList<>();
 
     private LocalDate fechaCreacion;
 
@@ -50,6 +55,14 @@ public class Presupuesto {
 
     public void setClienteId(Long clienteId) {
         this.clienteId = clienteId;
+    }
+
+    public List<PresupuestoItem> getItems() {
+        return items;
+    }
+
+    public void setItems(List<PresupuestoItem> items) {
+        this.items = items;
     }
 
     public LocalDate getFechaCreacion() {
