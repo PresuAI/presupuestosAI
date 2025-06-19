@@ -7,6 +7,7 @@ import com.presupuestos.negocioservice.model.Presupuesto;
 import com.presupuestos.negocioservice.model.PresupuestoItem;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,7 +28,11 @@ public class PresupuestoMapper {
                 item.setProductoId(itemDto.getProductoId());
                 item.setCantidad(itemDto.getCantidad());
                 item.setPrecioUnitario(itemDto.getPrecioUnitario());
-                item.setTotalItem(itemDto.getTotalItem());
+
+                item.setTotalItem(
+                        BigDecimal.valueOf(itemDto.getCantidad()).multiply(itemDto.getPrecioUnitario())
+                );
+
                 item.setPresupuesto(presupuesto);
                 return item;
             }).collect(Collectors.toList());
@@ -67,7 +72,9 @@ public class PresupuestoMapper {
         item.setProductoId(dto.getProductoId());
         item.setCantidad(dto.getCantidad());
         item.setPrecioUnitario(dto.getPrecioUnitario());
-        item.setTotalItem(dto.getTotalItem());
+        item.setTotalItem(
+                BigDecimal.valueOf(dto.getCantidad()).multiply(dto.getPrecioUnitario())
+        );
         return item;
     }
 }
