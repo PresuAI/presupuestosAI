@@ -4,6 +4,7 @@ public class ClienteResponseDTO {
 
     private Long id;
     private String nombre;
+    private String rut;
     private String email;
     private String telefono;
     private boolean activo;
@@ -22,6 +23,14 @@ public class ClienteResponseDTO {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
+    }
+
+    public String getRut() {
+        return rut;
+    }
+
+    public void setRut(String rut) {
+        this.rut = rut;
     }
 
     public String getEmail() {
