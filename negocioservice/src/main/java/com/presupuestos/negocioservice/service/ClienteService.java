@@ -8,4 +8,5 @@ import java.util.List;
 public interface ClienteService {
     ClienteResponseDTO registrarCliente(ClienteRequestDTO dto);
     List<ClienteResponseDTO> obtenerTodos();
+    void eliminarCliente(Long id);
 }

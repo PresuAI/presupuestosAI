@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api/clientes")
@@ -28,5 +29,15 @@ public class ClienteController {
     @GetMapping
     public List<ClienteResponseDTO> obtenerClientes() {
         return clienteService.obtenerTodos();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarCliente(@PathVariable Long id) {
+        try {
+            clienteService.eliminarCliente(id);
+            return ResponseEntity.noContent().build(); // 204
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.notFound().build(); // 404
+        }
     }
 }
