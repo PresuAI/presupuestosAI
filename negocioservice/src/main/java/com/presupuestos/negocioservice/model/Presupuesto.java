@@ -3,6 +3,7 @@ package com.presupuestos.negocioservice.model;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +20,7 @@ public class Presupuesto {
     @OneToMany(mappedBy = "presupuesto", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PresupuestoItem> items = new ArrayList<>();
 
-    private LocalDate fechaCreacion;
+    private LocalDateTime fechaCreacion;
 
     private String estado;
 
@@ -31,7 +32,7 @@ public class Presupuesto {
 
     public Presupuesto() {}
 
-    public Presupuesto(Long clienteId, LocalDate fechaCreacion, String estado,
+    public Presupuesto(Long clienteId, LocalDateTime fechaCreacion, String estado,
                        String tipoEvento, String comentarios, BigDecimal gananciaEstimada) {
         this.clienteId = clienteId;
         this.fechaCreacion = fechaCreacion;
@@ -65,12 +66,12 @@ public class Presupuesto {
         this.items = items;
     }
 
-    public LocalDate getFechaCreacion() {
+    public LocalDateTime getFechaCreacion() {
         return fechaCreacion;
     }
 
-    public void setFechaCreacion(LocalDate fechaCreacion) {
-        this.fechaCreacion = fechaCreacion;
+    public void setFechaCreacion() {
+        this.fechaCreacion = LocalDateTime.now();
     }
 
     public String getEstado() {
