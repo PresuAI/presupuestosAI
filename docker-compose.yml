@@ -27,5 +27,18 @@ services:
       - ./usuarioservice/.env:/app/.env
     restart: always
 
+  productoservice:
+    build:
+      context: ./productoservice
+      dockerfile: Dockerfile
+    container_name: productoservice
+    ports:
+      - "8082:8082"
+    depends_on:
+      - postgres
+    volumes:
+      - ./productoservice/.env:/app/.env
+    restart: always
+
 volumes:
   postgres-data:
