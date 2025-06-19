@@ -53,4 +53,28 @@ public class ClienteServiceImpl implements ClienteService {
 
         clienteRepository.deleteById(id);
     }
+
+    @Override
+    @Transactional
+    public ClienteResponseDTO actualizarCliente(Long id, ClienteRequestDTO dto) {
+        Cliente cliente = clienteRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Cliente no encontrado con ID: " + id));
+
+        if (clienteRepository.existsByEmail(dto.getEmail()) && !cliente.getEmail().equals(dto.getEmail())) {
+            throw new IllegalArgumentException("Ya existe un cliente con ese email.");
+        }
+
+        if (clienteRepository.existsByRut(dto.getRut()) && !cliente.getRut().equals(dto.getRut())) {
+            throw new IllegalArgumentException("Ya existe un cliente con ese RUT.");
+        }
+
+        cliente.setNombre(dto.getNombre());
+        cliente.setEmail(dto.getEmail());
+        cliente.setTelefono(dto.getTelefono());
+        cliente.setRut(dto.getRut());
+
+        cliente = clienteRepository.save(cliente);
+
+        return clienteMapper.toDTO(cliente);
+    }
 }

@@ -9,4 +9,5 @@ public interface ClienteService {
     ClienteResponseDTO registrarCliente(ClienteRequestDTO dto);
     List<ClienteResponseDTO> obtenerTodos();
     void eliminarCliente(Long id);
+    ClienteResponseDTO actualizarCliente(Long id, ClienteRequestDTO dto);
 }
