@@ -14,6 +14,14 @@ services:
       - postgres-data:/var/lib/postgresql/data
     restart: always
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"     # AMQP
+      - "15672:15672"   # Management UI: http://localhost:15672
+    restart: always
+
   usuarioservice:
     build:
       context: ./usuarioservice
@@ -23,8 +31,14 @@ services:
       - "8080:8080"
     depends_on:
       - postgres
+      - rabbitmq
     volumes:
       - ./usuarioservice/.env:/app/.env
+    environment:
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
     restart: always
 
   productoservice:
@@ -36,8 +50,14 @@ services:
       - "8082:8082"
     depends_on:
       - postgres
+      - rabbitmq
     volumes:
       - ./productoservice/.env:/app/.env
+    environment:
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
     restart: always
 
   negocioservice:
@@ -49,8 +69,14 @@ services:
       - "8081:8081"
     depends_on:
       - postgres
+      - rabbitmq
     volumes:
       - ./negocioservice/.env:/app/.env
+    environment:
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
     restart: always
 
 volumes:
