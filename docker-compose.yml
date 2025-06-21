@@ -20,6 +20,11 @@ services:
     ports:
       - "5672:5672"     # AMQP
       - "15672:15672"   # Management UI: http://localhost:15672
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "status"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     restart: always
 
   usuarioservice:
@@ -68,8 +73,10 @@ services:
     ports:
       - "8081:8081"
     depends_on:
-      - postgres
-      - rabbitmq
+      postgres:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
     volumes:
       - ./negocioservice/.env:/app/.env
     environment:

@@ -1,9 +1,12 @@
 package com.presupuestos.usuarioservice.controller;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,14 +23,30 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("token", "");
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false); // true en producción si usás HTTPS
-        cookie.setPath("/");
-        cookie.setMaxAge(0); // eliminar cookie
+    public ResponseEntity<Void> logout(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Authentication authentication
+    ) {
+        SecurityContextHolder.clearContext();
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
 
-        response.addCookie(cookie);
+        Cookie tokenCookie = new Cookie("token", "");
+        tokenCookie.setHttpOnly(true);
+        tokenCookie.setSecure(false); // true en prod si usás HTTPS
+        tokenCookie.setPath("/");
+        tokenCookie.setMaxAge(0);
+        response.addCookie(tokenCookie);
+
+        Cookie jsession = new Cookie("JSESSIONID", "");
+        jsession.setHttpOnly(true);
+        jsession.setSecure(false);
+        jsession.setPath("/");
+        jsession.setMaxAge(0);
+        response.addCookie(jsession);
 
         return ResponseEntity.ok().build();
     }

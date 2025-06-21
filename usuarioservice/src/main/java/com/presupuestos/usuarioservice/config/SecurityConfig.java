@@ -40,7 +40,9 @@ public class SecurityConfig {
                                 "/oauth2/**",
                                 "/error",
                                 "/public/**",
-                                "/api/auth/**"
+                                "/api/auth/**",
+                                "/api/auth/validar-cookie",
+                                "/api/auth/logout"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
