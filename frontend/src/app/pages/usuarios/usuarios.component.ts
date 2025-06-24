@@ -1,11 +1,18 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HttpClient } from '@angular/common/http';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { UsuarioService } from '../../services/usuario.service';
 import { AuthService } from '../../services/auth.service';
-import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+
+// PrimeNG
+import { TableModule } from 'primeng/table';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { DropdownModule } from 'primeng/dropdown';
+import { TagModule } from 'primeng/tag';
+import { CheckboxModule } from 'primeng/checkbox';
 
 @Component({
   selector: 'app-usuarios',
@@ -13,7 +20,13 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
   imports: [
     CommonModule,
     HttpClientModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    TableModule,
+    ButtonModule,
+    InputTextModule,
+    DropdownModule,
+    TagModule,
+    CheckboxModule
   ],
   templateUrl: './usuarios.component.html',
   styleUrls: ['./usuarios.component.scss']
@@ -21,18 +34,18 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 export class UsuariosComponent implements OnInit {
   usuarios: any[] = [];
   puedeCrear: boolean = false;
-  formulario!: FormGroup;
   creando: boolean = false;
+  formulario!: FormGroup;
   rolesDisponibles: string[] = [];
 
   @ViewChild('formularioCrear') formularioCrearRef!: ElementRef;
 
   constructor(
-    private usuarioService: UsuarioService,
-    public authService: AuthService,
     private fb: FormBuilder,
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private usuarioService: UsuarioService,
+    public authService: AuthService
   ) {
     this.formulario = this.fb.group({
       nombre: ['', [
@@ -49,7 +62,7 @@ export class UsuariosComponent implements OnInit {
 
   ngOnInit(): void {
     this.authService.cargarUsuario().subscribe({
-      next: (usuario) => {
+      next: () => {
         this.puedeCrear = this.authService.puedeCrearUsuarios();
         this.cargarUsuarios();
       },
@@ -57,6 +70,13 @@ export class UsuariosComponent implements OnInit {
         console.error('🔒 No autenticado. Redirigiendo...');
         this.router.navigate(['/login']);
       }
+    });
+  }
+
+  cargarUsuarios(): void {
+    this.usuarioService.getUsuarios().subscribe({
+      next: (data) => this.usuarios = data,
+      error: (err) => console.error('Error al obtener usuarios:', err)
     });
   }
 
@@ -71,17 +91,6 @@ export class UsuariosComponent implements OnInit {
   cancelarCreacion(): void {
     this.creando = false;
     this.formulario.reset({ activo: true });
-  }
-
-  cargarUsuarios(): void {
-    this.usuarioService.getUsuarios().subscribe({
-      next: (data) => {
-        this.usuarios = data;
-      },
-      error: (err) => {
-        console.error('Error al obtener usuarios:', err);
-      }
-    });
   }
 
   crearUsuario(): void {
@@ -104,35 +113,29 @@ export class UsuariosComponent implements OnInit {
     });
   }
 
-  cerrarSesion(): void {
-    this.http.post('http://localhost:8080/api/auth/logout', {}, {
-      withCredentials: true
-    }).subscribe({
-      next: () => this.router.navigate(['/login']),
-      error: (err: any) => console.error('Error al cerrar sesión', err)
-    });
+  editarRol(usuario: any): void {
+    const nuevoRol = prompt('Nuevo rol (ADMIN, USUARIO o SUPERADMIN):', usuario.rol);
+    if (nuevoRol && nuevoRol !== usuario.rol) {
+      this.usuarioService.actualizarRol(usuario.id, nuevoRol).subscribe({
+        next: () => usuario.rol = nuevoRol,
+        error: err => console.error('Error al actualizar rol', err)
+      });
+    }
   }
 
   eliminarUsuario(id: number): void {
     if (confirm('¿Estás seguro de que querés eliminar este usuario?')) {
       this.usuarioService.eliminarUsuario(id).subscribe({
-        next: () => {
-          this.usuarios = this.usuarios.filter(u => u.id !== id);
-        },
+        next: () => this.usuarios = this.usuarios.filter(u => u.id !== id),
         error: err => console.error('Error al eliminar usuario', err)
       });
     }
   }
 
-  editarRol(usuario: any): void {
-    const nuevoRol = prompt('Nuevo rol (ADMIN o USUARIO):', usuario.rol);
-    if (nuevoRol && nuevoRol !== usuario.rol) {
-      this.usuarioService.actualizarRol(usuario.id, nuevoRol).subscribe({
-        next: () => {
-          usuario.rol = nuevoRol;
-        },
-        error: err => console.error('Error al actualizar rol', err)
-      });
-    }
+  cerrarSesion(): void {
+    this.http.post('http://localhost:8080/api/auth/logout', {}, { withCredentials: true }).subscribe({
+      next: () => this.router.navigate(['/login']),
+      error: (err: any) => console.error('Error al cerrar sesión', err)
+    });
   }
 }
