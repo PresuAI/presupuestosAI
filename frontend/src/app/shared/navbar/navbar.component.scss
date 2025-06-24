@@ -1,0 +1,30 @@
+:host ::ng-deep .p-menubar {
+  background-color: #1a1a1a;
+  border: none;
+}
+
+:host ::ng-deep .p-menubar .p-menuitem-link {
+  color: white;
+}
+
+:host ::ng-deep .p-menubar .p-menuitem-link:hover {
+  background-color: #333;
+}
+.custom-menubar {
+  background-color: #1a1a1a;
+  border: none;
+  padding: 0.5rem 1rem;
+  .p-menubar-root-list {
+    display: none; // Oculta los ítems fijos de menú
+  }
+  .brand-text {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: white;
+    margin-left: 1rem;
+  }
+}
+
+.custom-sidebar {
+  width: 16rem;
+}

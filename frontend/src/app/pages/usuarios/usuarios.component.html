@@ -1,90 +1,115 @@
 <div class="usuarios-container">
   <div class="usuarios-header">
-    <h2>👤 Lista de Usuarios</h2>
+    <h2><i class="pi pi-users"></i> Lista de Usuarios</h2>
 
-    <!-- Solo lo ve ADMIN o SUPERADMIN y solo si no está creando -->
-    <div *ngIf="puedeCrear && !creando" class="crear-usuario-wrapper">
-      <button class="crear-usuario-btn" (click)="abrirFormularioCrearUsuario()">
-        ➕ Crear usuario
-      </button>
+    <div *ngIf="puedeCrear && !creando">
+      <button
+        pButton
+        icon="pi pi-plus"
+        label="Crear usuario"
+        class="p-button-sm p-button-primary"
+        (click)="abrirFormularioCrearUsuario()"
+      ></button>
     </div>
   </div>
 
-  <!-- ✅ Formulario para crear usuario -->
+  <!-- ✅ Formulario crear usuario -->
   <div #formularioCrear *ngIf="creando" class="formulario-crear-usuario">
     <h3>Crear nuevo usuario</h3>
 
-    <form [formGroup]="formulario" (ngSubmit)="crearUsuario()">
-      <!-- NOMBRE -->
-      <label>
-        Nombre:
-        <input type="text" formControlName="nombre" />
-      </label>
-      <div *ngIf="formulario.get('nombre')?.invalid && formulario.get('nombre')?.touched">
-        <small style="color: red;" *ngIf="formulario.get('nombre')?.errors?.['required']">El nombre es obligatorio</small>
-        <small style="color: red;" *ngIf="formulario.get('nombre')?.errors?.['minlength']">Mínimo 2 caracteres</small>
-        <small style="color: red;" *ngIf="formulario.get('nombre')?.errors?.['maxlength']">Máximo 50 caracteres</small>
-        <small style="color: red;" *ngIf="formulario.get('nombre')?.errors?.['pattern']">Solo letras y espacios</small>
+    <form [formGroup]="formulario" (ngSubmit)="crearUsuario()" class="p-fluid p-formgrid">
+      <div class="p-field">
+        <label for="nombre">Nombre</label>
+        <input id="nombre" type="text" pInputText formControlName="nombre" />
+        <small *ngIf="formulario.get('nombre')?.invalid && formulario.get('nombre')?.touched" class="p-error">
+          {{ formulario.get('nombre')?.errors?.['required'] ? 'El nombre es obligatorio' :
+             formulario.get('nombre')?.errors?.['minlength'] ? 'Mínimo 2 caracteres' :
+             formulario.get('nombre')?.errors?.['maxlength'] ? 'Máximo 50 caracteres' :
+             'Solo letras y espacios' }}
+        </small>
       </div>
 
-      <!-- EMAIL -->
-      <label>
-        Email:
-        <input type="email" formControlName="email" />
-      </label>
-      <div *ngIf="formulario.get('email')?.invalid && formulario.get('email')?.touched">
-        <small style="color: red;">Debe ingresar un email válido</small>
+      <div class="p-field">
+        <label for="email">Email</label>
+        <input id="email" type="email" pInputText formControlName="email" />
+        <small *ngIf="formulario.get('email')?.invalid && formulario.get('email')?.touched" class="p-error">
+          Debe ingresar un email válido
+        </small>
       </div>
 
-      <!-- ROL -->
-      <label>
-        Rol:
-        <select formControlName="rol">
-          <option value="" disabled>Seleccione un rol</option>
-          <option *ngFor="let rol of rolesDisponibles" [value]="rol">{{ rol }}</option>
-        </select>
-      </label>
-      <div *ngIf="formulario.get('rol')?.invalid && formulario.get('rol')?.touched">
-        <small style="color: red;">Debe seleccionar un rol</small>
+      <div class="p-field">
+        <label for="rol">Rol</label>
+        <p-dropdown
+          inputId="rol"
+          [options]="rolesDisponibles"
+          placeholder="Seleccione un rol"
+          formControlName="rol"
+        ></p-dropdown>
+        <small *ngIf="formulario.get('rol')?.invalid && formulario.get('rol')?.touched" class="p-error">
+          Debe seleccionar un rol
+        </small>
       </div>
 
-      <!-- ACTIVO -->
-      <label>
-        <input type="checkbox" formControlName="activo" />
-        Usuario activo
-      </label>
+      <div class="p-field-checkbox">
+        <p-checkbox inputId="activo" formControlName="activo" [binary]="true"></p-checkbox>
+        <label for="activo">Usuario activo</label>
+      </div>
 
-      <!-- BOTONES -->
-      <div style="margin-top: 1rem;">
-        <button type="submit">✅ Crear usuario</button>
-        <button type="button" (click)="cancelarCreacion()">❌ Cancelar</button>
+      <div class="formulario-botones">
+        <button pButton type="submit" label="✅ Crear usuario" [disabled]="formulario.invalid"></button>
+        <button pButton type="button" label="❌ Cancelar" class="p-button-secondary" (click)="cancelarCreacion()"></button>
       </div>
     </form>
   </div>
 
-  <!-- ✅ Tabla de usuarios -->
-  <table class="usuarios-tabla">
-    <thead>
+  <!-- ✅ Tabla usuarios con PrimeNG -->
+  <p-table
+    [value]="usuarios"
+    [responsiveLayout]="'scroll'"
+    class="p-datatable-striped p-datatable-sm"
+  >
+    <ng-template pTemplate="header">
       <tr>
         <th>Nombre</th>
         <th>Correo electrónico</th>
         <th>Rol</th>
         <th>Acciones</th>
       </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let usuario of usuarios">
-        <td><i class="fa-solid fa-user"></i> {{ usuario.nombre }}</td>
-        <td>{{ usuario.email }}</td>
-        <td>{{ usuario.rol }}</td>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-u>
+      <tr>
+        <td><i class="pi pi-user mr-2"></i> {{ u.nombre }}</td>
+        <td>{{ u.email }}</td>
         <td>
-          <button (click)="editarRol(usuario)">Editar</button>
-          <button (click)="eliminarUsuario(usuario.id)">Eliminar</button>
+          <p-tag
+            [value]="u.rol"
+            [severity]="u.rol === 'SUPERADMIN' ? 'success' : u.rol === 'ADMIN' ? 'info' : 'warning'"
+          ></p-tag>
+        </td>
+        <td>
+          <button
+            pButton
+            icon="pi pi-pencil"
+            class="p-button-rounded p-button-info p-button-sm mr-2"
+            (click)="editarRol(u)"
+          ></button>
+          <button
+            pButton
+            icon="pi pi-trash"
+            class="p-button-rounded p-button-danger p-button-sm"
+            (click)="eliminarUsuario(u.id)"
+          ></button>
         </td>
       </tr>
-    </tbody>
-  </table>
+    </ng-template>
+  </p-table>
 
-  <!-- BOTÓN CERRAR SESIÓN -->
-  <button class="logout-btn" (click)="cerrarSesion()">Cerrar sesión</button>
+  <button
+    pButton
+    label="Cerrar sesión"
+    icon="pi pi-sign-out"
+    class="p-button-danger mt-4"
+    (click)="cerrarSesion()"
+  ></button>
 </div>

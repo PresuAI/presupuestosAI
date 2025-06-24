@@ -1,115 +1,40 @@
 .usuarios-container {
-  background-color: #f9f9f9;
   padding: 2rem;
-  max-width: 900px;
-  margin: 3rem auto;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.usuarios-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
 
   h2 {
-    font-size: 1.8rem;
-    margin: 0;
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    i {
+      color: #2d78f4;
+    }
   }
 
-  .agregar-btn {
-    background-color: #000;
-    color: #fff;
-    padding: 0.6rem 1.2rem;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-  }
-}
-
-.usuarios-tabla {
-  width: 100%;
-  border-collapse: collapse;
-  background-color: #fff;
-  border-radius: 6px;
-  overflow: hidden;
-
-  th, td {
-    padding: 0.8rem 1rem;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
+  .usuarios-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
   }
 
-  th {
-    background-color: #f0f0f0;
+  .formulario-crear-usuario {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    border: 1px solid #ddd;
+    border-radius: 1rem;
+    background-color: #fff;
+
+    h3 {
+      margin-bottom: 1.5rem;
+    }
+
+    .formulario-botones {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
   }
-
-  .editar-btn, .eliminar-btn {
-    margin-right: 0.5rem;
-    padding: 0.4rem 0.8rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
-  .editar-btn {
-    background-color: #007bff;
-    color: white;
-  }
-
-  .eliminar-btn {
-    background-color: #dc3545;
-    color: white;
-  }
-}
-
-.logout-btn {
-  margin-top: 1.5rem;
-  background-color: #f44336;
-  color: white;
-  padding: 0.6rem 1.4rem;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-.crear-usuario-wrapper {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 1rem;
-}
-
-.crear-usuario-btn {
-  background-color: #007bff;
-  border: none;
-  color: white;
-  padding: 0.5rem 1.2rem;
-  font-size: 1rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.crear-usuario-btn:hover {
-  background-color: #0056b3;
-}
-.crear-usuario-wrapper {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 1rem;
-}
-
-.crear-usuario-btn {
-  background-color: #007bff;
-  border: none;
-  color: white;
-  padding: 0.5rem 1.2rem;
-  font-size: 1rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.crear-usuario-btn:hover {
-  background-color: #0056b3;
 }
