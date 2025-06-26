@@ -1,0 +1,84 @@
+package com.presupuestos.negocioservice.dto;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+
+public class PresupuestoResponseDTO {
+
+    private Long id;
+    private Long clienteId;
+    private LocalDateTime fechaCreacion;
+    private String estado;
+    private String tipoEvento;
+    private String comentarios;
+    private BigDecimal gananciaEstimada;
+
+    private List<PresupuestoItemDTO> items;
+
+    public PresupuestoResponseDTO() {}
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getClienteId() {
+        return clienteId;
+    }
+
+    public void setClienteId(Long clienteId) {
+        this.clienteId = clienteId;
+    }
+
+    public LocalDateTime getFechaCreacion() {
+        return fechaCreacion;
+    }
+
+    public void setFechaCreacion(LocalDateTime fechaCreacion) {
+        this.fechaCreacion = fechaCreacion;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    public String getTipoEvento() {
+        return tipoEvento;
+    }
+
+    public void setTipoEvento(String tipoEvento) {
+        this.tipoEvento = tipoEvento;
+    }
+
+    public String getComentarios() {
+        return comentarios;
+    }
+
+    public void setComentarios(String comentarios) {
+        this.comentarios = comentarios;
+    }
+
+    public BigDecimal getGananciaEstimada() {
+        return gananciaEstimada;
+    }
+
+    public void setGananciaEstimada(BigDecimal gananciaEstimada) {
+        this.gananciaEstimada = gananciaEstimada;
+    }
+
+    public List<PresupuestoItemDTO> getItems() {
+        return items;
+    }
+
+    public void setItems(List<PresupuestoItemDTO> items) {
+        this.items = items;
+    }
+}
