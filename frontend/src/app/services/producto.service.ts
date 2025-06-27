@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface Producto {
   id: number;
@@ -16,31 +17,30 @@ export interface Producto {
   providedIn: 'root'
 })
 export class ProductoService {
-  private apiUrl = 'http://localhost:8082/api/productos';
 
-  constructor(private http: HttpClient) {}
+  private baseUrl = `${environment.productoApi}/productos`;
+
+  constructor(private http: HttpClient) { }
 
   obtenerProductos(): Observable<Producto[]> {
-    return this.http.get<Producto[]>(this.apiUrl);
+    return this.http.get<Producto[]>(this.baseUrl, {
+      withCredentials: true
+    });
   }
 
+  actualizarProducto(id: number, producto: Producto): Observable<Producto> {
+    return this.http.put<Producto>(
+      `${this.baseUrl}/${id}`,
+      producto,
+      { withCredentials: true }
+    );
+  }
 
- actualizarProducto(id: number, producto: Producto): Observable<Producto> {
-  return this.http.put<Producto>(
-    `${this.apiUrl}/${id}`,
-    producto,
-    { withCredentials: true }
-  );
+  crearProducto(producto: Producto): Observable<Producto> {
+    return this.http.post<Producto>(
+      this.baseUrl,
+      producto,
+      { withCredentials: true }
+    );
+  }
 }
-
-crearProducto(producto: Producto): Observable<Producto> {
-  return this.http.post<Producto>(
-    this.apiUrl,
-    producto,
-    { withCredentials: true } 
-  );
-}
-
-}
-
-

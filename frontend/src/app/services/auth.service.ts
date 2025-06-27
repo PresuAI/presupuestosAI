@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
+import { tap } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
-interface Usuario {
+export interface Usuario {
   email: string;
   nombre: string;
   rol: 'USUARIO' | 'ADMIN' | 'SUPERADMIN';
@@ -16,23 +18,16 @@ export class AuthService {
   private usuarioActualSubject = new BehaviorSubject<Usuario | null>(null);
   usuarioActual$ = this.usuarioActualSubject.asObservable();
 
-  constructor(private http: HttpClient) {}
+  private baseUrl = `${environment.usuarioApi}/usuarios`;
+
+  constructor(private http: HttpClient) { }
 
   cargarUsuario(): Observable<Usuario> {
-    return new Observable(observer => {
-      this.http.get<Usuario>('http://localhost:8080/api/usuarios/me', { withCredentials: true })
-        .subscribe({
-          next: (usuario) => {
-            this.usuarioActualSubject.next(usuario);
-            observer.next(usuario);
-            observer.complete();
-          },
-          error: (err) => {
-            console.error('Error al cargar usuario autenticado', err);
-            observer.error(err);
-          }
-        });
-    });
+    return this.http
+      .get<Usuario>(`${this.baseUrl}/me`, { withCredentials: true })
+      .pipe(
+        tap(usuario => this.usuarioActualSubject.next(usuario))
+      );
   }
 
   getUsuario(): Usuario | null {
