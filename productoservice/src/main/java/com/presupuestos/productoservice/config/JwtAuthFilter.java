@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -20,7 +21,11 @@ import java.util.Collections;
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    private final Dotenv dotenv = Dotenv.load(); // carga .env
+    private final String jwtSecret;
+
+    public JwtAuthFilter(@Value("${JWT_SECRET}") String jwtSecret) {
+        this.jwtSecret = jwtSecret;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest req,
@@ -48,7 +53,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         if (token != null) {
             try {
-                String email = JWT.require(Algorithm.HMAC256(dotenv.get("JWT_SECRET")))
+                String email = JWT.require(Algorithm.HMAC256(jwtSecret))
                         .build()
                         .verify(token)
                         .getSubject();
