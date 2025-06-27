@@ -3,13 +3,8 @@
     <h2><i class="pi pi-users"></i> Lista de Usuarios</h2>
 
     <div *ngIf="puedeCrear && !creando">
-      <button
-        pButton
-        icon="pi pi-plus"
-        label="Crear usuario"
-        class="p-button-sm p-button-primary"
-        (click)="abrirFormularioCrearUsuario()"
-      ></button>
+      <button pButton icon="pi pi-plus" label="Crear usuario" class="p-button-sm p-button-primary"
+        (click)="abrirFormularioCrearUsuario()"></button>
     </div>
   </div>
 
@@ -23,9 +18,9 @@
         <input id="nombre" type="text" pInputText formControlName="nombre" />
         <small *ngIf="formulario.get('nombre')?.invalid && formulario.get('nombre')?.touched" class="p-error">
           {{ formulario.get('nombre')?.errors?.['required'] ? 'El nombre es obligatorio' :
-             formulario.get('nombre')?.errors?.['minlength'] ? 'Mínimo 2 caracteres' :
-             formulario.get('nombre')?.errors?.['maxlength'] ? 'Máximo 50 caracteres' :
-             'Solo letras y espacios' }}
+          formulario.get('nombre')?.errors?.['minlength'] ? 'Mínimo 2 caracteres' :
+          formulario.get('nombre')?.errors?.['maxlength'] ? 'Máximo 50 caracteres' :
+          'Solo letras y espacios' }}
         </small>
       </div>
 
@@ -39,12 +34,8 @@
 
       <div class="p-field">
         <label for="rol">Rol</label>
-        <p-dropdown
-          inputId="rol"
-          [options]="rolesDisponibles"
-          placeholder="Seleccione un rol"
-          formControlName="rol"
-        ></p-dropdown>
+        <p-dropdown inputId="rol" [options]="rolesDisponibles" placeholder="Seleccione un rol"
+          formControlName="rol"></p-dropdown>
         <small *ngIf="formulario.get('rol')?.invalid && formulario.get('rol')?.touched" class="p-error">
           Debe seleccionar un rol
         </small>
@@ -57,17 +48,14 @@
 
       <div class="formulario-botones">
         <button pButton type="submit" label="✅ Crear usuario" [disabled]="formulario.invalid"></button>
-        <button pButton type="button" label="❌ Cancelar" class="p-button-secondary" (click)="cancelarCreacion()"></button>
+        <button pButton type="button" label="❌ Cancelar" class="p-button-secondary"
+          (click)="cancelarCreacion()"></button>
       </div>
     </form>
   </div>
 
   <!-- ✅ Tabla usuarios con PrimeNG -->
-  <p-table
-    [value]="usuarios"
-    [responsiveLayout]="'scroll'"
-    class="p-datatable-striped p-datatable-sm"
-  >
+  <p-table [value]="usuarios" [responsiveLayout]="'scroll'" class="p-datatable-striped p-datatable-sm">
     <ng-template pTemplate="header">
       <tr>
         <th>Nombre</th>
@@ -82,34 +70,19 @@
         <td><i class="pi pi-user mr-2"></i> {{ u.nombre }}</td>
         <td>{{ u.email }}</td>
         <td>
-          <p-tag
-            [value]="u.rol"
-            [severity]="u.rol === 'SUPERADMIN' ? 'success' : u.rol === 'ADMIN' ? 'info' : 'warning'"
-          ></p-tag>
+          <p-tag [value]="u.rol"
+            [severity]="u.rol === 'SUPERADMIN' ? 'success' : u.rol === 'ADMIN' ? 'info' : 'warning'"></p-tag>
         </td>
         <td>
-          <button
-            pButton
-            icon="pi pi-pencil"
-            class="p-button-rounded p-button-info p-button-sm mr-2"
-            (click)="editarRol(u)"
-          ></button>
-          <button
-            pButton
-            icon="pi pi-trash"
-            class="p-button-rounded p-button-danger p-button-sm"
-            (click)="eliminarUsuario(u.id)"
-          ></button>
+          <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-info p-button-sm mr-2"
+            (click)="editarRol(u)"></button>
+          <button pButton icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-sm"
+            (click)="eliminarUsuario(u.id)"></button>
         </td>
       </tr>
     </ng-template>
   </p-table>
 
-  <button
-    pButton
-    label="Cerrar sesión"
-    icon="pi pi-sign-out"
-    class="p-button-danger mt-4"
-    (click)="cerrarSesion()"
-  ></button>
+  <button pButton label="Cerrar sesión" icon="pi pi-sign-out" class="p-button-danger mt-4"
+    (click)="cerrarSesion()"></button>
 </div>

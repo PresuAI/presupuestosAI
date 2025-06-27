@@ -65,5 +65,19 @@ services:
     mem_limit: 512m
     cpus: 0.5
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: presupuestosai-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - usuarioservice
+      - productoservice
+      - negocioservice
+    mem_limit: 256m
+    cpus: 0.25
+
 volumes:
   postgres_data:

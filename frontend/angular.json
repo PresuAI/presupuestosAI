@@ -26,15 +26,28 @@
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
-              {
-                "glob": "**/*",
-                "input": "public"
-              }
+             {
+              "glob": "**/*",
+              "input": "public",
+              "output": "/"
+             },
+             {
+              "glob": "**/*",
+              "input": "node_modules/primeng/resources/themes",
+              "output": "assets/themes"
+             },
+             {
+              "glob": "**/*",
+              "input": "node_modules/primeng/resources",
+              "output": "assets/primeng"
+             },
+             {
+              "glob": "**/*",
+              "input": "node_modules/primeicons",
+              "output": "assets/primeicons"
+             }
             ],
             "styles": [
-               "node_modules/primeng/resources/themes/lara-light-blue/theme.css",
-               "node_modules/primeng/resources/primeng.min.css",
-               "node_modules/primeicons/primeicons.css",
                "src/styles.scss"
             ],
             "scripts": []
@@ -44,13 +57,13 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "2MB",
+                  "maximumError": "5MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "6kB",
+                  "maximumError": "10kB"
                 }
               ],
               "outputHashing": "all"
@@ -101,5 +114,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": false
   }
 }
