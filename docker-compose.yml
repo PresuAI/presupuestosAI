@@ -1,90 +1,69 @@
-version: '3.8'
-
+version: "3.8"
 services:
   postgres:
-    image: postgres:15
-    container_name: postgres-presupuestos
-    ports:
-      - "5432:5432"
+    image: postgres:14
+    env_file:
+      - .env
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
     volumes:
-      - postgres-data:/var/lib/postgresql/data
-    restart: always
+      - postgres_data:/var/lib/postgresql/data
+    mem_limit: 1g
+    cpus: 0.5
 
   rabbitmq:
     image: rabbitmq:3-management
-    container_name: rabbitmq
     ports:
-      - "5672:5672"     # AMQP
-      - "15672:15672"   # Management UI: http://localhost:15672
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "status"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    restart: always
+      - "15672:15672"
+      - "5672:5672"
+    mem_limit: 512m
+    cpus: 0.5
 
   usuarioservice:
-    build:
-      context: ./usuarioservice
-      dockerfile: Dockerfile
-    container_name: usuarioservice
+    build: ./usuarioservice
+    env_file:
+      - .env
     ports:
       - "8080:8080"
     depends_on:
       - postgres
-      - rabbitmq
-    volumes:
-      - ./usuarioservice/.env:/app/.env
     environment:
-      - SPRING_RABBITMQ_HOST=rabbitmq
-      - SPRING_RABBITMQ_PORT=5672
-      - SPRING_RABBITMQ_USERNAME=guest
-      - SPRING_RABBITMQ_PASSWORD=guest
-    restart: always
+      # solo lo que cambia para este servicio
+      - SERVER_PORT=8080
+      - JAVA_TOOL_OPTIONS=-Xms128m -Xmx256m
+    mem_limit: 512m
+    cpus: 0.5
 
   productoservice:
-    build:
-      context: ./productoservice
-      dockerfile: Dockerfile
-    container_name: productoservice
+    build: ./productoservice
+    env_file:
+      - .env
     ports:
       - "8082:8082"
     depends_on:
       - postgres
-      - rabbitmq
-    volumes:
-      - ./productoservice/.env:/app/.env
     environment:
-      - SPRING_RABBITMQ_HOST=rabbitmq
-      - SPRING_RABBITMQ_PORT=5672
-      - SPRING_RABBITMQ_USERNAME=guest
-      - SPRING_RABBITMQ_PASSWORD=guest
-    restart: always
+      - SERVER_PORT=8082
+      - JAVA_TOOL_OPTIONS=-Xms128m -Xmx256m
+    mem_limit: 512m
+    cpus: 0.5
 
   negocioservice:
-    build:
-      context: ./negocioService
-      dockerfile: Dockerfile
-    container_name: negocioservice
+    build: ./negocioservice
+    env_file:
+      - .env
     ports:
       - "8081:8081"
     depends_on:
-      postgres:
-        condition: service_started
-      rabbitmq:
-        condition: service_healthy
-    volumes:
-      - ./negocioservice/.env:/app/.env
+      - postgres
+      - rabbitmq
     environment:
-      - SPRING_RABBITMQ_HOST=rabbitmq
-      - SPRING_RABBITMQ_PORT=5672
-      - SPRING_RABBITMQ_USERNAME=guest
-      - SPRING_RABBITMQ_PASSWORD=guest
-    restart: always
+      - SERVER_PORT=8081
+      - JAVA_TOOL_OPTIONS=-Xms128m -Xmx256m
+    mem_limit: 512m
+    cpus: 0.5
 
 volumes:
-  postgres-data:
+  postgres_data:
