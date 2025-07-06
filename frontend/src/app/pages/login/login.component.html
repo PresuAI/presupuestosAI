@@ -3,9 +3,15 @@
         <img src="https://img.icons8.com/color/96/restaurant.png" alt="Logo Restaurante" />
         <h1>Bienvenido</h1>
         <p>Gestioná tu negocio con inteligencia</p>
-        <button class="google-login-btn" (click)="iniciarSesionConGoogle()">
-            <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google Logo">
-            Ingresar con Google
-        </button>
+
+        <form (ngSubmit)="login()" #loginForm="ngForm">
+            <input type="email" placeholder="Correo electrónico" name="email" [(ngModel)]="email" required />
+            <input type="password" placeholder="Contraseña" name="password" [(ngModel)]="password" required />
+            <button type="submit" [disabled]="loginForm.invalid">
+                Ingresar
+            </button>
+        </form>
+
+        <p *ngIf="error" class="error">{{ error }}</p>
     </div>
 </div>

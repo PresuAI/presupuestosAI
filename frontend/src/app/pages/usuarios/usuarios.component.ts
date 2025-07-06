@@ -39,7 +39,7 @@ export class UsuariosComponent implements OnInit {
 
   @ViewChild('formularioCrear') formularioCrearRef!: ElementRef;
 
-  private logoutUrl = `${environment.usuarioApi}/auth/logout`;
+  private logoutUrl = `${environment.apiUrlBase}/api/auth/logout`;
 
   constructor(
     private fb: FormBuilder,
@@ -56,6 +56,11 @@ export class UsuariosComponent implements OnInit {
         Validators.pattern(/^[a-zA-ZÁÉÍÓÚáéíóúñÑ\s]+$/)
       ]],
       email: ['', [Validators.required, Validators.email]],
+      password: ['', [
+        Validators.required,
+        Validators.minLength(6),
+        Validators.maxLength(100)
+      ]],
       rol: ['', Validators.required],
       activo: [true]
     });

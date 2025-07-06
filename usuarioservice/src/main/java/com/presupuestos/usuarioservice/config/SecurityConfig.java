@@ -6,6 +6,8 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -19,11 +21,9 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final OAuth2LoginSuccessHandler successHandler;
     private final JwtAuthFilter jwtAuthFilter;
 
-    public SecurityConfig(OAuth2LoginSuccessHandler successHandler, JwtAuthFilter jwtAuthFilter) {
-        this.successHandler = successHandler;
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
     }
 
@@ -46,14 +46,6 @@ public class SecurityConfig {
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
-                .oauth2Login(oauth -> oauth
-                        .loginPage("/oauth2/authorization/google")
-                        .successHandler(successHandler)
-                )
-                .logout(logout -> logout
-                        .logoutSuccessUrl("/").permitAll()
-                )
-
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -61,7 +53,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:4200", "http://localhost:8080"));
+        //config.setAllowedOrigins(List.of("http://localhost:4200", "http://localhost:8080"));
+        config.addAllowedOriginPattern("*"); // QUITAR EN PRODUCCION. SOLO PARA PRUEBAS!!!
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true); // Muy importante
@@ -70,6 +63,11 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
 }

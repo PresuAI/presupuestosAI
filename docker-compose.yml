@@ -12,6 +12,8 @@ services:
       - postgres_data:/var/lib/postgresql/data
     mem_limit: 1g
     cpus: 0.5
+    ports:
+      - "5432:5432"
 
   rabbitmq:
     image: rabbitmq:3-management

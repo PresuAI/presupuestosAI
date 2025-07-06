@@ -18,7 +18,7 @@ export class AuthService {
   private usuarioActualSubject = new BehaviorSubject<Usuario | null>(null);
   usuarioActual$ = this.usuarioActualSubject.asObservable();
 
-  private baseUrl = `${environment.usuarioApi}/usuarios`;
+  private baseUrl = `${environment.usuarioApi}`;
 
   constructor(private http: HttpClient) { }
 

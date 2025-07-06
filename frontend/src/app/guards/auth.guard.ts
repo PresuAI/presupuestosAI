@@ -10,7 +10,7 @@ import { environment } from '../../environments/environment';
 })
 export class AuthGuard implements CanActivate {
 
-  private validarCookieUrl = `${environment.usuarioApi}/auth/validar-cookie`;
+  private validarCookieUrl = `${environment.apiUrlBase}/api/auth/validar-cookie`;
 
   constructor(
     private http: HttpClient,
