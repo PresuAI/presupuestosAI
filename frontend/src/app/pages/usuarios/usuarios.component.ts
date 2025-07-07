@@ -13,6 +13,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { DropdownModule } from 'primeng/dropdown';
 import { TagModule } from 'primeng/tag';
 import { CheckboxModule } from 'primeng/checkbox';
+import { CardModule } from 'primeng/card';
 
 @Component({
   selector: 'app-usuarios',
@@ -25,7 +26,8 @@ import { CheckboxModule } from 'primeng/checkbox';
     InputTextModule,
     DropdownModule,
     TagModule,
-    CheckboxModule
+    CheckboxModule,
+    CardModule,
   ],
   templateUrl: './usuarios.component.html',
   styleUrls: ['./usuarios.component.scss']

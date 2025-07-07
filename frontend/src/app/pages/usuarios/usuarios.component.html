@@ -9,10 +9,10 @@
   </div>
 
   <!-- ✅ Formulario crear usuario -->
-  <div #formularioCrear *ngIf="creando" class="formulario-crear-usuario">
+  <!--<div #formularioCrear *ngIf="creando" class="formulario-crear-usuario">
     <h3>Crear nuevo usuario</h3>
 
-    <form [formGroup]="formulario" (ngSubmit)="crearUsuario()" class="formulario">
+    <form [formGroup]="formulario" (ngSubmit)="crearUsuario()" class="p-fluid p-formgrid">
       <div class="p-field">
         <label for="nombre">Nombre</label>
         <input id="nombre" type="text" pInputText formControlName="nombre" />
@@ -51,17 +51,88 @@
         </small>
       </div>
 
-      <div class="form-group checkbox-group">
-        <input type="checkbox" id="activo" formControlName="activo" />
+      <div class="p-field-checkbox">
+        <p-checkbox inputId="activo" formControlName="activo" [binary]="true"></p-checkbox>
         <label for="activo">Usuario activo</label>
       </div>
 
       <div class="formulario-botones">
-        <button type="submit" [disabled]="formulario.invalid">✅ Crear usuario</button>
-        <button type="button" (click)="cancelarCreacion()">❌ Cancelar</button>
+        <button pButton type="submit" label="✅ Crear usuario" [disabled]="formulario.invalid"></button>
+        <button pButton type="button" label="❌ Cancelar" class="p-button-secondary"
+          (click)="cancelarCreacion()"></button>
       </div>
     </form>
-  </div>
+  </div>-->
+
+  <p-card *ngIf="creando" header="Crear nuevo usuario" class="mb-4 p-shadow-3">
+    <div class="formulario-wrapper">
+      <form [formGroup]="formulario" (ngSubmit)="crearUsuario()" class="p-fluid p-formgrid grid gap-3 mt-3">
+        <div class="col-12 md:col-6">
+          <div class="flex flex-column gap-2">
+            <label for="nombre">Nombre</label>
+            <input id="nombre" type="text" pInputText formControlName="nombre" />
+          </div>
+          <small *ngIf="formulario.get('nombre')?.invalid && formulario.get('nombre')?.touched" class="p-error mt-1">
+            {{ formulario.get('nombre')?.errors?.['required'] ? 'El nombre es obligatorio' :
+            formulario.get('nombre')?.errors?.['minlength'] ? 'Mínimo 2 caracteres' :
+            formulario.get('nombre')?.errors?.['maxlength'] ? 'Máximo 50 caracteres' :
+            'Solo letras y espacios' }}
+          </small>
+        </div>
+
+        <div class="col-12 md:col-6">
+          <div class="flex flex-column gap-2">
+            <label for="email">Email</label>
+            <input id="email" type="email" pInputText formControlName="email" />
+          </div>
+          <small *ngIf="formulario.get('email')?.invalid && formulario.get('email')?.touched" class="p-error mt-1">
+            Debe ingresar un email válido
+          </small>
+        </div>
+
+        <div class="col-12 md:col-6">
+          <div class="flex flex-column gap-2">
+            <label for="password">Contraseña</label>
+            <input id="password" type="password" pInputText formControlName="password" />
+          </div>
+          <small *ngIf="formulario.get('password')?.invalid && formulario.get('password')?.touched"
+            class="p-error mt-1">
+            La contraseña debe tener al menos 6 caracteres.
+          </small>
+        </div>
+
+        <div class="col-12 md:col-6">
+          <div class="flex flex-column gap-2">
+            <label for="rol">Rol</label>
+            <select id="rol" formControlName="rol" class="p-inputtext">
+              <option value="">Seleccione un rol</option>
+              <option *ngFor="let rol of rolesDisponibles" [value]="rol">{{ rol }}</option>
+            </select>
+          </div>
+          <small *ngIf="formulario.get('rol')?.invalid && formulario.get('rol')?.touched" class="p-error mt-1">
+            Debe seleccionar un rol
+          </small>
+        </div>
+
+        <div class="col-12">
+          <div class="flex align-items-center gap-2">
+            <p-checkbox inputId="activo" formControlName="activo" [binary]="true"></p-checkbox>
+            <label for="activo">Usuario activo</label>
+          </div>
+        </div>
+
+        <div class="col-12 flex gap-3">
+          <button pButton type="submit" label="✅ Crear usuario" [disabled]="formulario.invalid"></button>
+          <button pButton type="button" label="❌ Cancelar" class="p-button-secondary"
+            (click)="cancelarCreacion()"></button>
+        </div>
+      </form>
+    </div>
+  </p-card>
+
+
+
+
 
   <!-- ✅ Tabla usuarios con PrimeNG -->
   <p-table [value]="usuarios" [responsiveLayout]="'scroll'" class="p-datatable-striped p-datatable-sm">
