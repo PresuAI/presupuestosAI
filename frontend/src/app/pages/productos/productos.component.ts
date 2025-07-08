@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ProductoService, Producto } from '../../services/producto.service';
+import { ChatbotComponent } from '../../shared/chatbot/chatbot.component';
 import { CommonModule } from '@angular/common';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
@@ -33,7 +34,8 @@ import { AuthService } from '../../services/auth.service';
     DropdownModule,
     PanelModule,
     CheckboxModule,
-    ToastModule
+    ToastModule,
+    ChatbotComponent,
   ],
   templateUrl: './productos.component.html',
   styleUrls: ['./productos.component.scss'],

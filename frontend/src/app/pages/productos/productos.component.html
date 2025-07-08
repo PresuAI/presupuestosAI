@@ -5,116 +5,61 @@
       <div class="p-toolbar-group-left">
         <span class="p-input-icon-left">
           <i class="pi pi-search"></i>
-          <input
-            type="text"
-            pInputText
-            placeholder="Buscar producto..."
-            [(ngModel)]="filtro"
-          />
+          <input type="text" pInputText placeholder="Buscar producto..." [(ngModel)]="filtro" />
         </span>
       </div>
       <div class="p-toolbar-group-right flex gap-2">
-        <p-dropdown
-  [options]="opcionesOrden"
-  [(ngModel)]="ordenSeleccionado"
-  placeholder="Ordenar por"
-  optionLabel="label"
-   optionValue="value"
-></p-dropdown>
+        <p-dropdown [options]="opcionesOrden" [(ngModel)]="ordenSeleccionado" placeholder="Ordenar por"
+          optionLabel="label" optionValue="value"></p-dropdown>
 
 
-        <button
-          pButton
-          icon="pi pi-plus"
-          label="Nuevo producto"
-          class="p-button-success p-button-sm"
-          (click)="panelVisible = !panelVisible"
-        ></button>
+        <button pButton icon="pi pi-plus" label="Nuevo producto" class="p-button-success p-button-sm"
+          (click)="panelVisible = !panelVisible"></button>
       </div>
     </p-toolbar>
 
-    <p-panel
-      header="Agregar nuevo producto"
-      [toggleable]="true"
-      [collapsed]="!panelVisible"
-      styleClass="mb-3"
-    >
+    <p-panel header="Agregar nuevo producto" [toggleable]="true" [collapsed]="!panelVisible" styleClass="mb-3">
       <form [formGroup]="formularioProducto" (ngSubmit)="crearProducto()">
         <div class="p-fluid p-grid p-formgrid">
           <div class="p-field p-col-12 p-md-6">
             <label for="nombre">Nombre</label>
-            <input
-              id="nombre"
-              type="text"
-              pInputText
-              formControlName="nombre"
-            />
+            <input id="nombre" type="text" pInputText formControlName="nombre" />
           </div>
 
           <div class="p-field p-col-12 p-md-6">
             <label for="precio">Precio</label>
-            <input
-              id="precio"
-              type="number"
-              pInputText
-              formControlName="precioUnitario"
-            />
+            <input id="precio" type="number" pInputText formControlName="precioUnitario" />
           </div>
 
           <div class="p-field p-col-12">
             <label for="descripcion">Descripción</label>
-            <input
-              id="descripcion"
-              type="text"
-              pInputText
-              formControlName="descripcion"
-            />
+            <input id="descripcion" type="text" pInputText formControlName="descripcion" />
           </div>
 
           <div class="p-field p-col-12">
             <label for="ingredientes">Ingredientes</label>
-            <input
-              id="ingredientes"
-              type="text"
-              pInputText
-              formControlName="ingredientes"
-            />
+            <input id="ingredientes" type="text" pInputText formControlName="ingredientes" />
           </div>
 
           <div class="p-field-checkbox p-col-6">
-            <p-checkbox
-              inputId="vegano"
-              formControlName="esVegano"
-              [binary]="true"
-            ></p-checkbox>
+            <p-checkbox inputId="vegano" formControlName="esVegano" [binary]="true"></p-checkbox>
             <label for="vegano">Vegano</label>
           </div>
 
           <div class="p-field-checkbox p-col-6">
-            <p-checkbox
-              inputId="vegetariano"
-              formControlName="esVegetariano"
-              [binary]="true"
-            ></p-checkbox>
+            <p-checkbox inputId="vegetariano" formControlName="esVegetariano" [binary]="true"></p-checkbox>
             <label for="vegetariano">Vegetariano</label>
           </div>
         </div>
 
         <div class="text-right">
-          <button
-            pButton
-            type="submit"
-            label="Agregar producto"
-            [disabled]="formularioProducto.invalid"
-          ></button>
+          <button pButton type="submit" label="Agregar producto" [disabled]="formularioProducto.invalid"></button>
         </div>
       </form>
     </p-panel>
 
     <div class="tarjetas">
-     <p-card *ngFor="let producto of productosFiltrados"
-        styleClass="producto-card"
-      >
+      <p-card *ngFor="let producto of productosFiltrados" styleClass="producto-card">
         <ng-template pTemplate="header">
           <div class="producto-header">
             <h3 class="producto-nombre">{{ producto.nombre }}</h3>
@@ -128,42 +73,28 @@
             <strong>Ingredientes:</strong> {{ producto.ingredientes }}
           </small>
           <br />
-          <p-tag
-            [value]="
+          <p-tag [value]="
               producto.esVegano
                 ? 'Vegano'
                 : producto.esVegetariano
                 ? 'Vegetariano'
                 : 'Otro'
-            "
-            [severity]="
+            " [severity]="
               producto.esVegano
                 ? 'success'
                 : producto.esVegetariano
                 ? 'info'
                 : 'warning'
-            "
-          ></p-tag>
+            "></p-tag>
         </div>
 
         <ng-template pTemplate="footer">
-          <button
-            pButton
-            label="Ver más"
-            icon="pi pi-eye"
-            (click)="abrirModal(producto)"
-            class="ver-mas-btn"
-          ></button>
+          <button pButton label="Ver más" icon="pi pi-eye" (click)="abrirModal(producto)" class="ver-mas-btn"></button>
         </ng-template>
       </p-card>
     </div>
 
-    <p-dialog
-      header="Detalle del producto"
-      [(visible)]="modalVisible"
-      [modal]="true"
-      [style]="{ width: '450px' }"
-    >
+    <p-dialog header="Detalle del producto" [(visible)]="modalVisible" [modal]="true" [style]="{ width: '450px' }">
       <div *ngIf="productoSeleccionado" class="dialog-body">
         <p><strong>Nombre:</strong> {{ productoSeleccionado.nombre }}</p>
         <p>
@@ -175,34 +106,19 @@
 
         <div class="p-field">
           <label for="precio">Precio unitario</label>
-          <p-inputNumber
-            inputId="precio"
-            [(ngModel)]="nuevoPrecio"
-            mode="currency"
-            currency="UYU"
-            locale="es-UY"
-            [min]="1"
-            [showButtons]="true"
-          >
+          <p-inputNumber inputId="precio" [(ngModel)]="nuevoPrecio" mode="currency" currency="UYU" locale="es-UY"
+            [min]="1" [showButtons]="true">
           </p-inputNumber>
         </div>
       </div>
 
       <ng-template pTemplate="footer">
-        <button
-          pButton
-          label="Cancelar"
-          icon="pi pi-times"
-          (click)="modalVisible = false"
-          class="p-button-text"
-        ></button>
-        <button
-          pButton
-          label="Guardar"
-          icon="pi pi-check"
-          (click)="actualizarPrecio()"
-        ></button>
+        <button pButton label="Cancelar" icon="pi pi-times" (click)="modalVisible = false"
+          class="p-button-text"></button>
+        <button pButton label="Guardar" icon="pi pi-check" (click)="actualizarPrecio()"></button>
       </ng-template>
     </p-dialog>
   </div>
+
+  <app-chatbot></app-chatbot>
 </div>
