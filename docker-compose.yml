@@ -12,6 +12,8 @@ services:
       - postgres_data:/var/lib/postgresql/data
     mem_limit: 1g
     cpus: 0.5
+    ports:
+      - "5432:5432"
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -64,6 +66,20 @@ services:
       - JAVA_TOOL_OPTIONS=-Xms128m -Xmx256m
     mem_limit: 512m
     cpus: 0.5
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: presupuestosai-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - usuarioservice
+      - productoservice
+      - negocioservice
+    mem_limit: 256m
+    cpus: 0.25
 
 volumes:
   postgres_data:

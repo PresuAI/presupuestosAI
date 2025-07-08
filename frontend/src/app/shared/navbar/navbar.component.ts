@@ -18,7 +18,7 @@ export class NavbarComponent {
   menuVisible = false; // ✅ ESTA LÍNEA ES CLAVE
   items: MenuItem[] = [];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
 
   ngOnInit(): void {
     this.items = [
@@ -36,7 +36,7 @@ export class NavbarComponent {
   }
 
   navegar(ruta: string): void {
-    this.menuVisible = false; 
+    this.menuVisible = false;
     this.router.navigate([ruta]);
   }
 }

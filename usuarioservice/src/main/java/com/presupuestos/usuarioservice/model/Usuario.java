@@ -15,6 +15,9 @@ public class Usuario {
     @Column(unique = true, nullable = false)
     private String email;
 
+    @Column(nullable = false)
+    private String password;
+
     @Enumerated(EnumType.STRING)
     private Rol rol;
 
@@ -32,6 +35,14 @@ public class Usuario {
 
     public Long getId() {
         return id;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getNombre() {

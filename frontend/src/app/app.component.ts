@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { AuthService } from './services/auth.service';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from './shared/navbar/navbar.component';
+import { environment } from '../environments/environment'; // Importar el entorno para usar la URL de la API
 
 @Component({
   selector: 'app-root',

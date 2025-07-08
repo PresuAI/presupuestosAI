@@ -1,0 +1,7 @@
+export const environment = {
+    production: true,
+    apiUrlBase: 'https://app.confiteriamalu.com',
+    usuarioApi: 'https://app.confiteriamalu.com/api/usuarios',
+    negocioApi: 'https://app.confiteriamalu.com/api/negocios',
+    productoApi: 'https://app.confiteriamalu.com/api/productos',
+};

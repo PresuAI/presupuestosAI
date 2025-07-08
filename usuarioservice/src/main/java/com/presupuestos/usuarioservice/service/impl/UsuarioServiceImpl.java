@@ -7,6 +7,8 @@ import com.presupuestos.usuarioservice.model.Rol;
 import com.presupuestos.usuarioservice.model.Usuario;
 import com.presupuestos.usuarioservice.repository.UsuarioRepository;
 import com.presupuestos.usuarioservice.service.UsuarioService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,21 +19,28 @@ import java.util.stream.Collectors;
 public class UsuarioServiceImpl implements UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public UsuarioServiceImpl(UsuarioRepository usuarioRepository) {
         this.usuarioRepository = usuarioRepository;
     }
 
     @Override
-    @Transactional
     public UsuarioResponseDto crearUsuario(UsuarioRequestDto dto) {
         if (usuarioRepository.existsByEmail(dto.getEmail())) {
-            throw new IllegalArgumentException("Ya existe un usuario con ese email.");
+            throw new RuntimeException("Ya existe un usuario con ese email");
         }
 
-        Usuario usuario = UsuarioMapper.toEntity(dto);
-        Usuario guardado = usuarioRepository.save(usuario);
-        return UsuarioMapper.toDto(guardado);
+        Usuario nuevo = new Usuario();
+        nuevo.setNombre(dto.getNombre());
+        nuevo.setEmail(dto.getEmail());
+        nuevo.setPassword(passwordEncoder.encode(dto.getPassword()));
+        nuevo.setRol(Rol.USUARIO);
+        nuevo.setActivo(true);
+
+        usuarioRepository.save(nuevo);
+        return UsuarioMapper.toDto(nuevo);
     }
 
     @Override
