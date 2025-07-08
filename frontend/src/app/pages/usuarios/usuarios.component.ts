@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { UsuarioService } from '../../services/usuario.service';
 import { AuthService } from '../../services/auth.service';
 import { environment } from '../../../environments/environment';
+import { ChatbotComponent } from '../../shared/chatbot/chatbot.component';
 
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -14,6 +15,9 @@ import { DropdownModule } from 'primeng/dropdown';
 import { TagModule } from 'primeng/tag';
 import { CheckboxModule } from 'primeng/checkbox';
 import { CardModule } from 'primeng/card';
+import { DialogModule } from 'primeng/dialog';
+import { FormsModule } from '@angular/forms';
+
 
 @Component({
   selector: 'app-usuarios',
@@ -28,6 +32,9 @@ import { CardModule } from 'primeng/card';
     TagModule,
     CheckboxModule,
     CardModule,
+    DialogModule,
+    FormsModule,
+    ChatbotComponent,
   ],
   templateUrl: './usuarios.component.html',
   styleUrls: ['./usuarios.component.scss']
@@ -152,4 +159,5 @@ export class UsuariosComponent implements OnInit {
         error: err => console.error('Error al cerrar sesión', err)
       });
   }
+
 }
