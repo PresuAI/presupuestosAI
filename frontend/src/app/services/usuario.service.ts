@@ -1,42 +1,45 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UsuarioService {
 
-  private apiUrl = 'http://localhost:8080/api/usuarios';
+  private base = environment.usuarioApi;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getUsuarios(): Observable<any> {
-    return this.http.get(this.apiUrl, {
-      withCredentials: true  // ✅ Para que se envíe la cookie con el token
+    return this.http.get<any>(`${this.base}`, {
+      withCredentials: true
     });
   }
+
   validarSesion(): Observable<any> {
-  return this.http.get('http://localhost:8080/api/usuarios/validar-sesion', {
-    withCredentials: true
-  });
-}
-eliminarUsuario(id: number): Observable<void> {
-  return this.http.delete<void>(`http://localhost:8080/api/usuarios/${id}`, {
-    withCredentials: true
-  });
-}
-actualizarRol(id: number, nuevoRol: string): Observable<any> {
-  return this.http.put(`http://localhost:8080/api/usuarios/${id}/rol`, 
-    { nuevoRol }, 
-    { withCredentials: true });
-}
-crearUsuario(usuario: any): Observable<any> {
-  return this.http.post('http://localhost:8080/api/usuarios', usuario, {
-    withCredentials: true
-  });
-}
+    return this.http.get<any>(`${this.base}/validar-sesion`, {
+      withCredentials: true
+    });
+  }
 
+  eliminarUsuario(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${id}`, {
+      withCredentials: true
+    });
+  }
 
+  actualizarRol(id: number, nuevoRol: string): Observable<any> {
+    return this.http.put<any>(`${this.base}/${id}/rol`, { nuevoRol }, {
+      withCredentials: true
+    });
+  }
+
+  crearUsuario(usuario: any): Observable<any> {
+    return this.http.post<any>(`${this.base}`, usuario, {
+      withCredentials: true
+    });
+  }
 
 }

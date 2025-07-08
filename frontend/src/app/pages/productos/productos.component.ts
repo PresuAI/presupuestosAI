@@ -59,7 +59,7 @@ export class ProductosComponent implements OnInit {
     public authService: AuthService,
     private fb: FormBuilder,
     private messageService: MessageService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.obtenerProductos();

@@ -47,7 +47,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         var cors = new CorsConfiguration();
-        cors.setAllowedOrigins(List.of("http://localhost:4200"));
+        //cors.setAllowedOrigins(List.of("http://localhost:4200"));
+        cors.addAllowedOriginPattern("*"); // QUITAR EN PRODUCCION. SOLO PARA PRUEBAS!!!
         cors.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
         cors.setAllowedHeaders(List.of("*"));
         cors.setAllowCredentials(true);

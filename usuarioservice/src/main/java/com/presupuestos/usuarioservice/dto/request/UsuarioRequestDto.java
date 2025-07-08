@@ -13,6 +13,9 @@ public class UsuarioRequestDto {
     @NotBlank
     private String email;
 
+    @NotBlank
+    private String password;
+
     @ValidEnum(enumClass = Rol.class, message = "Rol debe ser ADMIN o USUARIO")
     private String rol;
 
@@ -50,5 +53,13 @@ public class UsuarioRequestDto {
 
     public void setActivo(boolean activo) {
         this.activo = activo;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
