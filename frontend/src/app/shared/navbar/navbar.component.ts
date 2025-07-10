@@ -20,20 +20,31 @@ export class NavbarComponent {
 
   constructor(private router: Router) { }
 
-  ngOnInit(): void {
-    this.items = [
-      {
-        label: 'Usuarios',
-        icon: 'pi pi-users',
-        command: () => this.navegar('/usuarios')
-      },
-      {
-        label: 'Productos',
-        icon: 'pi pi-shopping-cart',
-        command: () => this.navegar('/productos')
-      }
-    ];
-  }
+ngOnInit(): void {
+  this.items = [
+    {
+      label: 'Usuarios',
+      icon: 'pi pi-users',
+      command: () => this.navegar('/usuarios')
+    },
+    {
+      label: 'Productos',
+      icon: 'pi pi-shopping-cart',
+      command: () => this.navegar('/productos')
+    },
+    {
+      label: 'Clientes',
+      icon: 'pi pi-id-card',
+      command: () => this.navegar('/clientes')
+    },
+    {
+      label: 'Presupuestos',
+      icon: 'pi pi-file-edit',
+      command: () => this.navegar('/presupuestos')
+    }
+  ];
+}
+
 
   navegar(ruta: string): void {
     this.menuVisible = false;

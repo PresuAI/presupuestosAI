@@ -1,0 +1,32 @@
+.clientes-container {
+  padding: 2rem;
+
+  h2 {
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    i {
+      color: #2d78f4;
+    }
+  }
+
+  .clientes-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .p-card {
+    padding: 1rem;
+    border-radius: 10px;
+  }
+
+  .formulario-wrapper {
+    max-width: 600px;
+    padding: 1rem;
+  }
+}

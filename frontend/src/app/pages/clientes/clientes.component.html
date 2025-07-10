@@ -1,0 +1,72 @@
+<div class="clientes-container">
+  <div class="clientes-header">
+    <h2><i class="pi pi-id-card"></i> Lista de Clientes</h2>
+    <button pButton icon="pi pi-plus" label="Crear cliente" class="p-button-sm p-button-primary" (click)="abrirFormularioCrear()"></button>
+  </div>
+
+  <p-card *ngIf="creando" header="Crear nuevo cliente" class="mb-4 p-shadow-3">
+    <div class="formulario-wrapper">
+      <form [formGroup]="formulario" (ngSubmit)="crearCliente()" class="p-fluid p-formgrid grid gap-3 mt-3">
+        <div class="col-12 md:col-6">
+          <label for="rut">RUT</label>
+          <input id="rut" type="text" pInputText formControlName="rut" />
+        </div>
+
+        <div class="col-12 md:col-6">
+          <label for="nombre">Nombre</label>
+          <input id="nombre" type="text" pInputText formControlName="nombre" />
+        </div>
+
+        <div class="col-12 md:col-6">
+          <label for="email">Email</label>
+          <input id="email" type="email" pInputText formControlName="email" />
+        </div>
+
+        <div class="col-12 md:col-6">
+          <label for="telefono">Teléfono</label>
+          <input id="telefono" type="text" pInputText formControlName="telefono" />
+        </div>
+
+        <div class="col-12">
+          <p-checkbox inputId="activo" formControlName="activo" [binary]="true"></p-checkbox>
+          <label for="activo">Cliente activo</label>
+        </div>
+
+        <div class="col-12 flex gap-3">
+          <button pButton type="submit" label="✅ Crear cliente" [disabled]="formulario.invalid"></button>
+          <button pButton type="button" label="❌ Cancelar" class="p-button-secondary" (click)="cancelarCreacion()"></button>
+        </div>
+      </form>
+    </div>
+  </p-card>
+
+  <p-table [value]="clientes" [responsiveLayout]="'scroll'" class="p-datatable-striped p-datatable-sm mt-3">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>RUT</th>
+        <th>Nombre</th>
+        <th>Email</th>
+        <th>Teléfono</th>
+        <th>Activo</th>
+        <th>Acciones</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-cliente>
+      <tr>
+        <td>{{ cliente.rut }}</td>
+        <td>{{ cliente.nombre }}</td>
+        <td>{{ cliente.email }}</td>
+        <td>{{ cliente.telefono }}</td>
+        <td>
+          <p-tag [value]="cliente.activo ? 'Sí' : 'No'" [severity]="cliente.activo ? 'success' : 'danger'"></p-tag>
+        </td>
+        <td>
+          <button pButton icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-sm" (click)="eliminarCliente(cliente.id)"></button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <app-chatbot />
+</div>
