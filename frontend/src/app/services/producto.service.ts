@@ -11,6 +11,7 @@ export interface Producto {
   precioUnitario: number;
   esVegano: boolean;
   esVegetariano: boolean;
+  flag: 'VEGANO' | 'VEGETARIANO' | 'OTRO';
 }
 
 @Injectable({

@@ -3,12 +3,13 @@ import { RouterOutlet } from '@angular/router';
 import { AuthService } from './services/auth.service';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from './shared/navbar/navbar.component';
-import { environment } from '../environments/environment'; // Importar el entorno para usar la URL de la API
+import { environment } from '../environments/environment'; 
+import { ToastModule } from 'primeng/toast';
 
 @Component({
   selector: 'app-root',
   standalone: true, 
-  imports: [RouterOutlet, CommonModule, NavbarComponent], 
+  imports: [RouterOutlet, CommonModule, NavbarComponent,ToastModule], 
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })

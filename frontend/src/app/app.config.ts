@@ -7,6 +7,8 @@ import { providePrimeNG } from 'primeng/config';
 import Lara from '@primeng/themes/lara';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { NavbarComponent } from './shared/navbar/navbar.component';
+import { MessageService } from 'primeng/api'; 
+
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -21,7 +23,8 @@ export const appConfig: ApplicationConfig = {
           darkMode: false
         }
       }
-    })
+    }),
+      MessageService
   ]
 
 };
