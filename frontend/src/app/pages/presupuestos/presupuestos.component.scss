@@ -1,98 +1,234 @@
-.productos-container {
-  padding: 2rem;
+.p-toast {
+  z-index: 9999;
+}
 
-  h2 {
-    margin-bottom: 1.5rem;
-    color: #2e2e2e;
+.presupuesto-container {
+  padding: 2rem;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  h2,
+  h3 {
+    margin-bottom: 1rem;
+    color: #1e3932;
   }
 
-  .tarjetas {
+  .tabs {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #ccc;
+
+    button {
+      background: none;
+      border: none;
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #1e3932;
+      padding: 1rem 0;
+      position: relative;
+      cursor: pointer;
+
+      &.active {
+        color: #00754a;
+
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          height: 3px;
+          background-color: #00754a;
+        }
+      }
+    }
+  }
+
+  .productos-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 1.5rem;
-    margin-top: 1rem;
+    margin-bottom: 2rem;
   }
 
   ::ng-deep .producto-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  background-color: white !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  padding: 1.2rem;
+  min-height: 330px;
+  height: 100%;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+
+  .producto-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #1e3932;
+    margin-bottom: 0.5rem;
+  }
+
+  .producto-nombre {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #1e3932;
+    margin: 0;
+    max-width: 65%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .producto-precio {
+    font-size: 1.2rem;
+    color: #22c55e;
+    font-weight: bold;
+  }
+
+  .producto-descripcion {
+    flex-grow: 1;
+    font-size: 0.95rem;
+    color: #444;
+    margin-top: 0.5rem;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    min-height: 280px;
-    max-height: 360px;
-    border-radius: 1.25rem;
-    overflow: hidden;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-    padding: 1rem;
-    transition: transform 0.2s ease-in-out;
-    background-color: white;
-    cursor: pointer;
+    justify-content: flex-start;
 
-    &:hover {
-      transform: scale(1.02);
+    p {
+      flex-grow: 1;
     }
 
-    .producto-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.75rem;
+    strong {
+      color: #1e3932;
+      font-weight: 600;
     }
 
-    .producto-nombre {
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: #2c3e50;
-      margin: 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 65%;
-    }
-
-    .producto-precio {
-      font-size: 1.3rem;
-      color: #22c55e;
-      font-weight: 700;
-      white-space: nowrap;
-      text-align: right;
-    }
-
-    .producto-descripcion {
-      flex: 1;
-      font-size: 0.95rem;
-      color: #555;
-
-      .ingredientes {
-        margin-top: 0.5rem;
-        font-size: 0.9rem;
-        color: #777;
-      }
-    }
-
-    .card-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 1rem;
-    }
-
-    .cantidad-input {
-      width: 70px;
+    small {
+      font-size: 0.85rem;
+      color: #777;
     }
   }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1rem;
+
+    .cantidad-input {
+      width: 60px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 0.4rem 0.5rem;
+      font-size: 1rem;
+      color: #333;
+      background: #fff;
+    }
+
+    button {
+      background-color: #00754a;
+      border-radius: 50%;
+      color: white;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: #005f3c;
+      }
+    }
+  }
+
+  ::ng-deep .p-tag {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 0.25rem 0.75rem;
+    text-transform: capitalize;
+  }
+
+  ::ng-deep .p-tag-success {
+    background-color: #22c55e;
+    color: white;
+  }
+
+  ::ng-deep .p-tag-info {
+    background-color: #60a5fa;
+    color: white;
+  }
+
+  ::ng-deep .p-tag-warning {
+    background-color: #f59e0b;
+    color: white;
+  }
+}
+
 
   .ver-sidebar-btn {
     position: fixed;
     bottom: 20px;
     right: 20px;
     z-index: 9999;
+    background-color: #10b981 !important;
+    color: white;
   }
 
   .resumen-sidebar {
-    width: 450px;
-    padding: 1rem;
-    background-color: #fff;
-    color: #333;
+    width: 420px;
+    background-color: #1e1e1e;
+    color: white;
+
+    h3 {
+      margin-bottom: 1.5rem;
+      font-size: 1.3rem;
+      color: #10b981;
+    }
+
+    ::ng-deep .p-table th {
+      background-color: #2c2c2c;
+      color: #ddd;
+      border: none;
+    }
+
+    ::ng-deep .p-table td {
+      background-color: #1e1e1e;
+      color: white;
+      border: none;
+    }
+
+    ::ng-deep .p-button.p-button-success {
+      background-color: #10b981;
+      border: none;
+
+      &:hover {
+        background-color: #0ea277;
+      }
+    }
+
+    ::ng-deep .p-button.p-button-danger {
+      background-color: #ef4444;
+      border: none;
+
+      &:hover {
+        background-color: #dc2626;
+      }
+    }
   }
 
   .d-flex {
@@ -103,7 +239,103 @@
     justify-content: space-between;
   }
 
+  .mt-3 {
+    margin-top: 1rem;
+  }
+
   .mt-4 {
     margin-top: 1.5rem;
+  }
+}
+.formulario-final {
+  max-width: 520px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+  padding: 2rem;
+  border-radius: 20px;
+  margin: 0 auto;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+  h3 {
+    font-size: 1.6rem;
+    margin-bottom: 1.5rem;
+    color: #1e3932;
+    font-weight: 600;
+  }
+
+  label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1e3932;
+    margin-bottom: 0.25rem;
+    display: block;
+  }
+
+  input,
+  textarea,
+  ::ng-deep .p-inputtext {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    background: white;
+    color: #1e3932;
+  }
+
+  ::ng-deep .p-dropdown {
+    width: 100%;
+    margin-bottom: 1rem;
+
+    .p-dropdown-label {
+      color: #1e3932;
+      font-weight: 500;
+      text-align: left;
+    }
+  }
+
+  ::ng-deep .p-inputnumber {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 90px;
+  }
+
+  .d-flex {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  button {
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.75rem 1.75rem;
+    border-radius: 12px;
+
+    &.p-button-success {
+      background-color: #00754a;
+      border: none;
+
+      &:hover {
+        background-color: #005f3c;
+      }
+    }
+
+    &.p-button-secondary {
+      background-color: #222;
+      color: white;
+      border: none;
+
+      &:hover {
+        background-color: #000;
+      }
+    }
   }
 }

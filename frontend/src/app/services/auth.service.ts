@@ -45,4 +45,10 @@ export class AuthService {
     if (rol === 'ADMIN') return ['USUARIO'];
     return [];
   }
+  logout(): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/logout`, {}, { withCredentials: true }).pipe(
+      tap(() => this.usuarioActualSubject.next(null))
+    );
+  }
+
 }

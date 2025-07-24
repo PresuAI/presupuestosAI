@@ -1,51 +1,61 @@
 <p-toast></p-toast>
 
 <div class="presupuesto-container">
-  <h2>📦 Armado de Presupuesto</h2>
+  <!-- 📁 Tabs -->
+  <div class="tabs">
+    <button [class.active]="vista === 'productos'" (click)="vista = 'productos'">Productos</button>
+    <button [class.active]="vista === 'presupuestos'" (click)="vista = 'presupuestos'">Presupuestos</button>
+  </div>
 
-  <!-- Paso 1: Selección de productos -->
-  <div *ngIf="!mostrarFormularioFinal">
-    <h3>🛒 Productos disponibles</h3>
+  <!-- 🛒 TAB: Productos -->
+  <div *ngIf="vista === 'productos' && !mostrarFormularioFinal">
+    <h2> Armado de Presupuesto | Productos disponibles</h2>
 
     <div class="productos-grid">
-      <p-card *ngFor="let prod of productos" class="producto-card">
+      <p-card *ngFor="let prod of productos" styleClass="producto-card">
         <ng-template pTemplate="header">
-          <div class="card-header">
-            <strong>{{ prod.nombre }}</strong>
-            <span class="precio">{{ prod.precioUnitario | currency: 'UYU' }}</span>
+          <div class="producto-header">
+            <h3 class="producto-nombre">{{ prod.nombre }}</h3>
+            <span class="producto-precio">${{ prod.precioUnitario }}</span>
           </div>
         </ng-template>
 
-        <p>{{ prod.descripcion }}</p>
-
-        <div class="ingredientes">
-          <strong>Ingredientes:</strong>
-          <span>{{ prod.ingredientes }}</span>
+        <div class="producto-descripcion">
+          <p>{{ prod.descripcion }}</p>
+          <small><strong>Ingredientes:</strong> {{ prod.ingredientes }}</small><br />
+          <p-tag [value]="
+                prod.flag === 'VEGANO'
+                  ? 'Vegano'
+                  : prod.flag === 'VEGETARIANO'
+                  ? 'Vegetariano'
+                  : 'Otro'
+              " [severity]="
+                prod.flag === 'VEGANO'
+                  ? 'success'
+                  : prod.flag === 'VEGETARIANO'
+                  ? 'info'
+                  : 'warning'
+              " class="mt-2"></p-tag>
         </div>
 
-        <span *ngIf="prod.flag === 'VEGANO'" class="badge vegano">Vegano</span>
-        <span *ngIf="prod.flag === 'VEGETARIANO'" class="badge vegetariano">Vegetariano</span>
-        <span *ngIf="prod.flag === 'OTRO'" class="badge otro">Otro</span>
-
-        <div class="card-footer">
-          <input type="number" [(ngModel)]="prod.cantidadTemp" min="1" class="cantidad-input" />
-          <button
-            pButton
-            icon="pi pi-plus"
-            class="p-button-sm p-button-success"
-            (click)="agregarProducto(prod, prod.cantidadTemp || 1)">
-          </button>
-        </div>
+        <ng-template pTemplate="footer">
+          <div class="card-footer">
+            <input type="number" [(ngModel)]="prod.cantidadTemp" min="1" class="cantidad-input" />
+            <button pButton icon="pi pi-plus" class="p-button-success"
+              (click)="agregarProducto(prod, prod.cantidadTemp || 1)">
+            </button>
+          </div>
+        </ng-template>
       </p-card>
     </div>
 
-    <button
-      pButton
-      icon="pi pi-shopping-cart"
-      class="p-button-rounded p-button-info ver-sidebar-btn"
+
+
+    <button pButton icon="pi pi-shopping-cart" class="p-button-rounded p-button-info ver-sidebar-btn"
       (click)="mostrarSidebar = true">
     </button>
 
+    <!-- 🧾 Sidebar de resumen -->
     <p-sidebar [(visible)]="mostrarSidebar" position="right" styleClass="resumen-sidebar" [baseZIndex]="10000">
       <h3>🧾 Ítems seleccionados</h3>
 
@@ -66,11 +76,7 @@
             <td>{{ item.precioUnitario | currency: 'UYU' }}</td>
             <td>{{ item.totalItem | currency: 'UYU' }}</td>
             <td>
-              <button
-                pButton
-                icon="pi pi-trash"
-                class="p-button-danger p-button-sm"
-                (click)="eliminarItem(i)">
+              <button pButton icon="pi pi-trash" class="p-button-danger p-button-sm" (click)="eliminarItem(i)">
               </button>
             </td>
           </tr>
@@ -83,146 +89,75 @@
     </p-sidebar>
   </div>
 
-  <!-- Paso 2: Formulario final -->
-  <div *ngIf="mostrarFormularioFinal">
-    <h3>📝 Completar presupuesto</h3>
+  <!-- 📝 Formulario final -->
+  <div *ngIf="mostrarFormularioFinal && vista === 'productos'" class="formulario-final">
+  <h3>📝 Completar presupuesto</h3>
 
+  <div class="formulario-card">
     <form [formGroup]="formPresupuesto">
-      <div class="form-group mb-3">
+      <div class="form-group">
         <label for="cliente">Cliente:</label>
-        <p-dropdown 
-          [options]="clientes" 
-          formControlName="clienteId"
-          optionLabel="nombre" 
-          optionValue="id" 
-          placeholder="Seleccionar cliente"
-          inputId="cliente">
-        </p-dropdown>
+        <p-dropdown [options]="clientes" formControlName="clienteId" optionLabel="nombre" optionValue="id"
+          placeholder="Seleccionar cliente" inputId="cliente"></p-dropdown>
       </div>
 
-      <div class="form-group mb-3">
+      <div class="form-group">
         <label for="estado">Estado:</label>
         <input type="text" pInputText formControlName="estado" id="estado" placeholder="Ej: Propuesta" />
       </div>
 
-      <div class="form-group mb-3">
+      <div class="form-group">
         <label for="tipoEvento">Tipo de evento:</label>
         <input type="text" pInputText formControlName="tipoEvento" id="tipoEvento" placeholder="Ej: Casamiento" />
       </div>
 
-      <div class="form-group mb-3">
+      <div class="form-group">
         <label for="gananciaEstimada">Ganancia estimada (UYU):</label>
-        <p-inputNumber 
-          formControlName="gananciaEstimada"
-          inputId="gananciaEstimada" 
-          mode="currency" 
-          currency="UYU" 
-          locale="es-UY" 
-          [min]="0" 
-          [showButtons]="true">
+        <p-inputNumber formControlName="gananciaEstimada" inputId="gananciaEstimada" mode="currency" currency="UYU"
+          locale="es-UY" [min]="0" [showButtons]="true">
         </p-inputNumber>
       </div>
 
-      <div class="form-group mb-3">
+      <div class="form-group">
         <label for="comentarios">Comentarios:</label>
-        <textarea 
-          pInputTextarea 
-          formControlName="comentarios" 
-          rows="3" 
-          placeholder="Notas adicionales...">
-        </textarea>
+        <textarea pInputTextarea formControlName="comentarios" rows="3" placeholder="Notas adicionales..."></textarea>
       </div>
 
-      <div class="d-flex justify-content-between mt-4">
-        <button 
-          pButton 
-          label="← Volver" 
-          class="p-button-secondary" 
-          (click)="volver()">
-        </button>
-
-        <button 
-          pButton 
-          label="💾 Guardar presupuesto" 
-          class="p-button-success" 
-          (click)="crearPresupuesto()" 
-          [disabled]="formPresupuesto.invalid || items.length === 0">
-        </button>
+      <div class="form-buttons">
+        <button pButton label="← Volver" class="p-button-secondary" (click)="volver()"></button>
+        <button pButton label="💾 Guardar presupuesto" class="p-button-success"
+          [disabled]="formPresupuesto.invalid || items.length === 0" (click)="crearPresupuesto()"></button>
       </div>
     </form>
   </div>
 </div>
 
-<style>
-  .productos-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-  }
 
-  .producto-card {
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
+  <!-- 📑 TAB: Presupuestos anteriores -->
+  <div *ngIf="vista === 'presupuestos'">
+    <h3>📑 Presupuestos anteriores</h3>
 
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 1.1rem;
-  }
-
-  .precio {
-    color: #28a745;
-    font-weight: bold;
-  }
-
-  .ingredientes {
-    margin-top: 0.5rem;
-    font-size: 0.9rem;
-  }
-
-  .badge {
-    display: inline-block;
-    margin-top: 0.5rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 8px;
-    font-size: 0.8rem;
-    color: white;
-    font-weight: bold;
-  }
-
-  .vegano { background-color: #28a745; }
-  .vegetariano { background-color: #007bff; }
-  .otro { background-color: #6c757d; }
-
-  .card-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 1rem;
-  }
-
-  .cantidad-input {
-    width: 70px;
-  }
-
-  .resumen-sidebar {
-    width: 450px;
-    padding: 1rem;
-    background-color: #fff;
-    color: #333;
-  }
-
-  .ver-sidebar-btn {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 9999;
-  }
-</style>
+    <p-table [value]="presupuestos">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>ID</th>
+          <th>Cliente</th>
+          <th>Evento</th>
+          <th>Comentarios</th>
+          <th>Estado</th>
+          <th>Total</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-pres>
+        <tr>
+          <td>{{ pres.id }}</td>
+          <td>{{ pres.clienteNombre }}</td>
+          <td>{{ pres.tipoEvento }}</td>
+          <td>{{ pres.comentarios }}</td>
+          <td>{{ pres.estado }}</td>
+          <td>{{ obtenerTotal(pres) | currency: 'UYU' }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>

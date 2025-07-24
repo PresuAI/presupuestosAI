@@ -162,4 +162,30 @@ export class ProductosComponent implements OnInit {
   abrirFormularioProducto() {
     this.panelVisible = !this.panelVisible;
   }
+  guardarCambiosProducto() {
+  if (!this.productoSeleccionado) return;
+
+  const actualizado = { ...this.productoSeleccionado };
+
+  this.productoService.actualizarProducto(actualizado.id, actualizado).subscribe({
+    next: () => {
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Producto actualizado',
+        detail: `Se actualizó correctamente "${actualizado.nombre}".`
+      });
+      this.modalVisible = false;
+      this.obtenerProductos();
+    },
+    error: (err) => {
+      console.error('Error al actualizar producto', err);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error al actualizar',
+        detail: err.error?.message || 'No se pudo actualizar el producto.'
+      });
+    }
+  });
+}
+
 }

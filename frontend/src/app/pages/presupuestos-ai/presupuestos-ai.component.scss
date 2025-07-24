@@ -1,0 +1,281 @@
+@use '../../styles/presupuestosAi-theme' as presets;
+// 🎨 Personalización directa de PrimeNG p-dropdown sin romper visibilidad
+
+.p-dropdown {
+  background-color: #00754a !important;
+  border: 1px solid #ccc !important;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  min-height: 46px;
+
+  .p-dropdown-label {
+    // 🔥 Esto aplica solo cuando hay selección
+    color: #1e3932 !important;
+    font-weight: 500;
+    width: 100%;
+    text-align: center;
+  }
+
+  .p-dropdown-label.p-placeholder {
+    // 🔥 Esto solo cuando no hay valor seleccionado
+    color: #888 !important;
+    font-weight: 400;
+  }
+
+  .p-dropdown-trigger {
+    color: #1e3932;
+  }
+}
+
+
+.contenedor-principal {
+  background-color: presets.$fondo-claro;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 1.1rem;
+  width: 100%;
+  min-height: 100vh;
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+
+  .card-principal {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+
+    .header {
+      margin-bottom: 1rem;
+
+      h1 {
+        font-size: 2.4rem;
+        color: #090909;
+        font-weight: 600;
+        letter-spacing: -0.5px;
+      }
+    }
+
+    form {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+
+      .contenido-interno {
+        flex: 1;
+        display: flex;
+        gap: 2rem;
+        align-items: stretch;
+
+        .formulario {
+          flex: 2;
+          padding: 1rem;
+
+          .card-formulario {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(4px);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+
+            .campos {
+              display: flex;
+              gap: 1rem;
+
+              p-dropdown {
+                flex: 1;
+
+                .p-inputtext {
+                  min-height: 46px;
+                  font-size: 1.1rem;
+                  text-align: center;
+                }
+              }
+            }
+
+            .card-tabla {
+              background: white;
+              border: 1px solid presets.$verde-suave;
+              border-radius: 16px;
+              padding: 1.5rem;
+              box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+              display: flex;
+              flex-direction: column;
+              gap: 1rem;
+              flex-grow: 1;
+
+              .encabezado-tabla {
+                display: grid;
+                grid-template-columns: 2fr 1fr 1fr 1fr 0.5fr;
+                padding: 0.5rem 0;
+                font-weight: bold;
+                font-size: 1.1rem;
+                background-color: presets.$verde-suave;
+                color: #090909;
+                border-radius: 8px;
+                padding-left: 1rem;
+              }
+
+              .fila-producto {
+                display: grid;
+                grid-template-columns: 2fr 1fr 1fr 1fr 0.5fr;
+                gap: 0.5rem;
+                align-items: center;
+
+                input {
+                  @extend .input-base;
+                  text-align: center;
+                }
+
+                .input-disabled {
+                  background-color: #f0fdf4;
+                }
+
+                .boton-agregar {
+                  background-color: #090909;
+                  color: white;
+                  border-radius: 50%;
+                  width: 44px;
+                  height: 44px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-size: 1.2rem;
+                  border: none;
+                }
+              }
+
+              .nueva-fila {
+                background: #f7f9fc;
+                padding: 0.75rem;
+                border-radius: 12px;
+              }
+
+              .fila-total-global {
+                display: flex;
+                justify-content: flex-end;
+                align-items: center;
+                padding: 1rem;
+                font-size: 1.2rem;
+                font-weight: bold;
+                color: #333;
+                background-color: #f7f9fc;
+                border-radius: 12px;
+
+                .label-total {
+                  margin-right: 0.5rem;
+                }
+              }
+            }
+
+            textarea {
+              @extend .input-base;
+              resize: none;
+              width: 100%;
+              border-radius: 12px;
+            }
+
+            .guardar {
+              background-color: #090909 !important;
+              color: white !important;
+              border-radius: 50px;
+              padding: 1rem 3rem;
+              font-weight: 700;
+              font-size: 1.15rem;
+              border: none;
+              display: block;
+              margin: 2rem auto 0 auto; // ⬅️ centrado horizontal
+              text-align: center;
+              transition: background-color 0.2s ease-in-out;
+
+              &:hover {
+                background-color: darken(presets.$verde, 10%) !important;
+                cursor: pointer;
+              }
+            }
+
+          }
+        }
+
+        .chat-flotante {
+          flex: 1;
+          max-height: 700px;
+          background: rgba(255, 255, 255, 0.9);
+          backdrop-filter: blur(6px);
+          border-radius: 16px;
+          border: 1px solid presets.$verde-suave;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+          display: flex;
+          flex-direction: column;
+
+          .chat-header {
+            background-color: presets.$verde;
+            color: white;
+            padding: 1rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+          }
+
+          .chat-mensajes {
+            flex: 1;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            font-size: 1.1rem;
+            overflow-y: auto;
+          }
+
+          .mensaje-bot {
+            background-color: presets.$verde-suave;
+            color: presets.$texto;
+            padding: 0.75rem 1rem;
+            border-radius: 18px;
+            max-width: 80%;
+            align-self: flex-start;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            font-weight: 500;
+          }
+
+          .chat-input {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: rgb(248, 247, 247);
+            border-top: 1px solid #dfe3ec;
+
+            textarea {
+              @extend .input-base;
+              flex: 1;
+              resize: none;
+              height: 42px;
+              border-radius: 20px;
+            }
+
+            button {
+              height: 42px;
+              width: 42px;
+              border-radius: 50%;
+              background-color: presets.$verde;
+              color: white;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 1.1rem;
+            }
+          }
+        }
+      }
+    }
+  }
+
+}

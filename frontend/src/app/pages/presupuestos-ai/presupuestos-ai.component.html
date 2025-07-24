@@ -1,0 +1,78 @@
+<div class="contenedor-principal">
+  <div class="card-principal">
+    <div class="header">
+      <h1>Nuevo presupuesto | PresupuestosAI</h1>
+    </div>
+
+    <form [formGroup]="form">
+      <div class="contenido-interno">
+        <!-- 👇 tu contenido existente va acá -->
+        <div class="formulario">
+          <div class="card-formulario">
+            <div class="campos">
+              <p-dropdown [options]="clientes" formControlName="clienteId" optionLabel="nombre" optionValue="id"
+                placeholder="Seleccionar cliente" [style]="{'color': '#1e3932'}">
+              </p-dropdown>
+              <p-dropdown [options]="tiposEvento" formControlName="tipoEvento"
+                placeholder="Tipo de evento"></p-dropdown>
+            </div>
+
+            <div class="card-tabla">
+              <div class="encabezado-tabla">
+                <span>Producto</span><span>Cant.</span><span>Unitario</span><span>Total</span><span></span>
+              </div>
+
+              <div class="fila-producto" *ngFor="let item of items; let i = index">
+                <p-dropdown [options]="productos" [(ngModel)]="item.productoId" [ngModelOptions]="{standalone: true}"
+                  name="productoExistente{{i}}" optionLabel="nombre" optionValue="id" [disabled]="true">
+                </p-dropdown>
+                <input type="number" [(ngModel)]="item.cantidad" [ngModelOptions]="{standalone: true}" disabled
+                  class="input-cantidad" />
+                <input type="text" [value]="item.precioUnitario | currency:'UYU'" class="input-disabled" disabled />
+                <input type="text" [value]="item.totalItem | currency:'UYU'" class="input-disabled" disabled />
+                <button type="button" pButton icon="pi pi-trash" class="p-button-danger p-button-sm"
+                  (click)="eliminarItem(i)"></button>
+              </div>
+
+              <div class="fila-producto nueva-fila">
+                <p-dropdown [options]="productos" [(ngModel)]="nuevoItem.productoId"
+                  [ngModelOptions]="{standalone: true}" name="productoNuevo" optionLabel="nombre" optionValue="id"
+                  (ngModelChange)="setPrecioUnitario()" placeholder="Producto">
+                </p-dropdown>
+                <input type="number" [(ngModel)]="nuevoItem.cantidad" [ngModelOptions]="{standalone: true}"
+                  name="cantidadNueva" class="input-cantidad" (ngModelChange)="onCantidadChange()" />
+                <input type="text" [value]="nuevoItem.precioUnitario | currency:'UYU'" class="input-disabled"
+                  disabled />
+                <input type="text" [value]="nuevoItem.totalItem | currency:'UYU'" class="input-disabled" disabled />
+                <button type="button" pButton icon="pi pi-plus" class="boton-agregar" (click)="agregarItem()"></button>
+              </div>
+
+              <div class="fila-total-global">
+                <span class="label-total">Total</span>
+                <span class="valor-total">{{ totalGlobal | currency:'UYU' }}</span>
+              </div>
+            </div>
+
+            <textarea pInputTextarea formControlName="comentarios" rows="3"
+              placeholder="Comentarios adicionales"></textarea>
+
+            <button pButton label="Guardar presupuesto" class="guardar" (click)="crearPresupuesto()">
+
+            </button>
+          </div>
+        </div>
+
+        <div class="chat-flotante">
+          <div class="chat-header">🤖 Asistente AI</div>
+          <div class="chat-mensajes">
+            <div class="mensaje-bot">Hola 👋 ¿En qué puedo ayudarte hoy?</div>
+          </div>
+          <div class="chat-input">
+            <textarea pInputTextarea [(ngModel)]="prompt" name="prompt" placeholder="Escribe tu mensaje..."></textarea>
+            <button pButton icon="pi pi-send" class="p-button-info" (click)="enviarPromptAI()"></button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

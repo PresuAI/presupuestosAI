@@ -1,12 +1,32 @@
-<p-menubar [model]="[]" styleClass="custom-menubar">
-  <ng-template pTemplate="start">
-    <button pButton type="button" icon="pi pi-bars" class="p-button-text" (click)="menuVisible = true"></button>
-  </ng-template>
-  <ng-template pTemplate="end">
-    <span class="brand-text">PresupuestosAI</span>
-  </ng-template>
-</p-menubar>
+<div class="navbar-container">
+  <div class="navbar starbucks-theme">
+    <div class="navbar-logo" (click)="navegar('/usuarios')">
+      PresupuestosAI
+    </div>
 
-<p-sidebar [(visible)]="menuVisible" position="left" styleClass="custom-sidebar">
-  <p-panelMenu [model]="items" styleClass="w-full"></p-panelMenu>
-</p-sidebar>
+    <div class="navbar-items desktop-only">
+      <a (click)="navegar('/usuarios')">USUARIOS</a>
+      <a (click)="navegar('/productos')">PRODUCTOS</a>
+      <a (click)="navegar('/clientes')">CLIENTES</a>
+      <a (click)="navegar('/presupuestos')">PRESUPUESTOS</a>
+      <div class="dropdown" [class.open]="iaOpen" (mouseenter)="iaOpen = true" (mouseleave)="iaOpen = false">
+        <a class="dropdown-toggle">IA <span [class.pi-chevron-down]="!iaOpen" [class.pi-chevron-up]="iaOpen" class="pi"></span></a>
+        <div class="dropdown-menu" *ngIf="iaOpen">
+          <a (click)="navegar('/presupuestos-ai')">Presupuestos</a>
+          <a (click)="navegar('/estadisticas-ai')">Estadísticas</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="navbar-end desktop-only">
+      <button class="logout-button" (click)="cerrarSesion()">Cerrar sesión</button>
+    </div>
+
+    <!-- Mobile -->
+    <button pButton icon="pi pi-bars" class="p-button-text mobile-only" (click)="menuVisible = true"></button>
+  </div>
+
+  <p-sidebar [(visible)]="menuVisible" position="left" styleClass="custom-sidebar mobile-only">
+    <p-panelMenu [model]="mobileItems" styleClass="w-full"></p-panelMenu>
+  </p-sidebar>
+</div>
