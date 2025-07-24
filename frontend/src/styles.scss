@@ -12,3 +12,43 @@ body {
 :root {
     color-scheme: light;
 }
+.p-dropdown-label {
+  color: #1e3932 !important;
+  font-weight: 500;
+}
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Helvetica Neue', sans-serif;
+  background-color: #f9f7f4;
+}
+
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+router-outlet, .contenedor-principal {
+  flex: 1 0 auto;
+}
+
+footer.footer {
+  background-color: #00754a;
+  color: white;
+  padding: 5rem 1rem;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.05);
+  z-index: 100;
+  width: 100%;
+}
+
+.footer-content {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+

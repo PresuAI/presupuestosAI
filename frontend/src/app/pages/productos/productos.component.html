@@ -89,33 +89,51 @@
         </div>
 
         <ng-template pTemplate="footer">
-          <button pButton label="Ver más" icon="pi pi-eye" (click)="abrirModal(producto)" class="ver-mas-btn"></button>
+          <button pButton label="Editar" icon="pi pi-eye" (click)="abrirModal(producto)" class="ver-mas-btn"></button>
         </ng-template>
       </p-card>
     </div>
 
-    <p-dialog header="Detalle del producto" [(visible)]="modalVisible" [modal]="true" [style]="{ width: '450px' }">
+    <p-dialog header="Editar producto" [(visible)]="modalVisible" [modal]="true" [style]="{ width: '500px' }">
       <div *ngIf="productoSeleccionado" class="dialog-body">
-        <p><strong>Nombre:</strong> {{ productoSeleccionado.nombre }}</p>
-        <p>
-          <strong>Descripción:</strong> {{ productoSeleccionado.descripcion }}
-        </p>
-        <p>
-          <strong>Ingredientes:</strong> {{ productoSeleccionado.ingredientes }}
-        </p>
+        <div class="p-field">
+          <label for="nombre">Nombre</label>
+          <input id="nombre" type="text" pInputText [(ngModel)]="productoSeleccionado.nombre" />
+        </div>
+
+        <div class="p-field">
+          <label for="descripcion">Descripción</label>
+          <input id="descripcion" type="text" pInputText [(ngModel)]="productoSeleccionado.descripcion" />
+        </div>
+
+        <div class="p-field">
+          <label for="ingredientes">Ingredientes</label>
+          <input id="ingredientes" type="text" pInputText [(ngModel)]="productoSeleccionado.ingredientes" />
+        </div>
 
         <div class="p-field">
           <label for="precio">Precio unitario</label>
-          <p-inputNumber inputId="precio" [(ngModel)]="nuevoPrecio" mode="currency" currency="UYU" locale="es-UY"
-            [min]="1" [showButtons]="true">
-          </p-inputNumber>
+          <p-inputNumber inputId="precio" [(ngModel)]="productoSeleccionado.precioUnitario" mode="currency"
+            currency="UYU" locale="es-UY" [min]="1" [showButtons]="true"></p-inputNumber>
+        </div>
+
+        <div class="p-formgrid p-grid">
+          <div class="p-field-checkbox p-col-6">
+            <p-checkbox inputId="vegano" [(ngModel)]="productoSeleccionado.esVegano" [binary]="true"></p-checkbox>
+            <label for="vegano">Vegano</label>
+          </div>
+          <div class="p-field-checkbox p-col-6">
+            <p-checkbox inputId="vegetariano" [(ngModel)]="productoSeleccionado.esVegetariano"
+              [binary]="true"></p-checkbox>
+            <label for="vegetariano">Vegetariano</label>
+          </div>
         </div>
       </div>
 
       <ng-template pTemplate="footer">
         <button pButton label="Cancelar" icon="pi pi-times" (click)="modalVisible = false"
           class="p-button-text"></button>
-        <button pButton label="Guardar" icon="pi pi-check" (click)="actualizarPrecio()"></button>
+        <button pButton label="Guardar" icon="pi pi-check" (click)="guardarCambiosProducto()"></button>
       </ng-template>
     </p-dialog>
   </div>

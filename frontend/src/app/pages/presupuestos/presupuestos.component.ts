@@ -38,13 +38,17 @@ import { SidebarModule } from 'primeng/sidebar';
   ]
 })
 export class PresupuestosComponent implements OnInit {
+  vista: 'productos' | 'presupuestos' = 'productos';
+
   formPresupuesto!: FormGroup;
   clientes: Cliente[] = [];
-  productos: (Producto & { cantidadTemp: number })[] = []; // ← Cambio aplicado acá
+  productos: (Producto & { cantidadTemp: number })[] = [];
   items: PresupuestoItem[] = [];
-  mostrarFormulario = false;
+
   mostrarFormularioFinal = false;
-  mostrarSidebar: boolean = false;
+  mostrarSidebar = false;
+
+  presupuestos: any[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -64,20 +68,28 @@ export class PresupuestosComponent implements OnInit {
     });
 
     this.clienteService.getClientes().subscribe({
-      next: (clientes) => this.clientes = clientes,
+      next: (clientes) => (this.clientes = clientes),
       error: (err) => console.error('Error al obtener clientes', err)
     });
 
     this.productoService.obtenerProductos().subscribe({
       next: (productos) => {
-        this.productos = productos.map(p => ({ ...p, cantidadTemp: 1 }));
+        this.productos = productos.map((p) => ({ ...p, cantidadTemp: 1 }));
       },
       error: (err) => console.error('Error al obtener productos', err)
     });
+
+    this.presupuestoService.obtenerPresupuestos().subscribe({
+      next: (res) => (this.presupuestos = res),
+      error: (err) => console.error('Error al obtener presupuestos', err)
+    });
   }
+  obtenerTotal(presupuesto: any): number {
+  return presupuesto.items?.reduce((acc: number, i: any) => acc + i.totalItem, 0) || 0;
+}
 
   agregarProducto(producto: Producto, cantidad: number): void {
-    const itemExistente = this.items.find(i => i.productoId === producto.id);
+    const itemExistente = this.items.find((i) => i.productoId === producto.id);
     if (itemExistente) {
       itemExistente.cantidad += cantidad;
       itemExistente.totalItem = itemExistente.cantidad * itemExistente.precioUnitario;
@@ -90,6 +102,8 @@ export class PresupuestosComponent implements OnInit {
       };
       this.items.push(item);
     }
+
+    this.mostrarSidebar = true;
 
     this.messageService.add({
       severity: 'success',
@@ -130,10 +144,11 @@ export class PresupuestosComponent implements OnInit {
           summary: 'Presupuesto creado',
           detail: 'El presupuesto fue registrado correctamente'
         });
+
         this.formPresupuesto.reset();
         this.items = [];
-        this.mostrarFormulario = false;
         this.mostrarFormularioFinal = false;
+        this.vista = 'presupuestos'; // ⬅️ te lleva a la pestaña de resultados
       },
       error: (err) => {
         console.error('Error al crear presupuesto', err);
