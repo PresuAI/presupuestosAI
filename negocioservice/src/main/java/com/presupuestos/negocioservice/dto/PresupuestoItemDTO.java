@@ -1,15 +1,18 @@
 package com.presupuestos.negocioservice.dto;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 
+@Data
+@NoArgsConstructor
 public class PresupuestoItemDTO {
 
     private Long productoId;
     private Integer cantidad;
     private BigDecimal precioUnitario;
     private BigDecimal totalItem;
-
-    public PresupuestoItemDTO() {}
 
     public PresupuestoItemDTO(Long productoId, Integer cantidad, BigDecimal precioUnitario, BigDecimal totalItem) {
         this.productoId = productoId;
