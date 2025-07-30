@@ -12,6 +12,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PresupuestoServiceImpl implements PresupuestoService {
@@ -88,4 +89,13 @@ public class PresupuestoServiceImpl implements PresupuestoService {
                 .map(PresupuestoMapper::toDTO)
                 .toList();
     }
+
+    public List<PresupuestoResponseDTO> findTop10ByClienteIdOrderByFechaCreacionDesc(Long clienteId) {
+        return presupuestoRepository
+                .findTop10ByClienteIdOrderByFechaCreacionDesc(clienteId)
+                .stream()
+                .map(PresupuestoMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
 }
