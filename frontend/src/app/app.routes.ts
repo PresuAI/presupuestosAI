@@ -24,5 +24,6 @@ export const routes: Routes = [
   },
   { path: 'login', component: LoginComponent }, // Fuera del layout
   { path: '**', redirectTo: 'login' } // catch-all
+  
 ];
 

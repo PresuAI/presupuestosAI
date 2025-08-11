@@ -26,29 +26,34 @@
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
-             {
-              "glob": "**/*",
-              "input": "public",
-              "output": "/"
-             },
-             {
-              "glob": "**/*",
-              "input": "node_modules/primeng/resources/themes",
-              "output": "assets/themes"
-             },
-             {
-              "glob": "**/*",
-              "input": "node_modules/primeng/resources",
-              "output": "assets/primeng"
-             },
-             {
-              "glob": "**/*",
-              "input": "node_modules/primeicons",
-              "output": "assets/primeicons"
-             }
+              {
+                "glob": "**/*",
+                "input": "src/assets",
+                "output": "assets"
+              },
+              {
+                "glob": "**/*",
+                "input": "public",
+                "output": "/"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/primeng/resources/themes",
+                "output": "assets/themes"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/primeng/resources",
+                "output": "assets/primeng"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/primeicons",
+                "output": "assets/primeicons"
+              }
             ],
             "styles": [
-               "src/styles.scss"
+              "src/styles.scss"
             ],
             "scripts": []
           },

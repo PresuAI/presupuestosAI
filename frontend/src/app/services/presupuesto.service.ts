@@ -19,5 +19,10 @@ export class PresupuestoService {
   obtenerPresupuestos(): Observable<PresupuestoResponse[]> {
   return this.http.get<PresupuestoResponse[]>(this.url, { withCredentials: true });
 }
-
+actualizarPresupuesto(id: number, dto: PresupuestoRequest): Observable<any> {
+  return this.http.put(`${this.url}/${id}`, dto, { withCredentials: true });
+}
+eliminarPresupuesto(id: number): Observable<void> {
+  return this.http.delete<void>(`http://localhost:8081/api/presupuestos/${id}`);
+}
 }

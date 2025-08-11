@@ -1,7 +1,7 @@
 <div class="navbar-container">
   <div class="navbar starbucks-theme">
     <div class="navbar-logo" (click)="navegar('/usuarios')">
-      PresupuestosAI
+      <img src="/assets/logo-presupuestos-ai.png" alt="Logo" class="logo-img" /> 
     </div>
 
     <div class="navbar-items desktop-only">
@@ -10,7 +10,8 @@
       <a (click)="navegar('/clientes')">CLIENTES</a>
       <a (click)="navegar('/presupuestos')">PRESUPUESTOS</a>
       <div class="dropdown" [class.open]="iaOpen" (mouseenter)="iaOpen = true" (mouseleave)="iaOpen = false">
-        <a class="dropdown-toggle">IA <span [class.pi-chevron-down]="!iaOpen" [class.pi-chevron-up]="iaOpen" class="pi"></span></a>
+        <a class="dropdown-toggle">IA <span [class.pi-chevron-down]="!iaOpen" [class.pi-chevron-up]="iaOpen"
+            class="pi"></span></a>
         <div class="dropdown-menu" *ngIf="iaOpen">
           <a (click)="navegar('/presupuestos-ai')">Presupuestos</a>
           <a (click)="navegar('/estadisticas-ai')">Estadísticas</a>

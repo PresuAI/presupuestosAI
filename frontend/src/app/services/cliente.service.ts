@@ -31,4 +31,7 @@ export class ClienteService {
   eliminarCliente(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`, { withCredentials: true });
   }
+  actualizarCliente(id: number, cliente: Partial<Cliente>): Observable<Cliente> {
+  return this.http.put<Cliente>(`${this.baseUrl}/${id}`, cliente, { withCredentials: true });
+}
 }

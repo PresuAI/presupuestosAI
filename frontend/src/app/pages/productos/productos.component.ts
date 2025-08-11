@@ -50,6 +50,11 @@ export class ProductosComponent implements OnInit {
   ordenSeleccionado: string | null = null;
   formularioProducto!: FormGroup;
   panelVisible: boolean = false;
+  creando = false;
+  editando = false;
+  productoEditandoId: number | null = null;
+ 
+
 
   opcionesOrden = [
     { label: 'Precio ascendente', value: 'asc' },
@@ -91,6 +96,25 @@ export class ProductosComponent implements OnInit {
     return filtrados;
   }
 
+  abrirFormularioProducto(): void {
+  this.creando = true;
+  this.editando = false;
+  this.formularioProducto.reset({ esVegano: false, esVegetariano: false });
+}
+
+cancelarCreacion(): void {
+  this.creando = false;
+  this.editando = false;
+  this.productoEditandoId = null;
+  this.formularioProducto.reset({ esVegano: false, esVegetariano: false });
+}
+
+abrirFormularioEditar(producto: Producto): void {
+  this.creando = true;
+  this.editando = true;
+  this.productoEditandoId = producto.id;
+  this.formularioProducto.patchValue(producto);
+}
   obtenerProductos() {
     this.productoService.obtenerProductos().subscribe({
       next: (data) => (this.productos = data),
@@ -158,34 +182,30 @@ export class ProductosComponent implements OnInit {
       }
     });
   }
-
-  abrirFormularioProducto() {
-    this.panelVisible = !this.panelVisible;
-  }
   guardarCambiosProducto() {
-  if (!this.productoSeleccionado) return;
+    if (!this.productoSeleccionado) return;
 
-  const actualizado = { ...this.productoSeleccionado };
+    const actualizado = { ...this.productoSeleccionado };
 
-  this.productoService.actualizarProducto(actualizado.id, actualizado).subscribe({
-    next: () => {
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Producto actualizado',
-        detail: `Se actualizó correctamente "${actualizado.nombre}".`
-      });
-      this.modalVisible = false;
-      this.obtenerProductos();
-    },
-    error: (err) => {
-      console.error('Error al actualizar producto', err);
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error al actualizar',
-        detail: err.error?.message || 'No se pudo actualizar el producto.'
-      });
-    }
-  });
-}
+    this.productoService.actualizarProducto(actualizado.id, actualizado).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Producto actualizado',
+          detail: `Se actualizó correctamente "${actualizado.nombre}".`
+        });
+        this.modalVisible = false;
+        this.obtenerProductos();
+      },
+      error: (err) => {
+        console.error('Error al actualizar producto', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error al actualizar',
+          detail: err.error?.message || 'No se pudo actualizar el producto.'
+        });
+      }
+    });
+  }
 
 }
