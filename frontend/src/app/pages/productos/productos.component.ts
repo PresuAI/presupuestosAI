@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ProductoService, Producto } from '../../services/producto.service';
+import { ChatbotComponent } from '../../shared/chatbot/chatbot.component';
 import { CommonModule } from '@angular/common';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
@@ -33,7 +34,8 @@ import { AuthService } from '../../services/auth.service';
     DropdownModule,
     PanelModule,
     CheckboxModule,
-    ToastModule
+    ToastModule,
+    ChatbotComponent,
   ],
   templateUrl: './productos.component.html',
   styleUrls: ['./productos.component.scss'],
@@ -48,6 +50,11 @@ export class ProductosComponent implements OnInit {
   ordenSeleccionado: string | null = null;
   formularioProducto!: FormGroup;
   panelVisible: boolean = false;
+  creando = false;
+  editando = false;
+  productoEditandoId: number | null = null;
+ 
+
 
   opcionesOrden = [
     { label: 'Precio ascendente', value: 'asc' },
@@ -89,6 +96,25 @@ export class ProductosComponent implements OnInit {
     return filtrados;
   }
 
+  abrirFormularioProducto(): void {
+  this.creando = true;
+  this.editando = false;
+  this.formularioProducto.reset({ esVegano: false, esVegetariano: false });
+}
+
+cancelarCreacion(): void {
+  this.creando = false;
+  this.editando = false;
+  this.productoEditandoId = null;
+  this.formularioProducto.reset({ esVegano: false, esVegetariano: false });
+}
+
+abrirFormularioEditar(producto: Producto): void {
+  this.creando = true;
+  this.editando = true;
+  this.productoEditandoId = producto.id;
+  this.formularioProducto.patchValue(producto);
+}
   obtenerProductos() {
     this.productoService.obtenerProductos().subscribe({
       next: (data) => (this.productos = data),
@@ -156,8 +182,30 @@ export class ProductosComponent implements OnInit {
       }
     });
   }
+  guardarCambiosProducto() {
+    if (!this.productoSeleccionado) return;
 
-  abrirFormularioProducto() {
-    this.panelVisible = !this.panelVisible;
+    const actualizado = { ...this.productoSeleccionado };
+
+    this.productoService.actualizarProducto(actualizado.id, actualizado).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Producto actualizado',
+          detail: `Se actualizó correctamente "${actualizado.nombre}".`
+        });
+        this.modalVisible = false;
+        this.obtenerProductos();
+      },
+      error: (err) => {
+        console.error('Error al actualizar producto', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error al actualizar',
+          detail: err.error?.message || 'No se pudo actualizar el producto.'
+        });
+      }
+    });
   }
+
 }

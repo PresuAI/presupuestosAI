@@ -3,10 +3,27 @@ import { LoginComponent } from './pages/login/login.component';
 import { UsuariosComponent } from './pages/usuarios/usuarios.component';
 import { AuthGuard } from './guards/auth.guard';
 import { ProductosComponent } from './pages/productos/productos.component';
+import { ClientesComponent } from './pages/clientes/clientes.component';
+import { PresupuestosComponent } from './pages/presupuestos/presupuestos.component';
+import { PresupuestosAiComponent } from './pages/presupuestos-ai/presupuestos-ai.component';
+import { LayoutComponent } from './shared/layout/layout.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
-  { path: 'login', component: LoginComponent },
-  { path: 'usuarios', component: UsuariosComponent, canActivate: [AuthGuard] },
-  { path: 'productos', component: ProductosComponent, canActivate: [AuthGuard] }
+  {
+    path: '',
+    component: LayoutComponent, // Aplica layout
+    canActivate: [AuthGuard],
+    children: [
+      { path: 'usuarios', component: UsuariosComponent },
+      { path: 'productos', component: ProductosComponent },
+      { path: 'clientes', component: ClientesComponent },
+      { path: 'presupuestos', component: PresupuestosComponent },
+      { path: 'presupuestos-ai', component: PresupuestosAiComponent },
+      { path: '', redirectTo: 'usuarios', pathMatch: 'full' } // default dentro del layout
+    ]
+  },
+  { path: 'login', component: LoginComponent }, // Fuera del layout
+  { path: '**', redirectTo: 'login' } // catch-all
+  
 ];
+

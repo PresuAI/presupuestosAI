@@ -1,0 +1,116 @@
+// Paleta institucional
+$verde: #007442;
+$verde-suave: #e6f4ec;
+$texto: #1e3932;
+$fondo-claro: #f9f7f4;
+
+// Placeholder global para inputs, textareas, dropdowns
+::placeholder {
+    color: $texto !important;
+    opacity: 1 !important;
+    font-weight: 500;
+    text-align: center;
+}
+
+.p-dropdown.p-dropdown-clearable .p-dropdown-label.p-placeholder,
+.p-dropdown .p-dropdown-label.p-placeholder {
+    color: $texto !important;
+    font-weight: 500;
+    text-align: center;
+    opacity: 1 !important;
+}
+
+// Clase base reutilizable para campos
+.input-base {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 1.1rem;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+    color: $texto;
+
+    &::placeholder {
+        color: $texto;
+        font-weight: 500;
+        text-align: center;
+    }
+}
+
+// Botón institucional estilo Starbucks
+.btn-starbucks {
+    background-color: $verde !important;
+    color: white !important;
+    border-radius: 50px;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    font-size: 1.05rem;
+    border: none;
+
+    &:hover {
+        background-color: #025f3c !important;
+
+        cursor: pointer;
+    }
+}
+
+// Estilo del dropdown base
+.p-dropdown.dropdown-claro {
+    background-color: #ffffff !important;
+    color: $texto !important;
+    border: 1px solid #ccc !important;
+    border-radius: 8px;
+    min-height: 46px;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    padding-left: 0.75rem;
+
+    .p-dropdown-label {
+        color: $texto !important;
+        font-weight: 500;
+        text-align: center;
+        width: 100%;
+    }
+
+    .p-placeholder {
+        color: $texto !important;
+        opacity: 1;
+        text-align: center;
+        font-weight: 400;
+    }
+
+    .p-dropdown-trigger {
+        color: $texto;
+    }
+}
+
+// Panel desplegable del dropdown
+.p-dropdown-panel {
+    background-color: #ffffff !important;
+    color: $texto !important;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+    .p-dropdown-items {
+        padding: 0;
+
+        .p-dropdown-item {
+            padding: 0.75rem 1rem;
+            font-size: 1.05rem;
+            color: $texto;
+            font-weight: 500;
+
+            &:hover {
+                background-color: $verde-suave;
+                color: $texto;
+            }
+
+            &.p-highlight {
+                background-color: $verde !important;
+                color: white !important;
+            }
+        }
+    }
+}

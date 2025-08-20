@@ -1,0 +1,123 @@
+<!-- ✅ TOAST personalizado -->
+<div class="custom-toast" *ngIf="toastMensaje">
+  {{ toastMensaje }}
+</div>
+
+<div class="contenedor-principal">
+  <div class="card-principal">
+    <div class="header">
+      <h1>Nuevo presupuesto | PresupuestosAI</h1>
+    </div>
+
+    <form [formGroup]="form">
+      <div class="contenido-interno">
+        <div class="formulario">
+
+          <!-- 👤 Cliente / Tipo evento -->
+          <div class="campos-iniciales" *ngIf="!formularioVisible">
+            <div class="campo">
+              <label for="cliente">Cliente</label>
+              <select id="cliente" formControlName="clienteId">
+                <option value="" disabled>Seleccionar cliente</option>
+                <option *ngFor="let cliente of clientes" [value]="cliente.id">
+                  {{ cliente.nombre }}
+                </option>
+              </select>
+            </div>
+
+            <div class="campo">
+              <label for="evento">Tipo de evento</label>
+              <select id="evento" formControlName="tipoEvento">
+                <option value="" disabled>Seleccionar evento</option>
+                <option *ngFor="let evento of tiposEvento" [value]="evento.value">
+                  {{ evento.label }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 🧾 Formulario generado por IA -->
+          <div class="card-formulario" *ngIf="formularioVisible">
+            <div class="card-tabla">
+              <div class="encabezado-tabla">
+                <span>Producto</span><span>Cant.</span><span>Unitario</span><span>Total</span><span></span>
+              </div>
+
+              <div class="fila-producto" *ngFor="let item of items; let i = index">
+                <select [(ngModel)]="item.productoId" [ngModelOptions]="{standalone: true}" disabled>
+                  <option *ngFor="let producto of productos" [value]="producto.id">{{ producto.nombre }}</option>
+                </select>
+
+                <input type="number" [(ngModel)]="item.cantidad" [ngModelOptions]="{standalone: true}" disabled
+                  class="input-cantidad" />
+                <input type="text" [value]="item.precioUnitario | currency:'UYU'" class="input-disabled" disabled />
+                <input type="text" [value]="item.totalItem | currency:'UYU'" class="input-disabled" disabled />
+
+                <button type="button" class="btn-trash" (click)="eliminarItem(i)">🗑️</button>
+              </div>
+
+              <div class="fila-producto nueva-fila">
+                <select [(ngModel)]="nuevoItem.productoId" [ngModelOptions]="{standalone: true}"
+                  (ngModelChange)="setPrecioUnitario()">
+                  <option value="" disabled selected>Producto</option>
+                  <option *ngFor="let producto of productos" [value]="producto.id">{{ producto.nombre }}</option>
+                </select>
+
+                <input type="number" [(ngModel)]="nuevoItem.cantidad" [ngModelOptions]="{standalone: true}"
+                  (ngModelChange)="onCantidadChange()" class="input-cantidad" />
+
+                <input type="text" [value]="nuevoItem.precioUnitario | currency:'UYU'" class="input-disabled"
+                  disabled />
+                <input type="text" [value]="nuevoItem.totalItem | currency:'UYU'" class="input-disabled" disabled />
+
+                <button type="button" class="btn-icon" (click)="agregarItem()">➕</button>
+              </div>
+
+              <div class="fila-total-global">
+                <span class="label-total">Total</span>
+                <span class="valor-total">{{ totalGlobal | currency:'UYU' }}</span>
+              </div>
+            </div>
+
+            <label for="comentarios">Comentarios adicionales</label>
+            <textarea id="comentarios" formControlName="comentarios" rows="3" placeholder="Comentarios adicionales"
+              class="textarea-comentarios"></textarea>
+
+            <button type="button" class="btn-guardar" (click)="crearPresupuesto()">
+              Guardar presupuesto
+            </button>
+          </div>
+        </div>
+
+        <!-- 🤖 Chat -->
+        <div class="chat-flotante">
+          <div class="chat-header">🤖 Asistente AI</div>
+
+          <div class="chat-mensajes" id="chat-scroll">
+            <div *ngFor="let mensaje of chatMensajes" class="mensaje"
+              [ngClass]="{
+                'mensaje-bot': mensaje.tipo === 'bot',
+                'mensaje-usuario': mensaje.tipo === 'usuario'
+              }">
+              <div class="contenido-mensaje">
+                <span class="texto">{{ mensaje.texto }}</span>
+                <span class="hora" *ngIf="mensaje.timestamp">{{ mensaje.timestamp | date:'shortTime' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-input">
+            <textarea [(ngModel)]="prompt" [ngModelOptions]="{standalone: true}"
+              placeholder="Escribí tu mensaje..."></textarea>
+
+            <button type="button" class="btn-enviar" (click)="enviarPromptAI()">
+              <svg viewBox="0 0 24 24">
+                <path d="M2 21L23 12L2 3V10L17 12L2 14V21Z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
