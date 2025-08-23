@@ -125,6 +125,8 @@ public class GeminiServiceImpl implements GeminiService {
                 .append("  \"mensaje\": \"Texto breve para el usuario\"\n")
                 .append("}\n\n")
                 .append("⚠️ REGLAS OBLIGATORIAS:\n")
+                .append("- Necesitas prestar atencion a los productos. Hay productos que no tienen sentido en desayuno o almuerzo. Por favor presta suma atencion y se variado, no elijas siempre las mismas cosas.\n")
+                .append("- Ten en cuenta el historial quee te pasare de presupuestos, para no estar repitiendo productos, asi logramos variaciones buenas.\n")
                 .append("- Usa solo las claves 'operacion', 'presupuesto', 'items', 'total', 'mensaje'.\n")
                 .append("- Nunca inventes otras claves como 'Evento', 'Comentarios', 'productos', 'total_presupuesto'.\n")
                 .append("- 'items' nunca puede estar vacío. Si es una consulta, copia los items actuales.\n")
