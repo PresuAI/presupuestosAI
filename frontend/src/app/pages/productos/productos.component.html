@@ -2,89 +2,176 @@
 
 <div class="productos-container">
   <div class="productos-wrapper">
-    <!-- 🔘 Fila de búsqueda y controles -->
+    <!-- 🔎 Barra superior -->
     <div class="barra-superior-productos" *ngIf="!creando">
       <div class="controles-izquierda">
-        <input type="text" placeholder="Buscar producto..." [(ngModel)]="filtro" class="buscador-input" />
+        <input
+          type="text"
+          placeholder="Buscar producto..."
+          [(ngModel)]="filtro"
+          class="buscador-input"
+        />
 
-       <select [(ngModel)]="ordenSeleccionado" class="orden-select">
-  <option [ngValue]="null" disabled>Ordenar por</option>
-  <option [ngValue]="'asc'">Precio ascendente</option>
-  <option [ngValue]="'desc'">Precio descendente</option>
-</select>
+        <select [(ngModel)]="ordenSeleccionado" class="orden-select">
+          <option [ngValue]="null" disabled>Ordenar por</option>
+          <option [ngValue]="'asc'">Precio ascendente</option>
+          <option [ngValue]="'desc'">Precio descendente</option>
+        </select>
       </div>
 
       <button class="btn-nuevo-producto" (click)="abrirFormularioProducto()">
         <i class="pi pi-plus"></i> Nuevo producto
       </button>
     </div>
-    <!-- 🧾 Formulario centrado -->
+
+    <!-- 🧾 Formulario -->
     <div class="producto-form-centrado" *ngIf="creando">
       <div class="formulario-card">
-        <h3>{{ editando ? 'Editar producto' : 'Crear nuevo producto' }}</h3>
-        <form [formGroup]="formularioProducto" (ngSubmit)="editando ? guardarCambiosProducto() : crearProducto()"
-          class="formulario">
+        <h3>{{ editando ? "Editar producto" : "Crear nuevo producto" }}</h3>
+        <form
+          [formGroup]="formularioProducto"
+          (ngSubmit)="editando ? guardarCambiosProducto() : crearProducto()"
+          class="formulario"
+        >
           <label for="nombre">Nombre:</label>
           <input id="nombre" type="text" pInputText formControlName="nombre" />
 
           <label for="descripcion">Descripción:</label>
-          <input id="descripcion" type="text" pInputText formControlName="descripcion" />
+          <input
+            id="descripcion"
+            type="text"
+            pInputText
+            formControlName="descripcion"
+          />
 
           <label for="ingredientes">Ingredientes:</label>
-          <input id="ingredientes" type="text" pInputText formControlName="ingredientes" />
+          <input
+            id="ingredientes"
+            type="text"
+            pInputText
+            formControlName="ingredientes"
+          />
 
           <label for="precio">Precio unitario (UYU):</label>
-          <input id="precio" type="number" formControlName="precioUnitario" min="1" step="1" />
+          <input
+            id="precio"
+            type="number"
+            formControlName="precioUnitario"
+            min="1"
+            step="1"
+          />
+
           <div class="checkbox-wrapper">
-            <p-checkbox inputId="vegano" formControlName="esVegano" [binary]="true"></p-checkbox>
+            <p-checkbox
+              inputId="vegano"
+              formControlName="esVegano"
+              [binary]="true"
+            ></p-checkbox>
             <label for="vegano">Vegano</label>
           </div>
 
           <div class="checkbox-wrapper">
-            <p-checkbox inputId="vegetariano" formControlName="esVegetariano" [binary]="true"></p-checkbox>
+            <p-checkbox
+              inputId="vegetariano"
+              formControlName="esVegetariano"
+              [binary]="true"
+            ></p-checkbox>
             <label for="vegetariano">Vegetariano</label>
           </div>
 
           <div class="form-buttons">
-            <button type="submit" class="btn-guardar" [disabled]="formularioProducto.invalid">Guardar</button>
-            <button type="button" class="btn-cancelar" (click)="cancelarCreacion()">Cancelar</button>
+            <button
+              type="submit"
+              class="btn-guardar"
+              [disabled]="formularioProducto.invalid"
+            >
+              Guardar
+            </button>
+            <button
+              type="button"
+              class="btn-cancelar"
+              (click)="cancelarCreacion()"
+            >
+              Cancelar
+            </button>
           </div>
         </form>
       </div>
     </div>
-    <!-- 🟩 Grilla de productos -->
+
+    <!-- 🟩 Tarjetas -->
     <div class="tarjetas" *ngIf="!creando">
       <div *ngFor="let producto of productosFiltrados" class="producto-card">
         <div class="producto-header">
           <h3 class="producto-nombre">{{ producto.nombre }}</h3>
           <span class="producto-precio">${{ producto.precioUnitario }}</span>
         </div>
+
         <div class="producto-descripcion">
           <p>{{ producto.descripcion }}</p>
           <small><strong>Ingredientes:</strong> {{ producto.ingredientes }}</small>
           <div class="tipo-etiqueta">
-            <span class="etiqueta" [ngClass]="{
-              'etiqueta-vegano': producto.esVegano,
-              'etiqueta-vegetariano': !producto.esVegano && producto.esVegetariano,
-              'etiqueta-otro': !producto.esVegano && !producto.esVegetariano
-            }">
+            <span
+              class="etiqueta"
+              [ngClass]="{
+                'etiqueta-vegano': producto.esVegano,
+                'etiqueta-vegetariano': !producto.esVegano && producto.esVegetariano,
+                'etiqueta-otro': !producto.esVegano && !producto.esVegetariano
+              }"
+            >
               {{
-              producto.esVegano
-              ? 'Vegano'
-              : producto.esVegetariano
-              ? 'Vegetariano'
-              : 'Otro'
+                producto.esVegano
+                  ? "Vegano"
+                  : producto.esVegetariano
+                  ? "Vegetariano"
+                  : "Otro"
               }}
             </span>
           </div>
         </div>
+
         <button class="ver-mas-btn" (click)="abrirFormularioEditar(producto)">
           <i class="pi pi-pencil"></i> Editar
         </button>
+
+        <button
+          class="borrar-btn"
+          [disabled]="eliminandoIds?.has(producto.id)"
+          (click)="abrirConfirmacion(producto)"
+        >
+          <i class="pi pi-trash"></i>
+          <span *ngIf="!eliminandoIds?.has(producto.id)">Borrar</span>
+          <span *ngIf="eliminandoIds?.has(producto.id)">Borrando...</span>
+        </button>
       </div>
     </div>
-
   </div>
+
   <!-- 🤖 Chatbot -->
   <app-chatbot></app-chatbot>
+</div>
+
+<!-- ✅ Modal/Toast de confirmación estilo Starbucks -->
+<div class="sbx-confirm" *ngIf="confirmVisible">
+  <div class="sbx-card" role="dialog" aria-modal="true" aria-labelledby="confirm-title" (click)="$event.stopPropagation()">
+    <div class="sbx-card-header">
+      <div class="sbx-icon">🗑️</div>
+      <h4 id="confirm-title">Eliminar producto</h4>
+    </div>
+
+    <p class="sbx-card-text">
+      ¿Seguro que querés borrar
+      <strong>“{{ productoAEliminar?.nombre }}”</strong>?
+      <br />
+      <small>Esta acción no se puede deshacer.</small>
+    </p>
+
+    <div class="sbx-actions">
+      <button class="sbx-btn cancel" type="button" (click)="cerrarConfirmacion()">Cancelar</button>
+      <button class="sbx-btn danger" type="button" (click)="confirmarEliminar()">Sí, borrar</button>
+    </div>
+  </div>
+
+  <!-- Cerrar clickeando fuera -->
+  <div class="sbx-overlay" (click)="cerrarConfirmacion()"></div>
 </div>
