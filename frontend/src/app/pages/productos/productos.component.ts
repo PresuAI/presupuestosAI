@@ -62,6 +62,8 @@ export class ProductosComponent implements OnInit {
   eliminandoIds = new Set<number>();
   confirmVisible = false;
   productoAEliminar: Producto | null = null;
+  toastMensaje: string | null = null;
+  private toastTimer: any;
 
   opcionesOrden = [
     { label: 'Precio ascendente', value: 'asc' },
@@ -235,11 +237,7 @@ cerrarConfirmacion() {
   this.productoService.eliminarProducto(this.productoAEliminar.id).subscribe({
     next: () => {
       this.productos = this.productos.filter(p => p.id !== this.productoAEliminar!.id);
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Producto eliminado',
-        detail: `Se eliminó "${this.productoAEliminar!.nombre}".`
-      });
+      this.mostrarToast('Producto eliminado correctamente ');
       this.cerrarConfirmacion();
     },
     error: () => {
@@ -251,4 +249,10 @@ cerrarConfirmacion() {
     }
   });
 }
+private mostrarToast(msg: string, duracionMs = 3000) {
+  this.toastMensaje = msg;
+  clearTimeout(this.toastTimer);
+  this.toastTimer = setTimeout(() => (this.toastMensaje = null), duracionMs);
+}
+
 }
