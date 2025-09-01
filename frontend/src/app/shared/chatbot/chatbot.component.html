@@ -1,24 +1,29 @@
 <button class="chatbot-boton" pButton icon="pi pi-comments" (click)="mostrarChat = true" label="IA"></button>
 
 <div class="chatbot-popup" *ngIf="mostrarChat">
-    <div class="chatbot-header">
-        <span>🤖 Chat con la IA</span>
-        <button (click)="mostrarChat = false" class="chatbot-close">−</button>
-    </div>
-    <div class="chat-box">
-        <div class="mensajes">
-            <div *ngFor="let mensaje of historialMensajes">
-                <div [ngClass]="mensaje.origen === 'yo' ? 'mensaje-yo' : 'mensaje-ia'"
-                    [innerHTML]="mensaje.texto | markdownHtml">
-                </div>
-            </div>
-        </div>
+  <div class="chatbot-header">
+    <span>🤖 Chat con la IA</span>
+    <button (click)="mostrarChat = false" class="chatbot-close" aria-label="Cerrar">−</button>
+  </div>
 
-        <div class="chat-input">
-            <input type="text" [(ngModel)]="mensajeUsuario" (keyup.enter)="enviarMensaje()"
-                placeholder="Escribí tu mensaje..." class="p-inputtext" />
-            <button pButton icon="pi pi-send" class="p-button-sm p-button-rounded" (click)="enviarMensaje()"
-                [disabled]="!mensajeUsuario.trim()"></button>
+  <div class="chat-box">
+    <div class="mensajes">
+      <div *ngFor="let mensaje of historialMensajes">
+        <div
+          [ngClass]="mensaje.origen === 'yo' ? 'mensaje-yo' : 'mensaje-ia'"
+          [innerHTML]="mensaje.texto | markdownHtml">
         </div>
+      </div>
     </div>
+
+    <div class="chat-input">
+      <input
+        type="text"
+        [(ngModel)]="mensajeUsuario"
+        (keyup.enter)="enviarMensaje()"
+        placeholder="Escribí tu mensaje..."
+        class="p-inputtext" />
+      <button pButton icon="pi pi-send" class="p-button-sm p-button-rounded" (click)="enviarMensaje()" [disabled]="!mensajeUsuario.trim()"></button>
+    </div>
+  </div>
 </div>

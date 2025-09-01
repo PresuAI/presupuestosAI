@@ -1,58 +1,66 @@
 <p>estadisticas works!</p>
-<div class="estats-container">
-  <!-- Toast simple -->
-  <div class="toast" *ngIf="errorMsg">{{ errorMsg }}</div>
 
-  <div class="header">
-    <h2>Estadísticas</h2>
-    <button class="btn btn-outline" (click)="cargar()" [disabled]="cargando">
-      {{ cargando ? 'Actualizando…' : 'Actualizar' }}
-    </button>
-  </div>
+<div class="page">
+  <div class="estats-container">
+    <!-- Toast simple -->
+    <div class="toast" *ngIf="errorMsg">{{ errorMsg }}</div>
 
-  <!-- Cards -->
-  <div class="cards">
-    <div class="card kpi">
-      <div class="kpi-title">Ingreso total (último mes)</div>
-      <div class="kpi-value">{{ money(ingresoUltimoMes) }}</div>
-      <div class="kpi-foot">Incluye todos los presupuestos cerrados</div>
+    <div class="header">
+      <h2>Estadísticas</h2>
+      <button class="btn btn-outline" (click)="cargar()" [disabled]="cargando">
+        {{ cargando ? 'Actualizando…' : 'Actualizar' }}
+      </button>
     </div>
 
-    <div class="card">
-      <h3>Top productos (último mes)</h3>
-      <div *ngIf="topProductos.length === 0" class="empty">Sin datos para mostrar</div>
-      <ul class="bars" *ngIf="topProductos.length">
-        <li *ngFor="let p of topProductos">
-          <span class="label">{{ p.nombreProducto }}</span>
-          <div class="bar-wrap">
-            <div
-              class="bar"
-              [style.width.%]="(p.cantidad / maxCantidad()) * 100"
-              [attr.aria-valuenow]="p.cantidad"
-            ></div>
-          </div>
-          <span class="value">{{ p.cantidad }}</span>
-        </li>
-      </ul>
-    </div>
+    <!-- Cards -->
+    <div class="cards">
+      <div class="card kpi">
+        <div class="kpi-title">Ingreso total (último mes)</div>
+        <div class="kpi-value">{{ money(ingresoUltimoMes) }}</div>
+        <div class="kpi-foot">Incluye todos los presupuestos cerrados</div>
+      </div>
 
-    <div class="card">
-      <h3>Ingresos por cliente (último mes)</h3>
-      <div *ngIf="ingresosClientes.length === 0" class="empty">Sin datos para mostrar</div>
-      <table *ngIf="ingresosClientes.length">
-        <thead>
-          <tr>
-            <th>Cliente</th>
-            <th class="right">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let c of ingresosClientes">
-            <td>{{ c.nombreCliente }}</td>
-            <td class="right">{{ money(c.total) }}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="card">
+        <h3>Top productos (último mes)</h3>
+        <div *ngIf="topProductos.length === 0" class="empty">Sin datos para mostrar</div>
+        <ul class="bars" *ngIf="topProductos.length">
+          <li *ngFor="let p of topProductos">
+            <span class="label">{{ p.nombreProducto }}</span>
+            <div class="bar-wrap">
+              <div
+                class="bar"
+                [style.width.%]="(p.cantidad / maxCantidad()) * 100"
+                [attr.aria-valuenow]="p.cantidad"
+              ></div>
+            </div>
+            <span class="value">{{ p.cantidad }}</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>Ingresos por cliente (último mes)</h3>
+        <div *ngIf="ingresosClientes.length === 0" class="empty">Sin datos para mostrar</div>
+
+        <!-- 👇 Envolvemos la tabla para permitir scroll horizontal en mobile -->
+        <div class="table-wrap" *ngIf="ingresosClientes.length">
+          <table>
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th class="right">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let c of ingresosClientes">
+                <td>{{ c.nombreCliente }}</td>
+                <td class="right">{{ money(c.total) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- ☝️ nada más cambia: solo el wrapper -->
+      </div>
     </div>
   </div>
 </div>

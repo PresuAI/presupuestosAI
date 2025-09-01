@@ -9,118 +9,122 @@
   {{ toastMsg }}
 </div>
 
-<div class="usuarios-container">
-  <div class="usuarios-header">
-    <h2><span class="icon"></span> Lista de Usuarios</h2>
+<div class="page">
+  <div class="usuarios-container">
+    <div class="usuarios-header">
+      <h2><span class="icon"></span> Lista de Usuarios</h2>
 
-    <button
-      class="btn btn-primary"
-      *ngIf="canCreate && !creando"
-      (click)="abrirCrear()"
-    >
-      ＋ Crear usuario
-    </button>
-  </div>
-
-  <!-- Form crear / editar rol -->
-  <div class="usuario-form-centrado" *ngIf="creando">
-    <div class="form-card">
-      <h3>{{ editando ? "Cambiar rol" : "Crear nuevo usuario" }}</h3>
-
-      <form [formGroup]="form" (ngSubmit)="guardar()" class="form">
-        <label for="nombre">Nombre:</label>
-        <input
-          id="nombre"
-          type="text"
-          formControlName="nombre"
-          [readonly]="editando"
-        />
-
-        <label for="email">Email:</label>
-        <input
-          id="email"
-          type="email"
-          formControlName="email"
-          [readonly]="editando"
-        />
-
-        <ng-container *ngIf="!editando">
-          <label for="password">Contraseña (mín. 6)</label>
-          <input id="password" type="password" formControlName="password" />
-        </ng-container>
-
-        <label for="rol">Rol:</label>
-        <select id="rol" formControlName="rol">
-          <option value="">Seleccione un rol</option>
-          <option *ngFor="let r of rolesDisponibles" [value]="r">
-            {{ r }}
-          </option>
-        </select>
-
-        <!-- Checkbox alineado y consistente -->
-        <div class="activo-row">
-          <input type="checkbox" formControlName="activo" />
-          <label>Usuario activo</label>
-        </div>
-
-        <!-- Acciones -->
-        <div class="form-actions">
-          <button type="submit" class="btn btn-primary">Guardar</button>
-          <button type="button" class="btn btn-secondary" (click)="cancelar()">
-            Cancelar
-          </button>
-        </div>
-      </form>
+      <button
+        class="btn btn-primary"
+        *ngIf="canCreate && !creando"
+        (click)="abrirCrear()"
+      >
+        ＋ Crear usuario
+      </button>
     </div>
-  </div>
 
-  <!-- Tabla -->
-  <div class="tabla-usuarios" *ngIf="!creando">
-    <table>
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>Correo electrónico</th>
-          <th>Rol</th>
-          <th class="col-acciones">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let u of usuarios">
-          <td><span class="u-ico"></span> {{ u.nombre }}</td>
-          <td class="email-cell">{{ u.email }}</td>
-          <td>
-            <span
-              class="chip"
-              [class.chip--sa]="u.rol === 'SUPERADMIN'"
-              [class.chip--ad]="u.rol === 'ADMIN'"
-              [class.chip--us]="u.rol === 'USUARIO'"
-            >
-              {{ u.rol }}
-            </span>
-          </td>
-          <td class="acciones">
-            <button
-              class="icon-btn edit"
-              title="Cambiar rol"
-              (click)="abrirEditarRol(u)"
-            >
-              ✏️
-            </button>
-            <button
-              class="icon-btn del"
-              title="Eliminar"
-              (click)="pedirEliminar(u)"
-            >
-              🗑️
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+    <!-- Form crear / editar rol -->
+    <div class="usuario-form-centrado" *ngIf="creando">
+      <div class="form-card">
+        <h3>{{ editando ? "Cambiar rol" : "Crear nuevo usuario" }}</h3>
 
-  <app-chatbot></app-chatbot>
+        <form [formGroup]="form" (ngSubmit)="guardar()" class="form">
+          <label for="nombre">Nombre:</label>
+          <input
+            id="nombre"
+            type="text"
+            formControlName="nombre"
+            [readonly]="editando"
+          />
+
+          <label for="email">Email:</label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            [readonly]="editando"
+          />
+
+          <ng-container *ngIf="!editando">
+            <label for="password">Contraseña (mín. 6)</label>
+            <input id="password" type="password" formControlName="password" />
+          </ng-container>
+
+          <label for="rol">Rol:</label>
+          <select id="rol" formControlName="rol">
+            <option value="">Seleccione un rol</option>
+            <option *ngFor="let r of rolesDisponibles" [value]="r">
+              {{ r }}
+            </option>
+          </select>
+
+          <!-- Checkbox alineado y consistente -->
+          <div class="activo-row">
+            <input type="checkbox" formControlName="activo" />
+            <label>Usuario activo</label>
+          </div>
+
+          <!-- Acciones -->
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <button type="button" class="btn btn-secondary" (click)="cancelar()">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="tabla-usuarios" *ngIf="!creando">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Correo electrónico</th>
+              <th>Rol</th>
+              <th class="col-acciones">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let u of usuarios">
+              <td><span class="u-ico"></span> {{ u.nombre }}</td>
+              <td class="email-cell">{{ u.email }}</td>
+              <td>
+                <span
+                  class="chip"
+                  [class.chip--sa]="u.rol === 'SUPERADMIN'"
+                  [class.chip--ad]="u.rol === 'ADMIN'"
+                  [class.chip--us]="u.rol === 'USUARIO'"
+                >
+                  {{ u.rol }}
+                </span>
+              </td>
+              <td class="acciones">
+                <button
+                  class="icon-btn edit"
+                  title="Cambiar rol"
+                  (click)="abrirEditarRol(u)"
+                >
+                  ✏️
+                </button>
+                <button
+                  class="icon-btn del"
+                  title="Eliminar"
+                  (click)="pedirEliminar(u)"
+                >
+                  🗑️
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <app-chatbot></app-chatbot>
+  </div>
 </div>
 
 <!-- Confirmación de borrado -->
@@ -135,7 +139,7 @@
   >
     <div class="sbx-head">
       <span class="sbx-trash">🗑️</span>
-      <h4 id="sbx-title">Eliminar producto</h4>
+      <h4 id="sbx-title">Eliminar Usuario</h4>
     </div>
 
     <p class="sbx-question">

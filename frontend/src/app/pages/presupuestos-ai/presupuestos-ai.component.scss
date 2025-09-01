@@ -1,8 +1,8 @@
-@use '../../styles/presupuestosAi-theme' as presets;
+@use "../../styles/presupuestosAi-theme" as presets;
 
 .contenedor-principal {
   background-color: presets.$fondo-claro;
-  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-family: "Helvetica Neue", Arial, sans-serif;
   font-size: 1.1rem;
   width: 100%;
   min-height: 100vh;
@@ -20,9 +20,8 @@
 
     .header {
       margin-bottom: 1rem;
-
       h1 {
-        font-size: 2.4rem;
+        font-size: 1.6rem;
         color: #090909;
         font-weight: 600;
         letter-spacing: -0.5px;
@@ -62,7 +61,7 @@
               }
 
               select {
-                background-color: white;
+                background: #fff;
                 border: 1px solid #ccc;
                 border-radius: 8px;
                 padding: 0.5rem;
@@ -83,7 +82,7 @@
             gap: 1.5rem;
 
             .card-tabla {
-              background: white;
+              background: #fff;
               border: 1px solid presets.$verde-suave;
               border-radius: 16px;
               padding: 1.5rem;
@@ -96,9 +95,9 @@
                 display: grid;
                 grid-template-columns: 2fr 1fr 1fr 1fr 0.5fr;
                 padding: 0.5rem 1rem;
-                font-weight: bold;
+                font-weight: 700;
                 font-size: 1.1rem;
-                background-color: presets.$verde-suave;
+                background: presets.$verde-suave;
                 color: #090909;
                 border-radius: 8px;
               }
@@ -117,9 +116,8 @@
                   font-size: 1rem;
                   text-align: center;
                 }
-
                 .input-disabled {
-                  background-color: #f0fdf4;
+                  background: #f0fdf4;
                 }
 
                 .btn-trash {
@@ -129,10 +127,9 @@
                   border: none;
                   cursor: pointer;
                 }
-
                 .btn-icon {
-                  background-color: #090909;
-                  color: white;
+                  background: #090909;
+                  color: #fff;
                   border-radius: 50%;
                   width: 44px;
                   height: 44px;
@@ -156,11 +153,10 @@
                 align-items: center;
                 padding: 1rem;
                 font-size: 1.2rem;
-                font-weight: bold;
+                font-weight: 700;
                 color: #333;
-                background-color: #f7f9fc;
+                background: #f7f9fc;
                 border-radius: 12px;
-
                 .label-total {
                   margin-right: 0.5rem;
                 }
@@ -169,18 +165,7 @@
 
             textarea,
             .textarea-comentarios {
-              padding: 0.75rem;
-              border: 1px solid #ccc;
-              border-radius: 12px;
-              font-size: 1rem;
-              resize: none;
-              width: 100%;
-              color: #1e3932;
-            }
-
-            textarea,
-            .textarea-comentarios {
-              background-color: white;
+              background: #fff;
               color: #1e3932;
               border: 1px solid #ccc;
               padding: 0.75rem;
@@ -188,94 +173,91 @@
               font-size: 1rem;
               resize: none;
               width: 100%;
-              font-family: 'Helvetica Neue', Arial, sans-serif;
-
+              font-family: "Helvetica Neue", Arial, sans-serif;
               &::placeholder {
                 color: #888;
                 font-weight: 400;
               }
-
               &:focus {
                 outline: none;
                 border-color: presets.$verde;
                 box-shadow: 0 0 0 2px rgba(0, 117, 74, 0.15);
               }
             }
-
           }
         }
 
+        /* ===== Chat igual al widget Starbucks ===== */
         .chat-flotante {
           display: flex;
           flex-direction: column;
-          border-radius: 16px;
-          border: 1px solid presets.$verde-suave;
-          background-color: white;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-          max-height: 700px;
+          width: 360px;
+          border-radius: 12px;
           overflow: hidden;
-          height: 60vh;
-
+          background: #fff;
+          box-shadow: 0 18px 45px rgba(0, 0, 0, 0.18);
+          border: 1px solid presets.$verde-suave;
+          height: 50vh; /* antes 60vh o sin altura explícita */
+          max-height: 820px; /* opcional: para que no se dispare en pantallas muy altas */
+          min-height: 420px;
           .chat-header {
-            background-color: presets.$verde;
-            color: white;
-            padding: 1rem;
-            font-weight: bold;
-            font-size: 1.2rem;
-            text-align: center;
+            background: darken(
+              presets.$verde,
+              14%
+            ); /* verde oscuro, como el widget */
+            color: #fff;
+            padding: 0.85rem 1rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            .chat-close {
+              border: 0;
+              background: rgba(255, 255, 255, 0.12);
+              color: #fff;
+              width: 28px;
+              height: 28px;
+              line-height: 28px;
+              border-radius: 8px;
+              cursor: default;
+            }
           }
 
           .chat-mensajes {
             flex: 1 1 auto;
             min-height: 0;
-            max-height: 100%;
             overflow-y: auto;
-            padding: 1rem;
+            padding: 0.75rem 0.75rem 1rem;
             display: flex;
             flex-direction: column;
-            gap: 0.75rem;
-            font-size: 1.1rem;
-            scroll-behavior: smooth;
-            background-color: #fff;
-            max-height: 100%;
-            min-height: 0;
+            gap: 0.6rem;
+            background: #fbf7f1; /* crema */
 
             .mensaje {
-              max-width: 75%;
-              padding: 0.5rem 0.75rem;
-              border-radius: 16px;
-              font-size: 1rem;
-              font-weight: 500;
-              line-height: 1.4;
-              box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-              animation: fadein 0.3s ease-in-out;
-              display: flex;
+              max-width: 78%;
+              padding: 0.55rem 0.8rem;
+              border-radius: 12px;
+              font-size: 0.95rem;
+              line-height: 1.35;
+              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+              display: inline-flex;
               flex-direction: column;
+              animation: fadein-chat 0.2s ease-in;
 
               &.mensaje-bot {
-                background-color: presets.$verde-suave;
-                color: presets.$texto;
+                background: #e7f3ec;
+                color: #0a3d2e;
                 align-self: flex-start;
               }
-
               &.mensaje-usuario {
-                background-color: #e0f2f1;
-                color: #1e3932;
+                background: #1f2937;
+                color: #fff;
                 align-self: flex-end;
               }
-
-              .contenido-mensaje {
-                display: flex;
-                flex-direction: column;
-              }
-
-              .texto {
-                margin-bottom: 0.25rem;
-              }
-
               .hora {
-                font-size: 0.75rem;
-                color: #666;
+                font-size: 0.72rem;
+                color: #6b7280;
+                margin-top: 0.15rem;
                 align-self: flex-end;
               }
             }
@@ -284,90 +266,81 @@
           .chat-input {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1rem;
-            border-top: 1px solid #e0e0e0;
-            background-color: #f9f9f9;
-            flex-shrink: 0;
+            gap: 0.6rem;
+            padding: 0.75rem;
+            background: #fff;
+            border-top: 1px solid #e6e6e6;
 
             textarea {
               flex: 1;
+              height: 44px;
               resize: none;
-              height: 42px;
-              border-radius: 20px;
-              border: 1px solid #ccc;
-              padding: 0.5rem 1rem;
-              font-size: 1rem;
-              font-family: 'Helvetica Neue', sans-serif;
-              color: #1e3932;
-              background-color: white;
-              transition: all 0.2s ease-in-out;
-
+              border-radius: 999px;
+              border: 0;
+              padding: 0.65rem 1rem;
+              font-size: 0.95rem;
+              font-family: "Helvetica Neue", Arial, sans-serif;
+              color: #fff;
+              background: #2b2b2b;
+              box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
               &::placeholder {
-                color: #888;
+                color: #bfbfbf;
               }
-
               &:focus {
                 outline: none;
-                border-color: presets.$verde;
-                box-shadow: 0 0 0 2px rgba(0, 117, 74, 0.15);
+                box-shadow: 0 0 0 2px rgba(0, 117, 74, 0.18);
               }
             }
 
             .btn-enviar {
-              background-color: presets.$verde;
-              border: none;
+              border: 0;
               border-radius: 50%;
               width: 42px;
               height: 42px;
-              display: flex;
+              display: inline-flex;
               align-items: center;
               justify-content: center;
-              box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+              background: lighten(presets.$verde, 28%);
+              box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
               cursor: pointer;
-              transition: background-color 0.2s ease;
-
+              transition: transform 0.05s ease, filter 0.15s ease;
               svg {
                 width: 20px;
                 height: 20px;
-                fill: white;
+                fill: #0a3d2e;
               }
-
               &:hover {
-                background-color: darken(presets.$verde, 8%);
+                filter: brightness(0.95);
               }
-
               &:active {
-                transform: scale(0.95);
+                transform: translateY(1px) scale(0.98);
               }
             }
           }
-
         }
 
-        @keyframes fadein {
+        @keyframes fadein-chat {
           from {
             opacity: 0;
-            transform: translateY(5px);
+            transform: translateY(4px);
           }
-
           to {
             opacity: 1;
-            transform: translateY(0);
+            transform: none;
           }
         }
-
       }
     }
   }
 }
 
+/* Toast */
 .custom-toast {
   position: fixed;
   top: 2rem;
   right: 2rem;
   background: #1e3932;
-  color: white;
+  color: #fff;
   padding: 1rem 1.5rem;
   border-radius: 8px;
   font-weight: 600;
@@ -376,40 +349,36 @@
   font-size: 1rem;
   animation: fadein 0.3s ease-in-out;
 }
-
 @keyframes fadein {
   from {
     opacity: 0;
     transform: translateY(-10px);
   }
-
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
 }
 
- .btn-guardar {
-  background-color: #090909;
-  color: white;
+/* Botón guardar (sin cambios) */
+.btn-guardar {
+  background: #090909;
+  color: #fff;
   border-radius: 50px;
   padding: 1rem 3rem;
   font-weight: 700;
   font-size: 1.15rem;
   border: none;
-  display: block;
   width: 100%;
   text-align: center;
   margin-top: 2rem;
-  transition: background-color 0.2s ease-in-out;
-
+  transition: background-color 0.2s;
   &:hover {
-    background-color: darken(#090909, 10%);
+    background: darken(#090909, 10%);
     cursor: pointer;
   }
-
   &:disabled {
-    background-color: #ccc;
+    background: #ccc;
     cursor: not-allowed;
   }
 }

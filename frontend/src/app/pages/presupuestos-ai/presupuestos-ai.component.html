@@ -48,8 +48,7 @@
                   <option *ngFor="let producto of productos" [value]="producto.id">{{ producto.nombre }}</option>
                 </select>
 
-                <input type="number" [(ngModel)]="item.cantidad" [ngModelOptions]="{standalone: true}" disabled
-                  class="input-cantidad" />
+                <input type="number" [(ngModel)]="item.cantidad" [ngModelOptions]="{standalone: true}" disabled class="input-cantidad" />
                 <input type="text" [value]="item.precioUnitario | currency:'UYU'" class="input-disabled" disabled />
                 <input type="text" [value]="item.totalItem | currency:'UYU'" class="input-disabled" disabled />
 
@@ -57,17 +56,14 @@
               </div>
 
               <div class="fila-producto nueva-fila">
-                <select [(ngModel)]="nuevoItem.productoId" [ngModelOptions]="{standalone: true}"
-                  (ngModelChange)="setPrecioUnitario()">
+                <select [(ngModel)]="nuevoItem.productoId" [ngModelOptions]="{standalone: true}" (ngModelChange)="setPrecioUnitario()">
                   <option value="" disabled selected>Producto</option>
                   <option *ngFor="let producto of productos" [value]="producto.id">{{ producto.nombre }}</option>
                 </select>
 
-                <input type="number" [(ngModel)]="nuevoItem.cantidad" [ngModelOptions]="{standalone: true}"
-                  (ngModelChange)="onCantidadChange()" class="input-cantidad" />
+                <input type="number" [(ngModel)]="nuevoItem.cantidad" [ngModelOptions]="{standalone: true}" (ngModelChange)="onCantidadChange()" class="input-cantidad" />
 
-                <input type="text" [value]="nuevoItem.precioUnitario | currency:'UYU'" class="input-disabled"
-                  disabled />
+                <input type="text" [value]="nuevoItem.precioUnitario | currency:'UYU'" class="input-disabled" disabled />
                 <input type="text" [value]="nuevoItem.totalItem | currency:'UYU'" class="input-disabled" disabled />
 
                 <button type="button" class="btn-icon" (click)="agregarItem()">➕</button>
@@ -80,8 +76,7 @@
             </div>
 
             <label for="comentarios">Comentarios adicionales</label>
-            <textarea id="comentarios" formControlName="comentarios" rows="3" placeholder="Comentarios adicionales"
-              class="textarea-comentarios"></textarea>
+            <textarea id="comentarios" formControlName="comentarios" rows="3" placeholder="Comentarios adicionales" class="textarea-comentarios"></textarea>
 
             <button type="button" class="btn-guardar" (click)="crearPresupuesto()">
               Guardar presupuesto
@@ -91,14 +86,18 @@
 
         <!-- 🤖 Chat -->
         <div class="chat-flotante">
-          <div class="chat-header">🤖 Asistente AI</div>
+          <div class="chat-header">
+            <span>🤖 Chat con la IA</span>
+            <button type="button" class="chat-close" aria-label="Minimizar">−</button>
+          </div>
 
           <div class="chat-mensajes" id="chat-scroll">
-            <div *ngFor="let mensaje of chatMensajes" class="mensaje"
-              [ngClass]="{
-                'mensaje-bot': mensaje.tipo === 'bot',
-                'mensaje-usuario': mensaje.tipo === 'usuario'
-              }">
+            <div *ngFor="let mensaje of chatMensajes"
+                 class="mensaje"
+                 [ngClass]="{
+                   'mensaje-bot': mensaje.tipo === 'bot',
+                   'mensaje-usuario': mensaje.tipo === 'usuario'
+                 }">
               <div class="contenido-mensaje">
                 <span class="texto">{{ mensaje.texto }}</span>
                 <span class="hora" *ngIf="mensaje.timestamp">{{ mensaje.timestamp | date:'shortTime' }}</span>
@@ -107,11 +106,14 @@
           </div>
 
           <div class="chat-input">
-            <textarea [(ngModel)]="prompt" [ngModelOptions]="{standalone: true}"
-              placeholder="Escribí tu mensaje..."></textarea>
+            <textarea
+              [(ngModel)]="prompt"
+              [ngModelOptions]="{standalone: true}"
+              placeholder="Escribí tu mensaje...">
+            </textarea>
 
-            <button type="button" class="btn-enviar" (click)="enviarPromptAI()">
-              <svg viewBox="0 0 24 24">
+            <button type="button" class="btn-enviar" (click)="enviarPromptAI()" aria-label="Enviar">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M2 21L23 12L2 3V10L17 12L2 14V21Z" />
               </svg>
             </button>

@@ -1,17 +1,32 @@
 <div class="login-container">
-    <div class="login-card">
-        <img src="https://img.icons8.com/color/96/restaurant.png" alt="Logo Restaurante" />
-        <h1>Bienvenido</h1>
-        <p>Gestioná tu negocio con inteligencia</p>
+  <div class="login-card">
+    <img
+      src="/assets/logo-presupuestos-ai.png"
+      alt="Logo PresupuestosAI"
+      class="logo"
+    />
+    <h3>Gestioná tu negocio con inteligencia</h3>
 
-        <form (ngSubmit)="login()" #loginForm="ngForm">
-            <input type="email" placeholder="Correo electrónico" name="email" [(ngModel)]="email" required />
-            <input type="password" placeholder="Contraseña" name="password" [(ngModel)]="password" required />
-            <button type="submit" [disabled]="loginForm.invalid">
-                Ingresar
-            </button>
-        </form>
+    <form (ngSubmit)="login()" #loginForm="ngForm">
+      <input
+        type="email"
+        placeholder="Correo electrónico"
+        name="email"
+        [(ngModel)]="email"
+        required
+      />
+      <input
+        type="password"
+        placeholder="Contraseña"
+        name="password"
+        [(ngModel)]="password"
+        required
+      />
+      <button type="submit" [disabled]="loginForm.invalid">
+        Ingresar
+      </button>
+    </form>
 
-        <p *ngIf="error" class="error">{{ error }}</p>
-    </div>
+    <p *ngIf="error" class="error">{{ error }}</p>
+  </div>
 </div>

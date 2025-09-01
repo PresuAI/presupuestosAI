@@ -1,172 +1,227 @@
 <p-toast></p-toast>
 
-<div class="presupuesto-container">
-  <!-- 📁 Tabs -->
-  <div class="tabs" *ngIf="!mostrarFormularioFinal">
-    <button [class.active]="vista === 'productos'" (click)="vista = 'productos'">Productos</button>
-    <button [class.active]="vista === 'presupuestos'" (click)="vista = 'presupuestos'">Presupuestos</button>
-  </div>
+<div class="page">
+  <div class="presupuesto-container">
+    <!-- 📁 Tabs -->
+    <div class="tabs" *ngIf="!mostrarFormularioFinal">
+      <button [class.active]="vista === 'productos'" (click)="vista = 'productos'">Productos</button>
+      <button [class.active]="vista === 'presupuestos'" (click)="vista = 'presupuestos'">Presupuestos</button>
+    </div>
 
-  <!-- 🛒 TAB: Productos -->
-  <div *ngIf="vista === 'productos' && !mostrarFormularioFinal">
-    <h2>Armado de Presupuesto | Productos disponibles</h2>
+    <!-- 🛒 TAB: Productos -->
+    <div *ngIf="vista === 'productos' && !mostrarFormularioFinal">
+      <h2>Armado de Presupuesto | Productos disponibles</h2>
 
-    <div class="productos-grid">
-      <div *ngFor="let prod of productos" class="producto-card">
-        <div class="producto-header">
-          <h3 class="producto-nombre">{{ prod.nombre }}</h3>
-          <span class="producto-precio">${{ prod.precioUnitario }}</span>
+      <div class="productos-grid">
+        <div *ngFor="let prod of productos" class="producto-card">
+          <div class="producto-header">
+            <h3 class="producto-nombre">{{ prod.nombre }}</h3>
+            <span class="producto-precio">${{ prod.precioUnitario }}</span>
+          </div>
+
+          <div class="producto-descripcion">
+            <p>{{ prod.descripcion }}</p>
+            <small><strong>Ingredientes:</strong> {{ prod.ingredientes }}</small>
+
+            <span class="etiqueta"
+              [ngClass]="{
+                'etiqueta-vegano': prod.flag === 'VEGANO',
+                'etiqueta-vegetariano': prod.flag === 'VEGETARIANO',
+                'etiqueta-otro': prod.flag !== 'VEGANO' && prod.flag !== 'VEGETARIANO'
+              }">
+              {{ prod.flag === 'VEGANO' ? 'Vegano' : prod.flag === 'VEGETARIANO' ? 'Vegetariano' : 'Otro' }}
+            </span>
+          </div>
+
+          <div class="card-footer">
+            <input type="number" [(ngModel)]="prod.cantidadTemp" min="1" class="cantidad-input" />
+            <button class="btn-agregar" (click)="agregarProducto(prod, prod.cantidadTemp || 1)">
+              <i class="pi pi-plus"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botón flotante SIEMPRE visible -->
+      <button
+        class="carrito-toggle"
+        [disabled]="items.length === 0"
+        (click)="toggleCarrito()"
+        aria-label="Abrir carrito">
+        <i class="pi pi-shopping-cart" aria-hidden="true"></i>
+        <span class="badge" *ngIf="items.length">{{ items.length }}</span>
+      </button>
+
+      <!-- Panel lateral -->
+      <div class="carrito-lateral" *ngIf="carritoAbierto" #carritoRef>
+        <h3>🧾 Ítems seleccionados</h3>
+
+        <div class="table-wrap">
+          <table class="tabla-carrito">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Cant.</th>
+                <th>Precio</th>
+                <th>Total</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of items; let i = index">
+                <td>{{ item.productoId }}</td>
+                <td>{{ item.cantidad }}</td>
+                <td>{{ item.precioUnitario | currency: 'UYU' }}</td>
+                <td>{{ item.totalItem | currency: 'UYU' }}</td>
+                <td>
+                  <button class="btn-eliminar" (click)="eliminarItem(i)">
+                    <i class="pi pi-trash"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="!items.length">
+                <td colspan="5" style="text-align:center; padding:.75rem;">No hay productos agregados.</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
-        <div class="producto-descripcion">
-          <p>{{ prod.descripcion }}</p>
-          <small><strong>Ingredientes:</strong> {{ prod.ingredientes }}</small>
-
-          <span class="etiqueta" [ngClass]="{
-              'etiqueta-vegano': prod.flag === 'VEGANO',
-              'etiqueta-vegetariano': prod.flag === 'VEGETARIANO',
-              'etiqueta-otro': prod.flag !== 'VEGANO' && prod.flag !== 'VEGETARIANO'
-            }">
-            {{
-            prod.flag === 'VEGANO'
-            ? 'Vegano'
-            : prod.flag === 'VEGETARIANO'
-            ? 'Vegetariano'
-            : 'Otro'
-            }}
-          </span>
-        </div>
-
-        <div class="card-footer">
-          <input type="number" [(ngModel)]="prod.cantidadTemp" min="1" class="cantidad-input" />
-          <button class="btn-agregar" (click)="agregarProducto(prod, prod.cantidadTemp || 1)">
-            <i class="pi pi-plus"></i>
-          </button>
+        <div class="text-right mt-3">
+          <button class="btn-continuar" (click)="continuar()">Continuar →</button>
         </div>
       </div>
     </div>
 
-    <!-- 🛒 Botón flotante para abrir el carrito -->
-    <button class="carrito-toggle ver-sidebar-btn" (click)="carritoAbierto = true">
-      <i class="pi pi-shopping-cart"></i>
-    </button>
+    <!-- 📝 Formulario Final -->
+    <div *ngIf="mostrarFormularioFinal" class="formulario-final-wrapper">
+      <div class="formulario-card" id="form-presupuesto-top">
+        <h3>Completar presupuesto</h3>
 
-    <!-- 🧾 Sidebar personalizado -->
-    <div class="carrito-lateral" *ngIf="carritoAbierto" #carritoRef>
-      <h3>🧾 Ítems seleccionados</h3>
+        <form [formGroup]="formPresupuesto">
+          <!-- Cliente -->
+          <div class="form-group">
+            <label for="cliente">Cliente</label>
+            <small class="hint" id="clienteHint">Seleccioná el cliente para asociar el presupuesto.</small>
+            <select
+              id="cliente"
+              class="combo-cliente"
+              formControlName="clienteId"
+              [compareWith]="compareByString"
+              aria-describedby="clienteHint"
+              required>
+              <option [ngValue]="null" disabled>Seleccionar cliente</option>
+              <option *ngFor="let c of clientes" [ngValue]="c.id">{{ c.nombre }}</option>
+            </select>
+          </div>
 
-      <table class="tabla-carrito">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Cant.</th>
-            <th>Precio</th>
-            <th>Total</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let item of items; let i = index">
-            <td>{{ item.productoId }}</td>
-            <td>{{ item.cantidad }}</td>
-            <td>{{ item.precioUnitario | currency: 'UYU' }}</td>
-            <td>{{ item.totalItem | currency: 'UYU' }}</td>
-            <td>
-              <button class="btn-eliminar" (click)="eliminarItem(i)">
-                <i class="pi pi-trash"></i>
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+          <!-- Estado -->
+          <div class="form-group">
+            <label for="estado">Estado</label>
+            <small class="hint" id="estadoHint">Etapa del presupuesto: Propuesto, Aprobado o Rechazado.</small>
+            <select
+              id="estado"
+              class="combo-cliente"
+              formControlName="estado"
+              [compareWith]="compareByString"
+              aria-describedby="estadoHint"
+              required>
+              <option [ngValue]="null" disabled>Seleccionar estado</option>
+              <option *ngFor="let e of estados" [ngValue]="e.value">{{ e.label }}</option>
+            </select>
+          </div>
 
-      <div class="text-right mt-3">
-        <button class="btn-continuar" (click)="continuar()">Continuar →</button>
+          <!-- Tipo de evento -->
+          <div class="form-group">
+            <label for="tipoEvento">Tipo de evento</label>
+            <small class="hint" id="eventoHint">El contexto del presupuesto (Cumpleaños, Casamiento, Corporativo).</small>
+            <select
+              id="tipoEvento"
+              class="combo-cliente"
+              formControlName="tipoEvento"
+              [compareWith]="compareByString"
+              aria-describedby="eventoHint"
+              required>
+              <option [ngValue]="null" disabled>Seleccionar evento</option>
+              <option *ngFor="let t of tiposEvento" [ngValue]="t.value">{{ t.label }}</option>
+            </select>
+          </div>
+
+          <!-- Ganancia estimada -->
+          <div class="form-group">
+            <label for="gananciaEstimada">Ganancia estimada (UYU)</label>
+            <small class="hint" id="gananciaHint">Ingresá un número entero (podés poner 0 si aún no lo sabés).</small>
+            <input
+              type="number"
+              id="gananciaEstimada"
+              formControlName="gananciaEstimada"
+              min="0"
+              placeholder="Ej.: 500"
+              aria-describedby="gananciaHint" />
+          </div>
+
+          <!-- Comentarios -->
+          <div class="form-group">
+            <label for="comentarios">Comentarios</label>
+            <small class="hint" id="comentariosHint">Notas internas, pedidos del cliente u otros detalles.</small>
+            <textarea
+              id="comentarios"
+              rows="3"
+              placeholder="Escribí comentarios adicionales…"
+              formControlName="comentarios"
+              aria-describedby="comentariosHint"></textarea>
+          </div>
+
+          <div class="form-buttons">
+            <button type="button" class="cancelar" (click)="volver()">← Volver</button>
+            <button
+              type="button"
+              class="guardar"
+              [disabled]="formPresupuesto.invalid || items.length === 0"
+              (click)="presupuestoEditandoId ? editarPresupuesto() : crearPresupuesto()">
+              {{ presupuestoEditandoId ? 'Actualizar presupuesto' : 'Guardar presupuesto' }}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
-  </div>
 
-  <!-- 📝 Formulario Final -->
-  <div *ngIf="mostrarFormularioFinal" class="formulario-final-wrapper">
-    <div class="formulario-card">
-      <h3>Completar presupuesto</h3>
-      <form [formGroup]="formPresupuesto">
-        <div class="form-group">
-          <label for="cliente">Cliente:</label>
-          <select id="cliente" class="combo-cliente" formControlName="clienteId" required>
-            <option value="" disabled selected>Seleccionar cliente</option>
-            <option *ngFor="let c of clientes" [value]="c.id">
-              {{ c.nombre }}
-            </option>
-          </select>
-
-        </div>
-
-        <div class="form-group">
-          <label for="estado">Estado:</label>
-          <input type="text" id="estado" placeholder="Ej: Propuesta" formControlName="estado" />
-        </div>
-
-        <div class="form-group">
-          <label for="tipoEvento">Tipo de evento:</label>
-          <input type="text" id="tipoEvento" placeholder="Ej: Casamiento" formControlName="tipoEvento" />
-        </div>
-
-        <div class="form-group">
-          <label for="gananciaEstimada">Ganancia estimada (UYU):</label>
-          <input type="number" id="gananciaEstimada" formControlName="gananciaEstimada" min="0" />
-        </div>
-
-        <div class="form-group">
-          <label for="comentarios">Comentarios:</label>
-          <textarea id="comentarios" rows="3" placeholder="Notas adicionales..."
-            formControlName="comentarios"></textarea>
-        </div>
-
-        <div class="form-buttons">
-          <button type="button" class="cancelar" (click)="volver()">← Volver</button>
-          <button type="button" class="guardar" [disabled]="formPresupuesto.invalid || items.length === 0"
-            (click)="presupuestoEditandoId ? editarPresupuesto() : crearPresupuesto()">
-            {{ presupuestoEditandoId ? 'Actualizar presupuesto' : 'Guardar presupuesto' }}
-          </button>
-        </div>
-      </form>
+    <!-- 📑 Tabla de Presupuestos -->
+    <div *ngIf="vista === 'presupuestos' && !mostrarFormularioFinal" class="tabla-presupuestos-custom">
+      <h3>Presupuestos anteriores</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Cliente</th>
+              <th>Evento</th>
+              <th>Comentarios</th>
+              <th>Estado</th>
+              <th>Total</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let pres of presupuestos">
+              <td>{{ pres.id }}</td>
+              <td>{{ pres.clienteId }}</td>
+              <td>{{ pres.tipoEvento }}</td>
+              <td>{{ pres.comentarios }}</td>
+              <td>{{ pres.estado }}</td>
+              <td>{{ obtenerTotal(pres) | currency: 'UYU' }}</td>
+              <td class="acciones">
+                <button class="editar-btn" (click)="cargarPresupuestoParaEditar(pres)">
+                  <i class="pi pi-pencil"></i>
+                </button>
+                <button class="eliminar-btn" (click)="eliminarPresupuesto(pres.id)">
+                  <i class="pi pi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
 
-  <!-- 📑 Tabla de Presupuestos -->
-  <div *ngIf="vista === 'presupuestos' && !mostrarFormularioFinal" class="tabla-presupuestos-custom">
-    <h3>Presupuestos anteriores</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Cliente</th>
-          <th>Evento</th>
-          <th>Comentarios</th>
-          <th>Estado</th>
-          <th>Total</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let pres of presupuestos">
-          <td>{{ pres.id }}</td>
-          <td>{{ pres.clienteId }}</td>
-          <td>{{ pres.tipoEvento }}</td>
-          <td>{{ pres.comentarios }}</td>
-          <td>{{ pres.estado }}</td>
-          <td>{{ obtenerTotal(pres) | currency: 'UYU' }}</td>
-          <td class="acciones">
-            <button class="editar-btn" (click)="cargarPresupuestoParaEditar(pres)">
-              <i class="pi pi-pencil"></i>
-            </button>
-            <button class="eliminar-btn" (click)="eliminarPresupuesto(pres.id)">
-              <i class="pi pi-trash"></i>
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
   </div>
 </div>

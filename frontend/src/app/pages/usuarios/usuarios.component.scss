@@ -206,3 +206,7 @@ table tbody td:first-child {
   border-radius: 12px;
   display: inline-block;
 }
+.tabla-usuarios {
+  .table-wrap { overflow-x: auto; }
+  table { min-width: 720px; } /* asegura scroll horizontal en pantallas chicas */
+}

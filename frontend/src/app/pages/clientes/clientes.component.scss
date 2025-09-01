@@ -9,7 +9,7 @@
     margin-bottom: 2rem;
 
     h2 {
-      font-size: 1.5rem;
+      font-size: 1.6rem;
       color: #1e3932;
 
       i {
@@ -246,4 +246,9 @@
       }
     }
   }
+}
+/* Scroll horizontal seguro para la tabla en móviles */
+.tabla-clientes {
+  .table-wrap { overflow-x: auto; }
+  .table-wrap table { min-width: 720px; } /* evita que se aplaste */
 }

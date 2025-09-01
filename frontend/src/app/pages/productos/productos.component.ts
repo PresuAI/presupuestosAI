@@ -50,18 +50,25 @@ import { AuthService } from '../../services/auth.service';
 export class ProductosComponent implements OnInit {
   productos: Producto[] = [];
   productoSeleccionado?: Producto;
+
+  // modal de precio (se conserva para no romper nada)
   modalVisible = false;
   nuevoPrecio?: number;
+
   filtro: string = '';
   ordenSeleccionado: string | null = null;
+
   formularioProducto!: FormGroup;
-  panelVisible: boolean = false;
+
+  panelVisible: boolean = false; // se conserva
   creando = false;
   editando = false;
   productoEditandoId: number | null = null;
+
   eliminandoIds = new Set<number>();
   confirmVisible = false;
   productoAEliminar: Producto | null = null;
+
   toastMensaje: string | null = null;
   private toastTimer: any;
 
@@ -90,6 +97,19 @@ export class ProductosComponent implements OnInit {
     });
   }
 
+  // ===== Helpers =====
+  private setFormFromProducto(p: Producto) {
+    this.formularioProducto.setValue({
+      nombre: p.nombre ?? '',
+      descripcion: p.descripcion ?? '',
+      ingredientes: p.ingredientes ?? '',
+      precioUnitario: Number(p.precioUnitario ?? 0),
+      esVegano: !!p.esVegano,
+      esVegetariano: !!p.esVegetariano,
+    });
+  }
+
+  // ===== Listado / filtros =====
   get productosFiltrados(): Producto[] {
     let filtrados = this.productos.filter(
       (p) =>
@@ -106,25 +126,6 @@ export class ProductosComponent implements OnInit {
     return filtrados;
   }
 
-  abrirFormularioProducto(): void {
-    this.creando = true;
-    this.editando = false;
-    this.formularioProducto.reset({ esVegano: false, esVegetariano: false });
-  }
-
-  cancelarCreacion(): void {
-    this.creando = false;
-    this.editando = false;
-    this.productoEditandoId = null;
-    this.formularioProducto.reset({ esVegano: false, esVegetariano: false });
-  }
-
-  abrirFormularioEditar(producto: Producto): void {
-    this.creando = true;
-    this.editando = true;
-    this.productoEditandoId = producto.id;
-    this.formularioProducto.patchValue(producto);
-  }
   obtenerProductos() {
     this.productoService.obtenerProductos().subscribe({
       next: (data) => (this.productos = data),
@@ -132,6 +133,111 @@ export class ProductosComponent implements OnInit {
     });
   }
 
+  // ===== Crear / Editar =====
+  abrirFormularioProducto(): void {
+    this.creando = true;
+    this.editando = false;
+    this.productoEditandoId = null;
+    this.productoSeleccionado = undefined;
+
+    this.formularioProducto.reset({
+      nombre: '',
+      descripcion: '',
+      ingredientes: '',
+      precioUnitario: null,
+      esVegano: false,
+      esVegetariano: false,
+    });
+  }
+
+  cancelarCreacion(): void {
+    this.creando = false;
+    this.editando = false;
+    this.productoEditandoId = null;
+    this.productoSeleccionado = undefined;
+
+    this.formularioProducto.reset({
+      esVegano: false,
+      esVegetariano: false,
+    });
+  }
+
+  abrirFormularioEditar(producto: Producto): void {
+    this.creando = true;
+    this.editando = true;
+    this.productoEditandoId = producto.id;
+    this.productoSeleccionado = { ...producto };
+
+    this.setFormFromProducto(producto);
+
+    // opcional: scroll al formulario
+    setTimeout(() => {
+      document
+        .getElementById('form-top')
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 0);
+  }
+
+  crearProducto(): void {
+    if (this.formularioProducto.invalid) return;
+
+    const nuevoProducto: Producto = {
+      id: 0 as any, // el backend ignora/crea ID
+      ...this.formularioProducto.value,
+    };
+
+    this.productoService.crearProducto(nuevoProducto).subscribe({
+      next: (producto) => {
+        this.productos.push(producto);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Producto creado',
+          detail: `Se creó correctamente el producto "${producto.nombre}".`,
+        });
+        this.cancelarCreacion();
+        this.obtenerProductos();
+      },
+      error: (err) => {
+        console.error('Error al crear producto', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error al crear',
+          detail: err.error?.message || 'No se pudo crear el producto.',
+        });
+      },
+    });
+  }
+
+  guardarCambiosProducto(): void {
+    if (!this.editando || this.formularioProducto.invalid || !this.productoEditandoId) return;
+
+    const actualizado: Producto = {
+      id: this.productoEditandoId,
+      ...this.formularioProducto.value,
+    };
+
+    this.productoService.actualizarProducto(actualizado.id, actualizado).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Producto actualizado',
+          detail: `Se actualizó correctamente "${actualizado.nombre}".`,
+        });
+        this.cancelarCreacion();
+        this.obtenerProductos();
+      },
+      error: (err) => {
+        console.error('Error al actualizar producto', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error al actualizar',
+          detail: err.error?.message || 'No se pudo actualizar el producto.',
+        });
+      },
+    });
+  }
+
+  // ===== Modal de precio (se mantiene para compatibilidad) =====
   abrirModal(producto: Producto) {
     this.productoSeleccionado = { ...producto };
     this.nuevoPrecio = producto.precioUnitario;
@@ -169,90 +275,42 @@ export class ProductosComponent implements OnInit {
       });
   }
 
-  crearProducto(): void {
-    if (this.formularioProducto.invalid) return;
+  // ===== Eliminar =====
+  abrirConfirmacion(producto: Producto) {
+    this.productoAEliminar = producto;
+    this.confirmVisible = true;
+  }
 
-    const nuevoProducto = this.formularioProducto.value;
+  cerrarConfirmacion() {
+    this.confirmVisible = false;
+    this.productoAEliminar = null;
+  }
 
-    this.productoService.crearProducto(nuevoProducto).subscribe({
-      next: (producto) => {
-        this.productos.push(producto);
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Producto creado',
-          detail: `Se creó correctamente el producto "${producto.nombre}".`,
-        });
-        this.formularioProducto.reset();
+  confirmarEliminar() {
+    if (!this.productoAEliminar) return;
+
+    this.productoService.eliminarProducto(this.productoAEliminar.id).subscribe({
+      next: () => {
+        this.productos = this.productos.filter(
+          (p) => p.id !== this.productoAEliminar!.id
+        );
+        this.mostrarToast('Producto eliminado correctamente ');
+        this.cerrarConfirmacion();
       },
-      error: (err) => {
-        console.error('Error al crear producto', err);
+      error: () => {
         this.messageService.add({
           severity: 'error',
-          summary: 'Error al crear',
-          detail: err.error?.message || 'No se pudo crear el producto.',
+          summary: 'Error al eliminar',
+          detail: 'No se pudo eliminar el producto.',
         });
       },
     });
   }
-  guardarCambiosProducto() {
-    if (!this.productoSeleccionado) return;
 
-    const actualizado = { ...this.productoSeleccionado };
-
-    this.productoService
-      .actualizarProducto(actualizado.id, actualizado)
-      .subscribe({
-        next: () => {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Producto actualizado',
-            detail: `Se actualizó correctamente "${actualizado.nombre}".`,
-          });
-          this.modalVisible = false;
-          this.obtenerProductos();
-        },
-        error: (err) => {
-          console.error('Error al actualizar producto', err);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error al actualizar',
-            detail: err.error?.message || 'No se pudo actualizar el producto.',
-          });
-        },
-      });
+  // ===== Toast liviano (custom) =====
+  private mostrarToast(msg: string, duracionMs = 3000) {
+    this.toastMensaje = msg;
+    clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => (this.toastMensaje = null), duracionMs);
   }
-  
-abrirConfirmacion(producto: Producto) {
-  this.productoAEliminar = producto;
-  this.confirmVisible = true;
-}
-
-cerrarConfirmacion() {
-  this.confirmVisible = false;
-  this.productoAEliminar = null;
-}
- confirmarEliminar() {
-  if (!this.productoAEliminar) return;
-
-  this.productoService.eliminarProducto(this.productoAEliminar.id).subscribe({
-    next: () => {
-      this.productos = this.productos.filter(p => p.id !== this.productoAEliminar!.id);
-      this.mostrarToast('Producto eliminado correctamente ');
-      this.cerrarConfirmacion();
-    },
-    error: () => {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error al eliminar',
-        detail: 'No se pudo eliminar el producto.'
-      });
-    }
-  });
-}
-private mostrarToast(msg: string, duracionMs = 3000) {
-  this.toastMensaje = msg;
-  clearTimeout(this.toastTimer);
-  this.toastTimer = setTimeout(() => (this.toastMensaje = null), duracionMs);
-}
-
 }
