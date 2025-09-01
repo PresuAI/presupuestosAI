@@ -1,171 +1,164 @@
-<div class="usuarios-container">
-  <div class="usuarios-header">
-    <h2><i class="pi pi-users"></i> Lista de Usuarios</h2>
+<!-- Toast -->
+<div
+  class="toast"
+  [class.toast--success]="toastKind === 'success'"
+  [class.toast--error]="toastKind === 'error'"
+  [class.toast--info]="toastKind === 'info'"
+  *ngIf="toastMsg"
+>
+  {{ toastMsg }}
+</div>
 
-    <div *ngIf="puedeCrear && !creando">
-      <button pButton icon="pi pi-plus" label="Crear usuario" class="p-button-sm p-button-primary"
-        (click)="abrirFormularioCrearUsuario()"></button>
+<div class="page">
+  <div class="usuarios-container">
+    <div class="usuarios-header">
+      <h2><span class="icon"></span> Lista de Usuarios</h2>
+
+      <button
+        class="btn btn-primary"
+        *ngIf="canCreate && !creando"
+        (click)="abrirCrear()"
+      >
+        ＋ Crear usuario
+      </button>
+    </div>
+
+    <!-- Form crear / editar rol -->
+    <div class="usuario-form-centrado" *ngIf="creando">
+      <div class="form-card">
+        <h3>{{ editando ? "Cambiar rol" : "Crear nuevo usuario" }}</h3>
+
+        <form [formGroup]="form" (ngSubmit)="guardar()" class="form">
+          <label for="nombre">Nombre:</label>
+          <input
+            id="nombre"
+            type="text"
+            formControlName="nombre"
+            [readonly]="editando"
+          />
+
+          <label for="email">Email:</label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            [readonly]="editando"
+          />
+
+          <ng-container *ngIf="!editando">
+            <label for="password">Contraseña (mín. 6)</label>
+            <input id="password" type="password" formControlName="password" />
+          </ng-container>
+
+          <label for="rol">Rol:</label>
+          <select id="rol" formControlName="rol">
+            <option value="">Seleccione un rol</option>
+            <option *ngFor="let r of rolesDisponibles" [value]="r">
+              {{ r }}
+            </option>
+          </select>
+
+          <!-- Checkbox alineado y consistente -->
+          <div class="activo-row">
+            <input type="checkbox" formControlName="activo" />
+            <label>Usuario activo</label>
+          </div>
+
+          <!-- Acciones -->
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <button type="button" class="btn btn-secondary" (click)="cancelar()">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="tabla-usuarios" *ngIf="!creando">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Correo electrónico</th>
+              <th>Rol</th>
+              <th class="col-acciones">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let u of usuarios">
+              <td><span class="u-ico"></span> {{ u.nombre }}</td>
+              <td class="email-cell">{{ u.email }}</td>
+              <td>
+                <span
+                  class="chip"
+                  [class.chip--sa]="u.rol === 'SUPERADMIN'"
+                  [class.chip--ad]="u.rol === 'ADMIN'"
+                  [class.chip--us]="u.rol === 'USUARIO'"
+                >
+                  {{ u.rol }}
+                </span>
+              </td>
+              <td class="acciones">
+                <button
+                  class="icon-btn edit"
+                  title="Cambiar rol"
+                  (click)="abrirEditarRol(u)"
+                >
+                  ✏️
+                </button>
+                <button
+                  class="icon-btn del"
+                  title="Eliminar"
+                  (click)="pedirEliminar(u)"
+                >
+                  🗑️
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <app-chatbot></app-chatbot>
+  </div>
+</div>
+
+<!-- Confirmación de borrado -->
+<div *ngIf="confirmVisible" class="sbx-confirm">
+  <div class="sbx-overlay" (click)="cerrarConfirm()"></div>
+
+  <div
+    class="sbx-card"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="sbx-title"
+  >
+    <div class="sbx-head">
+      <span class="sbx-trash">🗑️</span>
+      <h4 id="sbx-title">Eliminar Usuario</h4>
+    </div>
+
+    <p class="sbx-question">
+      ¿Seguro que querés borrar
+      <strong>“{{ usuarioAEliminar?.nombre }}”</strong>?
+    </p>
+    <p class="sbx-hint">Esta acción no se puede deshacer.</p>
+
+    <div class="sbx-actions">
+      <button type="button" class="sbx-btn cancel" (click)="cerrarConfirm()">
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="sbx-btn danger"
+        (click)="confirmarEliminar()"
+      >
+        Sí, borrar
+      </button>
     </div>
   </div>
-
-  <!-- ✅ Formulario crear usuario -->
-  <!--<div #formularioCrear *ngIf="creando" class="formulario-crear-usuario">
-    <h3>Crear nuevo usuario</h3>
-
-    <form [formGroup]="formulario" (ngSubmit)="crearUsuario()" class="p-fluid p-formgrid">
-      <div class="p-field">
-        <label for="nombre">Nombre</label>
-        <input id="nombre" type="text" pInputText formControlName="nombre" />
-        <small *ngIf="formulario.get('nombre')?.invalid && formulario.get('nombre')?.touched" class="p-error">
-          {{ formulario.get('nombre')?.errors?.['required'] ? 'El nombre es obligatorio' :
-          formulario.get('nombre')?.errors?.['minlength'] ? 'Mínimo 2 caracteres' :
-          formulario.get('nombre')?.errors?.['maxlength'] ? 'Máximo 50 caracteres' :
-          'Solo letras y espacios' }}
-        </small>
-      </div>
-
-      <div class="p-field">
-        <label for="email">Email</label>
-        <input id="email" type="email" pInputText formControlName="email" />
-        <small *ngIf="formulario.get('email')?.invalid && formulario.get('email')?.touched" class="p-error">
-          Debe ingresar un email válido
-        </small>
-      </div>
-
-      <div class="p-field">
-        <label for="password">Contraseña</label>
-        <input id="password" type="password" formControlName="password" />
-        <small *ngIf="formulario.get('password')?.invalid && formulario.get('password')?.touched" class="p-error">
-          La contraseña debe tener al menos 6 caracteres.
-        </small>
-      </div>
-
-      <div class="form-group">
-        <label for="rol">Rol</label>
-        <select id="rol" formControlName="rol">
-          <option value="">Seleccione un rol</option>
-          <option *ngFor="let rol of rolesDisponibles" [value]="rol">{{ rol }}</option>
-        </select>
-        <small *ngIf="formulario.get('rol')?.invalid && formulario.get('rol')?.touched" class="p-error">
-          Debe seleccionar un rol
-        </small>
-      </div>
-
-      <div class="p-field-checkbox">
-        <p-checkbox inputId="activo" formControlName="activo" [binary]="true"></p-checkbox>
-        <label for="activo">Usuario activo</label>
-      </div>
-
-      <div class="formulario-botones">
-        <button pButton type="submit" label="✅ Crear usuario" [disabled]="formulario.invalid"></button>
-        <button pButton type="button" label="❌ Cancelar" class="p-button-secondary"
-          (click)="cancelarCreacion()"></button>
-      </div>
-    </form>
-  </div>-->
-
-  <p-card *ngIf="creando" header="Crear nuevo usuario" class="mb-4 p-shadow-3">
-    <div class="formulario-wrapper">
-      <form [formGroup]="formulario" (ngSubmit)="crearUsuario()" class="p-fluid p-formgrid grid gap-3 mt-3">
-        <div class="col-12 md:col-6">
-          <div class="flex flex-column gap-2">
-            <label for="nombre">Nombre</label>
-            <input id="nombre" type="text" pInputText formControlName="nombre" />
-          </div>
-          <small *ngIf="formulario.get('nombre')?.invalid && formulario.get('nombre')?.touched" class="p-error mt-1">
-            {{ formulario.get('nombre')?.errors?.['required'] ? 'El nombre es obligatorio' :
-            formulario.get('nombre')?.errors?.['minlength'] ? 'Mínimo 2 caracteres' :
-            formulario.get('nombre')?.errors?.['maxlength'] ? 'Máximo 50 caracteres' :
-            'Solo letras y espacios' }}
-          </small>
-        </div>
-
-        <div class="col-12 md:col-6">
-          <div class="flex flex-column gap-2">
-            <label for="email">Email</label>
-            <input id="email" type="email" pInputText formControlName="email" />
-          </div>
-          <small *ngIf="formulario.get('email')?.invalid && formulario.get('email')?.touched" class="p-error mt-1">
-            Debe ingresar un email válido
-          </small>
-        </div>
-
-        <div class="col-12 md:col-6">
-          <div class="flex flex-column gap-2">
-            <label for="password">Contraseña</label>
-            <input id="password" type="password" pInputText formControlName="password" />
-          </div>
-          <small *ngIf="formulario.get('password')?.invalid && formulario.get('password')?.touched"
-            class="p-error mt-1">
-            La contraseña debe tener al menos 6 caracteres.
-          </small>
-        </div>
-
-        <div class="col-12 md:col-6">
-          <div class="flex flex-column gap-2">
-            <label for="rol">Rol</label>
-            <select id="rol" formControlName="rol" class="p-inputtext">
-              <option value="">Seleccione un rol</option>
-              <option *ngFor="let rol of rolesDisponibles" [value]="rol">{{ rol }}</option>
-            </select>
-          </div>
-          <small *ngIf="formulario.get('rol')?.invalid && formulario.get('rol')?.touched" class="p-error mt-1">
-            Debe seleccionar un rol
-          </small>
-        </div>
-
-        <div class="col-12">
-          <div class="flex align-items-center gap-2">
-            <p-checkbox inputId="activo" formControlName="activo" [binary]="true"></p-checkbox>
-            <label for="activo">Usuario activo</label>
-          </div>
-        </div>
-
-        <div class="col-12 flex gap-3">
-          <button pButton type="submit" label="✅ Crear usuario" [disabled]="formulario.invalid"></button>
-          <button pButton type="button" label="❌ Cancelar" class="p-button-secondary"
-            (click)="cancelarCreacion()"></button>
-        </div>
-      </form>
-    </div>
-  </p-card>
-
-
-
-
-
-  <!-- ✅ Tabla usuarios con PrimeNG -->
-  <p-table [value]="usuarios" [responsiveLayout]="'scroll'" class="p-datatable-striped p-datatable-sm">
-    <ng-template pTemplate="header">
-      <tr>
-        <th>Nombre</th>
-        <th>Correo electrónico</th>
-        <th>Rol</th>
-        <th>Acciones</th>
-      </tr>
-    </ng-template>
-
-    <ng-template pTemplate="body" let-u>
-      <tr>
-        <td><i class="pi pi-user mr-2"></i> {{ u.nombre }}</td>
-        <td>{{ u.email }}</td>
-        <td>
-          <p-tag [value]="u.rol"
-            [severity]="u.rol === 'SUPERADMIN' ? 'success' : u.rol === 'ADMIN' ? 'info' : 'warning'"></p-tag>
-        </td>
-        <td>
-          <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-info p-button-sm mr-2"
-            (click)="editarRol(u)"></button>
-          <button pButton icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-sm"
-            (click)="eliminarUsuario(u.id)"></button>
-        </td>
-      </tr>
-    </ng-template>
-  </p-table>
-
-  <button pButton label="Cerrar sesión" icon="pi pi-sign-out" class="p-button-danger mt-4"
-    (click)="cerrarSesion()"></button>
-
-  <app-chatbot />
-
 </div>

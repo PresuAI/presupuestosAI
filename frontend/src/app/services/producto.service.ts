@@ -44,4 +44,10 @@ export class ProductoService {
       { withCredentials: true }
     );
   }
+
+  eliminarProducto(id: number): Observable<void> {
+  return this.http.delete<void>(`${this.baseUrl}/${id}`, {
+    withCredentials: true
+  });
+}
 }

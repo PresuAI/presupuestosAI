@@ -16,7 +16,7 @@ public class UsuarioRequestDto {
     @NotBlank
     private String password;
 
-    @ValidEnum(enumClass = Rol.class, message = "Rol debe ser ADMIN o USUARIO")
+    @ValidEnum(enumClass = Rol.class, message = "Rol debe ser ADMIN, USUARIO o SUPERADMIN")
     private String rol;
 
     private boolean activo;

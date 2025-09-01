@@ -27,8 +27,6 @@ public class GeminiController {
 
     @PostMapping("/presupuesto")
     public ResponseEntity<String> generarPresupuestoConAI(@RequestBody GeminiPresupuestoRequestDTO dto) throws JsonProcessingException {
-        System.out.println("LLEGO AL CONTROLLER:");
-        System.out.println(new ObjectMapper().writeValueAsString(dto));
         String respuesta = geminiService.generarPresupuestoConAI(dto);
         return ResponseEntity.ok(respuesta);
     }

@@ -5,4 +5,5 @@ export const environment = {
     apiNegocioUrlBase: 'http://localhost:8081',
     negocioApi: 'http://localhost:8081/api/negocios',
     productoApi: 'http://localhost:8082/api/productos',
+    estadisticasApi: 'http://localhost:8081/api/estadisticas',
 };

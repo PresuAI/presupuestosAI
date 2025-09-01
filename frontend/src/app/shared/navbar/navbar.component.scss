@@ -140,3 +140,16 @@
     }
   }
 }
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  height: 100%; // asegura alineación vertical
+  cursor: pointer;
+
+  .logo-img {
+    height: 199px;      // ajustá entre 40px–60px si hace falta
+    width: auto;
+    object-fit: contain;
+    display: block;
+  }
+}

@@ -1,142 +1,203 @@
-<p-toast></p-toast>
-<div class="productos-container">
-  <div class="productos-wrapper">
-    <p-toolbar class="mb-3">
-      <div class="p-toolbar-group-left">
-        <span class="p-input-icon-left">
-          <i class="pi pi-search"></i>
-          <input type="text" pInputText placeholder="Buscar producto..." [(ngModel)]="filtro" />
-        </span>
+<div class="custom-toast" *ngIf="toastMensaje">
+  {{ toastMensaje }}
+</div>
+
+<div class="page">
+  <div class="productos-container">
+    <div class="productos-wrapper">
+
+      <!-- Título de página -->
+      <div class="productos-header">
+        <h2><span class="icon"></span> Lista de Productos</h2>
       </div>
-      <div class="p-toolbar-group-right flex gap-2">
-        <p-dropdown [options]="opcionesOrden" [(ngModel)]="ordenSeleccionado" placeholder="Ordenar por"
-          optionLabel="label" optionValue="value"></p-dropdown>
 
+      <!-- 🔎 Barra superior -->
+      <div class="barra-superior-productos" *ngIf="!creando">
+        <div class="controles-izquierda">
+          <input
+            type="text"
+            placeholder="Buscar producto..."
+            [(ngModel)]="filtro"
+            class="buscador-input"
+          />
 
-        <button pButton icon="pi pi-plus" label="Nuevo producto" class="p-button-success p-button-sm"
-          (click)="panelVisible = !panelVisible"></button>
-      </div>
-    </p-toolbar>
-
-    <p-panel header="Agregar nuevo producto" [toggleable]="true" [collapsed]="!panelVisible" styleClass="mb-3">
-      <form [formGroup]="formularioProducto" (ngSubmit)="crearProducto()">
-        <div class="p-fluid p-grid p-formgrid">
-          <div class="p-field p-col-12 p-md-6">
-            <label for="nombre">Nombre</label>
-            <input id="nombre" type="text" pInputText formControlName="nombre" />
-          </div>
-
-          <div class="p-field p-col-12 p-md-6">
-            <label for="precio">Precio</label>
-            <input id="precio" type="number" pInputText formControlName="precioUnitario" />
-          </div>
-
-          <div class="p-field p-col-12">
-            <label for="descripcion">Descripción</label>
-            <input id="descripcion" type="text" pInputText formControlName="descripcion" />
-          </div>
-
-          <div class="p-field p-col-12">
-            <label for="ingredientes">Ingredientes</label>
-            <input id="ingredientes" type="text" pInputText formControlName="ingredientes" />
-          </div>
-
-          <div class="p-field-checkbox p-col-6">
-            <p-checkbox inputId="vegano" formControlName="esVegano" [binary]="true"></p-checkbox>
-            <label for="vegano">Vegano</label>
-          </div>
-
-          <div class="p-field-checkbox p-col-6">
-            <p-checkbox inputId="vegetariano" formControlName="esVegetariano" [binary]="true"></p-checkbox>
-            <label for="vegetariano">Vegetariano</label>
-          </div>
+          <select [(ngModel)]="ordenSeleccionado" class="orden-select">
+            <option [ngValue]="null" disabled>Ordenar por</option>
+            <option [ngValue]="'asc'">Precio ascendente</option>
+            <option [ngValue]="'desc'">Precio descendente</option>
+          </select>
         </div>
 
-        <div class="text-right">
-          <button pButton type="submit" label="Agregar producto" [disabled]="formularioProducto.invalid"></button>
-        </div>
-      </form>
-    </p-panel>
+        <button class="btn-nuevo-producto" (click)="abrirFormularioProducto()">
+          <i class="pi pi-plus"></i> Nuevo producto
+        </button>
+      </div>
 
-    <div class="tarjetas">
-      <p-card *ngFor="let producto of productosFiltrados" styleClass="producto-card">
-        <ng-template pTemplate="header">
+      <!-- 🧾 Formulario -->
+      <div class="producto-form-centrado" *ngIf="creando">
+        <div class="formulario-card" id="form-top">
+          <h3>{{ editando ? "Editar producto" : "Crear nuevo producto" }}</h3>
+
+          <form
+            [formGroup]="formularioProducto"
+            (ngSubmit)="editando ? guardarCambiosProducto() : crearProducto()"
+            class="formulario"
+          >
+            <label for="nombre">Nombre:</label>
+            <input
+              id="nombre"
+              type="text"
+              pInputText
+              formControlName="nombre"
+            />
+
+            <label for="descripcion">Descripción:</label>
+            <input
+              id="descripcion"
+              type="text"
+              pInputText
+              formControlName="descripcion"
+            />
+
+            <label for="ingredientes">Ingredientes:</label>
+            <input
+              id="ingredientes"
+              type="text"
+              pInputText
+              formControlName="ingredientes"
+            />
+
+            <label for="precio">Precio unitario (UYU):</label>
+            <input
+              id="precio"
+              type="number"
+              formControlName="precioUnitario"
+              min="1"
+              step="1"
+            />
+
+            <div class="checkbox-wrapper">
+              <p-checkbox
+                inputId="vegano"
+                formControlName="esVegano"
+                [binary]="true"
+              ></p-checkbox>
+              <label for="vegano">Vegano</label>
+            </div>
+
+            <div class="checkbox-wrapper">
+              <p-checkbox
+                inputId="vegetariano"
+                formControlName="esVegetariano"
+                [binary]="true"
+              ></p-checkbox>
+              <label for="vegetariano">Vegetariano</label>
+            </div>
+
+            <div class="form-buttons">
+              <button
+                type="submit"
+                class="btn-guardar"
+                [disabled]="formularioProducto.invalid"
+              >
+                Guardar
+              </button>
+              <button
+                type="button"
+                class="btn-cancelar"
+                (click)="cancelarCreacion()"
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- 🟩 Tarjetas -->
+      <div class="tarjetas" *ngIf="!creando">
+        <div *ngFor="let producto of productosFiltrados" class="producto-card">
           <div class="producto-header">
             <h3 class="producto-nombre">{{ producto.nombre }}</h3>
-            <span class="producto-precio">$ {{ producto.precioUnitario }}</span>
+            <span class="producto-precio">${{ producto.precioUnitario }}</span>
           </div>
-        </ng-template>
 
-        <div class="producto-descripcion">
-          <p>{{ producto.descripcion }}</p>
-          <small>
-            <strong>Ingredientes:</strong> {{ producto.ingredientes }}
-          </small>
-          <br />
-          <p-tag [value]="
-              producto.esVegano
-                ? 'Vegano'
-                : producto.esVegetariano
-                ? 'Vegetariano'
-                : 'Otro'
-            " [severity]="
-              producto.esVegano
-                ? 'success'
-                : producto.esVegetariano
-                ? 'info'
-                : 'warning'
-            "></p-tag>
-        </div>
-
-        <ng-template pTemplate="footer">
-          <button pButton label="Editar" icon="pi pi-eye" (click)="abrirModal(producto)" class="ver-mas-btn"></button>
-        </ng-template>
-      </p-card>
-    </div>
-
-    <p-dialog header="Editar producto" [(visible)]="modalVisible" [modal]="true" [style]="{ width: '500px' }">
-      <div *ngIf="productoSeleccionado" class="dialog-body">
-        <div class="p-field">
-          <label for="nombre">Nombre</label>
-          <input id="nombre" type="text" pInputText [(ngModel)]="productoSeleccionado.nombre" />
-        </div>
-
-        <div class="p-field">
-          <label for="descripcion">Descripción</label>
-          <input id="descripcion" type="text" pInputText [(ngModel)]="productoSeleccionado.descripcion" />
-        </div>
-
-        <div class="p-field">
-          <label for="ingredientes">Ingredientes</label>
-          <input id="ingredientes" type="text" pInputText [(ngModel)]="productoSeleccionado.ingredientes" />
-        </div>
-
-        <div class="p-field">
-          <label for="precio">Precio unitario</label>
-          <p-inputNumber inputId="precio" [(ngModel)]="productoSeleccionado.precioUnitario" mode="currency"
-            currency="UYU" locale="es-UY" [min]="1" [showButtons]="true"></p-inputNumber>
-        </div>
-
-        <div class="p-formgrid p-grid">
-          <div class="p-field-checkbox p-col-6">
-            <p-checkbox inputId="vegano" [(ngModel)]="productoSeleccionado.esVegano" [binary]="true"></p-checkbox>
-            <label for="vegano">Vegano</label>
+          <div class="producto-descripcion">
+            <p>{{ producto.descripcion }}</p>
+            <small><strong>Ingredientes:</strong> {{ producto.ingredientes }}</small>
+            <div class="tipo-etiqueta">
+              <span
+                class="etiqueta"
+                [ngClass]="{
+                  'etiqueta-vegano': producto.esVegano,
+                  'etiqueta-vegetariano': !producto.esVegano && producto.esVegetariano,
+                  
+                }"
+              >
+                {{
+                  producto.esVegano
+                    ? "Vegano"
+                    : producto.esVegetariano
+                    ? "Vegetariano"
+                    : "Otro"
+                }}
+              </span>
+            </div>
           </div>
-          <div class="p-field-checkbox p-col-6">
-            <p-checkbox inputId="vegetariano" [(ngModel)]="productoSeleccionado.esVegetariano"
-              [binary]="true"></p-checkbox>
-            <label for="vegetariano">Vegetariano</label>
-          </div>
+
+          <button class="ver-mas-btn" (click)="abrirFormularioEditar(producto)">
+            <i class="pi pi-pencil"></i> Editar
+          </button>
+
+          <button
+            class="borrar-btn"
+            [disabled]="eliminandoIds?.has(producto.id)"
+            (click)="abrirConfirmacion(producto)"
+          >
+            <i class="pi pi-trash"></i>
+            <span *ngIf="!eliminandoIds?.has(producto.id)">Borrar</span>
+            <span *ngIf="eliminandoIds?.has(producto.id)">Borrando...</span>
+          </button>
         </div>
       </div>
+    </div>
 
-      <ng-template pTemplate="footer">
-        <button pButton label="Cancelar" icon="pi pi-times" (click)="modalVisible = false"
-          class="p-button-text"></button>
-        <button pButton label="Guardar" icon="pi pi-check" (click)="guardarCambiosProducto()"></button>
-      </ng-template>
-    </p-dialog>
+    <!-- 🤖 Chatbot -->
+    <app-chatbot></app-chatbot>
+  </div>
+</div>
+
+<!-- ✅ Modal/Toast de confirmación estilo Starbucks -->
+<div class="sbx-confirm" *ngIf="confirmVisible">
+  <div
+    class="sbx-card"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="confirm-title"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="sbx-card-header">
+      <div class="sbx-icon">🗑️</div>
+      <h4 id="confirm-title">Eliminar producto</h4>
+    </div>
+
+    <p class="sbx-card-text">
+      ¿Seguro que querés borrar
+      <strong>“{{ productoAEliminar?.nombre }}”</strong>?
+      <br />
+      <small>Esta acción no se puede deshacer.</small>
+    </p>
+
+    <div class="sbx-actions">
+      <button class="sbx-btn cancel" type="button" (click)="cerrarConfirmacion()">
+        Cancelar
+      </button>
+      <button class="sbx-btn danger" type="button" (click)="confirmarEliminar()">
+        Sí, borrar
+      </button>
+    </div>
   </div>
 
-  <app-chatbot></app-chatbot>
+  <!-- Cerrar clickeando fuera -->
+  <div class="sbx-overlay" (click)="cerrarConfirmacion()"></div>
 </div>
