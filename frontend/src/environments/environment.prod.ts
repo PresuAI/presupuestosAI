@@ -5,4 +5,5 @@ export const environment = {
     apiNegocioUrlBase: 'https://app.confiteriamalu.com',
     negocioApi: 'https://app.confiteriamalu.com/api/negocios',
     productoApi: 'https://app.confiteriamalu.com/api/productos',
+    estadisticasApi: 'https://app.confiteriamalu.com/api/estadisticas',
 };
