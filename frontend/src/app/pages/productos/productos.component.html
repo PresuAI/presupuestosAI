@@ -1,3 +1,4 @@
+<!-- Toast propio (mismo de eliminar) -->
 <div class="custom-toast" *ngIf="toastMensaje">
   {{ toastMensaje }}
 </div>
@@ -44,71 +45,30 @@
             class="formulario"
           >
             <label for="nombre">Nombre:</label>
-            <input
-              id="nombre"
-              type="text"
-              pInputText
-              formControlName="nombre"
-            />
+            <input id="nombre" type="text" pInputText formControlName="nombre"/>
 
             <label for="descripcion">Descripción:</label>
-            <input
-              id="descripcion"
-              type="text"
-              pInputText
-              formControlName="descripcion"
-            />
+            <input id="descripcion" type="text" pInputText formControlName="descripcion"/>
 
             <label for="ingredientes">Ingredientes:</label>
-            <input
-              id="ingredientes"
-              type="text"
-              pInputText
-              formControlName="ingredientes"
-            />
+            <input id="ingredientes" type="text" pInputText formControlName="ingredientes"/>
 
             <label for="precio">Precio unitario (UYU):</label>
-            <input
-              id="precio"
-              type="number"
-              formControlName="precioUnitario"
-              min="1"
-              step="1"
-            />
+            <input id="precio" type="number" formControlName="precioUnitario" min="1" step="1"/>
 
             <div class="checkbox-wrapper">
-              <p-checkbox
-                inputId="vegano"
-                formControlName="esVegano"
-                [binary]="true"
-              ></p-checkbox>
+              <p-checkbox inputId="vegano" formControlName="esVegano" [binary]="true"></p-checkbox>
               <label for="vegano">Vegano</label>
             </div>
 
             <div class="checkbox-wrapper">
-              <p-checkbox
-                inputId="vegetariano"
-                formControlName="esVegetariano"
-                [binary]="true"
-              ></p-checkbox>
+              <p-checkbox inputId="vegetariano" formControlName="esVegetariano" [binary]="true"></p-checkbox>
               <label for="vegetariano">Vegetariano</label>
             </div>
 
             <div class="form-buttons">
-              <button
-                type="submit"
-                class="btn-guardar"
-                [disabled]="formularioProducto.invalid"
-              >
-                Guardar
-              </button>
-              <button
-                type="button"
-                class="btn-cancelar"
-                (click)="cancelarCreacion()"
-              >
-                Cancelar
-              </button>
+              <button type="submit" class="btn-guardar" [disabled]="formularioProducto.invalid">Guardar</button>
+              <button type="button" class="btn-cancelar" (click)="cancelarCreacion()">Cancelar</button>
             </div>
           </form>
         </div>
@@ -130,17 +90,10 @@
                 class="etiqueta"
                 [ngClass]="{
                   'etiqueta-vegano': producto.esVegano,
-                  'etiqueta-vegetariano': !producto.esVegano && producto.esVegetariano,
-                  
+                  'etiqueta-vegetariano': !producto.esVegano && producto.esVegetariano
                 }"
               >
-                {{
-                  producto.esVegano
-                    ? "Vegano"
-                    : producto.esVegetariano
-                    ? "Vegetariano"
-                    : "Otro"
-                }}
+                {{ producto.esVegano ? "Vegano" : producto.esVegetariano ? "Vegetariano" : "Otro" }}
               </span>
             </div>
           </div>
@@ -167,7 +120,7 @@
   </div>
 </div>
 
-<!-- ✅ Modal/Toast de confirmación estilo Starbucks -->
+<!-- ✅ Modal confirm estilo Starbucks -->
 <div class="sbx-confirm" *ngIf="confirmVisible">
   <div
     class="sbx-card"
@@ -189,15 +142,10 @@
     </p>
 
     <div class="sbx-actions">
-      <button class="sbx-btn cancel" type="button" (click)="cerrarConfirmacion()">
-        Cancelar
-      </button>
-      <button class="sbx-btn danger" type="button" (click)="confirmarEliminar()">
-        Sí, borrar
-      </button>
+      <button class="sbx-btn cancel" type="button" (click)="cerrarConfirmacion()">Cancelar</button>
+      <button class="sbx-btn danger" type="button" (click)="confirmarEliminar()">Sí, borrar</button>
     </div>
   </div>
 
-  <!-- Cerrar clickeando fuera -->
   <div class="sbx-overlay" (click)="cerrarConfirmacion()"></div>
 </div>

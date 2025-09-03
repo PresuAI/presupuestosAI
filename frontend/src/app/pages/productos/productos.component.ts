@@ -27,21 +27,10 @@ import { AuthService } from '../../services/auth.service';
   selector: 'app-productos',
   standalone: true,
   imports: [
-    CommonModule,
-    CardModule,
-    TagModule,
-    DialogModule,
-    ButtonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    InputNumberModule,
-    ToolbarModule,
-    InputTextModule,
-    DropdownModule,
-    PanelModule,
-    CheckboxModule,
-    ToastModule,
-    ChatbotComponent,
+    CommonModule, CardModule, TagModule, DialogModule, ButtonModule,
+    FormsModule, ReactiveFormsModule, InputNumberModule, ToolbarModule,
+    InputTextModule, DropdownModule, PanelModule, CheckboxModule,
+    ToastModule, ChatbotComponent,
   ],
   templateUrl: './productos.component.html',
   styleUrls: ['./productos.component.scss'],
@@ -51,16 +40,15 @@ export class ProductosComponent implements OnInit {
   productos: Producto[] = [];
   productoSeleccionado?: Producto;
 
-  // modal de precio (se conserva para no romper nada)
   modalVisible = false;
   nuevoPrecio?: number;
 
-  filtro: string = '';
+  filtro = '';
   ordenSeleccionado: string | null = null;
 
   formularioProducto!: FormGroup;
 
-  panelVisible: boolean = false; // se conserva
+  panelVisible = false;
   creando = false;
   editando = false;
   productoEditandoId: number | null = null;
@@ -71,11 +59,6 @@ export class ProductosComponent implements OnInit {
 
   toastMensaje: string | null = null;
   private toastTimer: any;
-
-  opcionesOrden = [
-    { label: 'Precio ascendente', value: 'asc' },
-    { label: 'Precio descendente', value: 'desc' },
-  ];
 
   constructor(
     private productoService: ProductoService,
@@ -170,11 +153,8 @@ export class ProductosComponent implements OnInit {
 
     this.setFormFromProducto(producto);
 
-    // opcional: scroll al formulario
     setTimeout(() => {
-      document
-        .getElementById('form-top')
-        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.getElementById('form-top')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 0);
   }
 
@@ -182,7 +162,7 @@ export class ProductosComponent implements OnInit {
     if (this.formularioProducto.invalid) return;
 
     const nuevoProducto: Producto = {
-      id: 0 as any, // el backend ignora/crea ID
+      id: 0 as any,
       ...this.formularioProducto.value,
     };
 
@@ -218,11 +198,8 @@ export class ProductosComponent implements OnInit {
 
     this.productoService.actualizarProducto(actualizado.id, actualizado).subscribe({
       next: () => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Producto actualizado',
-          detail: `Se actualizó correctamente "${actualizado.nombre}".`,
-        });
+        // ✅ MISMO TOAST QUE ELIMINAR
+        this.mostrarToast(`Producto actualizado correctamente: "${actualizado.nombre}"`);
         this.cancelarCreacion();
         this.obtenerProductos();
       },
@@ -237,7 +214,7 @@ export class ProductosComponent implements OnInit {
     });
   }
 
-  // ===== Modal de precio (se mantiene para compatibilidad) =====
+  // ===== Modal de precio (opcional)
   abrirModal(producto: Producto) {
     this.productoSeleccionado = { ...producto };
     this.nuevoPrecio = producto.precioUnitario;
@@ -252,27 +229,22 @@ export class ProductosComponent implements OnInit {
       precioUnitario: this.nuevoPrecio,
     };
 
-    this.productoService
-      .actualizarProducto(this.productoSeleccionado.id, actualizado)
-      .subscribe({
-        next: () => {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Precio actualizado',
-            detail: `Se actualizó correctamente el precio de "${actualizado.nombre}".`,
-          });
-          this.modalVisible = false;
-          this.obtenerProductos();
-        },
-        error: (err) => {
-          console.error('Error al actualizar', err);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error al actualizar precio',
-            detail: err.error?.message || 'No se pudo actualizar el precio.',
-          });
-        },
-      });
+    this.productoService.actualizarProducto(this.productoSeleccionado.id, actualizado).subscribe({
+      next: () => {
+        // ✅ MISMO TOAST QUE ELIMINAR
+        this.mostrarToast(`Precio actualizado: "${actualizado.nombre}"`);
+        this.modalVisible = false;
+        this.obtenerProductos();
+      },
+      error: (err) => {
+        console.error('Error al actualizar', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error al actualizar precio',
+          detail: err.error?.message || 'No se pudo actualizar el precio.',
+        });
+      },
+    });
   }
 
   // ===== Eliminar =====
@@ -280,21 +252,18 @@ export class ProductosComponent implements OnInit {
     this.productoAEliminar = producto;
     this.confirmVisible = true;
   }
-
   cerrarConfirmacion() {
     this.confirmVisible = false;
     this.productoAEliminar = null;
   }
-
   confirmarEliminar() {
     if (!this.productoAEliminar) return;
 
     this.productoService.eliminarProducto(this.productoAEliminar.id).subscribe({
       next: () => {
-        this.productos = this.productos.filter(
-          (p) => p.id !== this.productoAEliminar!.id
-        );
-        this.mostrarToast('Producto eliminado correctamente ');
+        this.productos = this.productos.filter((p) => p.id !== this.productoAEliminar!.id);
+        // ✅ ya lo tenías así
+        this.mostrarToast(`Producto eliminado: "${this.productoAEliminar!.nombre}"`);
         this.cerrarConfirmacion();
       },
       error: () => {

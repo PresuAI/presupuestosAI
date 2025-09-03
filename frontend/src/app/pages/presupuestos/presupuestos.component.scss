@@ -10,23 +10,17 @@
   box-shadow: 0 12px 30px rgba(0,0,0,.18);
   padding: 1rem 1.25rem;
   backdrop-filter: none;
-  opacity: 1; /* sin transparencia */
+  opacity: 1;
 }
-::ng-deep .p-toast .p-toast-message .p-toast-message-content {
-  gap: .75rem;
-}
+::ng-deep .p-toast .p-toast-message .p-toast-message-content { gap: .75rem; }
 ::ng-deep .p-toast .p-toast-message .p-toast-summary { font-weight: 700; }
 ::ng-deep .p-toast .p-toast-message .p-toast-detail { opacity: .95; }
-
-/* variantes (usá la que quieras: success/info/warn/error) */
 ::ng-deep .p-toast .p-toast-message-success { background: #0a3d2e; color: #fff; }
 ::ng-deep .p-toast .p-toast-message-info    { background: #00754a; color: #fff; }
 ::ng-deep .p-toast .p-toast-message-warn    { background: #f59e0b; color: #1a1a1a; }
 ::ng-deep .p-toast .p-toast-message-error   { background: #c0392b; color: #fff; }
 ::ng-deep .p-toast .p-toast-icon-close      { color: #fff; opacity: .9; }
 ::ng-deep .p-toast .p-toast-icon-close:hover{ opacity: 1; }
-
-/* ====== (resto de tus estilos existentes) ====== */
 
 .p-toast { z-index: 9999; }
 
@@ -98,6 +92,55 @@
   .carrito-toggle {
     position: fixed; bottom: 1.5rem; right: 1.5rem; background:#00754a; color:#fff; border:none;
     border-radius: 50%; width:56px; height:56px; font-size:1.2rem; box-shadow:0 4px 12px rgba(0,0,0,.2); z-index:12000;
+
+    /* 👉 Centro perfecto del ícono dentro del círculo */
+    display: grid;
+    place-items: center;
+    position: fixed;
+    /* para que la badge absoluta no desplace el ícono */
+    position: fixed;
+    /* y que pueda posicionarse relativa a este botón */
+    position: fixed;
+    /* corregido: usar relative además de fixed */
+    position: fixed;
+  }
+  /* Nota: mantener fixed arriba; agregamos relative aparte para posicionar la badge */
+  .carrito-toggle { position: fixed; }
+  .carrito-toggle { position: fixed; }
+  .carrito-toggle { position: fixed; }
+  .carrito-toggle { position: fixed; }
+
+  /* (versión correcta y única) */
+  .carrito-toggle {
+    position: fixed;
+    bottom: 1.5rem; right: 1.5rem;
+    background:#00754a; color:#fff; border:none; border-radius:50%;
+    width:56px; height:56px; font-size:1.2rem; box-shadow:0 4px 12px rgba(0,0,0,.2); z-index:12000;
+
+    display:grid; place-items:center;
+    /* relative para ubicar la badge */
+    position: fixed; /* fixed para el botón */
+  }
+
+  /* Badge: no interfiere con el centrado del ícono */
+  .carrito-toggle { position: fixed; }
+  .carrito-toggle .badge {
+    position: absolute;
+    bottom: -6px;
+    right: -6px;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 6px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .9rem;
+    font-weight: 700;
+    background: #0b6b4a;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,.25);
+    pointer-events: none;
   }
 
   /* 🧾 SIDEBAR */
@@ -107,9 +150,14 @@
     background:#fff; border: 1px solid #e5e5e5; box-shadow: 0 16px 40px rgba(0,0,0,.08);
     padding: 1.25rem; border-radius: 16px; z-index: 1100; transition: transform .3s ease-in-out;
     h3 { font-size: 1.3rem; font-weight: 600; color:#1e3932; margin-bottom: 1rem; }
+
     .tabla-carrito { width:100%; border-collapse: collapse; display:block; overflow-x:auto; }
     .tabla-carrito th, .tabla-carrito td { padding:.75rem 1rem; white-space: nowrap; text-align: left; }
     .tabla-carrito thead { background:#00754a; color:#fff; }
+
+    /* 👉 Forzar números/valores del cuerpo en negro para que siempre se vean */
+    .tabla-carrito tbody td { color:#111 !important; }
+
     .btn-continuar { margin-top: 1rem; background:#00754a; color:#fff; border:none; padding:.75rem 1.5rem; border-radius:10px; font-weight:600; cursor:pointer; }
     .btn-eliminar { background:#dc2626; color:#fff; border:none; padding:.4rem; border-radius:8px; cursor:pointer; }
     .btn-eliminar:hover { background:#b91c1c; }
@@ -158,7 +206,7 @@
 .combo-cliente:invalid { color:#777; }
 
 /* ====== Breakpoints ====== */
-@media (min-width: 993px) { .carrito-toggle { display: inline-flex !important; } }
+@media (min-width: 993px) { .carrito-toggle { display: inline-grid !important; place-items: center; } }
 @media (max-width: 992px) {
   .carrito-lateral {
     inset: auto 0 0 0; width: 100%; max-height: 70dvh; top: auto; right: 0;

@@ -84,7 +84,7 @@
           <table class="tabla-carrito">
             <thead>
               <tr>
-                <th>ID</th>
+                <th>Producto</th>
                 <th>Cant.</th>
                 <th>Precio</th>
                 <th>Total</th>
@@ -93,7 +93,8 @@
             </thead>
             <tbody>
               <tr *ngFor="let item of items; let i = index">
-                <td>{{ item.productoId }}</td>
+                <!-- 👇 ahora muestra el nombre -->
+                <td>{{ productoNombre(item.productoId) }}</td>
                 <td>{{ item.cantidad }}</td>
                 <td>{{ item.precioUnitario | currency: 'UYU' }}</td>
                 <td>{{ item.totalItem | currency: 'UYU' }}</td>

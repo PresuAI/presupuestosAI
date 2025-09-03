@@ -40,6 +40,9 @@ export class PresupuestosComponent implements OnInit {
   items: PresupuestoItem[] = [];
   presupuestos: any[] = [];
 
+  // 👉 Mapa rápido id->nombre para mostrar en el carrito
+  private prodNombreMap = new Map<number, string>();
+
   // Edición
   presupuestoEditandoId: number | null = null;
   modoEdicion = false;
@@ -82,8 +85,12 @@ export class PresupuestosComponent implements OnInit {
     });
 
     this.productoService.obtenerProductos().subscribe({
-      next: (productos) =>
-        (this.productos = productos.map((p) => ({ ...p, cantidadTemp: 1 }))),
+      next: (productos) => {
+        this.productos = productos.map((p) => ({ ...p, cantidadTemp: 1 }));
+        // llenar mapa id -> nombre para mostrar en el carrito
+        this.prodNombreMap.clear();
+        for (const p of productos) this.prodNombreMap.set(p.id, p.nombre);
+      },
       error: (err) => console.error('Error al obtener productos', err),
     });
 
@@ -112,6 +119,16 @@ export class PresupuestosComponent implements OnInit {
 
   /** Para selects: compara por string y evita mismatch string vs number */
   compareByString = (a: any, b: any) => `${a}` === `${b}`;
+
+  /** Nombre del producto por id (fallback: #id) */
+  /** Nombre del producto por id (soporta null/undefined) */
+productoNombre = (id: number | null | undefined): string => {
+  if (id == null) return '—';
+  const n = Number(id);
+  if (Number.isNaN(n)) return '—';
+  return this.prodNombreMap.get(n) ?? `#${n}`;
+};
+
 
   /* ===== Carga / edición ===== */
   cargarPresupuestoParaEditar(pres: any): void {
@@ -161,7 +178,8 @@ export class PresupuestosComponent implements OnInit {
       !this.presupuestoEditandoId ||
       this.formPresupuesto.invalid ||
       this.items.length === 0
-    ) return;
+    )
+      return;
 
     const dto: PresupuestoRequest = {
       clienteId: this.formPresupuesto.value.clienteId,
@@ -172,11 +190,12 @@ export class PresupuestosComponent implements OnInit {
       items: this.items,
     };
 
-    this.presupuestoService.actualizarPresupuesto(this.presupuestoEditandoId, dto)
+    this.presupuestoService
+      .actualizarPresupuesto(this.presupuestoEditandoId, dto)
       .subscribe({
         next: () => {
           this.messageService.add({
-            severity: 'success', // <- usa variantes definidas en el SCSS
+            severity: 'success',
             summary: 'Presupuesto actualizado',
             detail: 'Se editó correctamente el presupuesto.',
           });
@@ -246,7 +265,12 @@ export class PresupuestosComponent implements OnInit {
   }
 
   obtenerTotal(presupuesto: any): number {
-    return presupuesto.items?.reduce((acc: number, i: any) => acc + i.totalItem, 0) || 0;
+    return (
+      presupuesto.items?.reduce(
+        (acc: number, i: any) => acc + i.totalItem,
+        0
+      ) || 0
+    );
   }
 
   /* ===== Confirmación de borrado (Starbucks) ===== */
@@ -258,7 +282,7 @@ export class PresupuestosComponent implements OnInit {
 
   cerrarConfirm(): void {
     this.confirmVisible = false;
-    this.presupuestoAEliminar = undefined;
+       this.presupuestoAEliminar = undefined;
     document.body.style.overflow = '';
   }
 
@@ -300,7 +324,8 @@ export class PresupuestosComponent implements OnInit {
     const itemExistente = this.items.find((i) => i.productoId === producto.id);
     if (itemExistente) {
       itemExistente.cantidad += cantidad;
-      itemExistente.totalItem = itemExistente.cantidad * itemExistente.precioUnitario;
+      itemExistente.totalItem =
+        itemExistente.cantidad * itemExistente.precioUnitario;
     } else {
       const item: PresupuestoItem = {
         productoId: producto.id,
