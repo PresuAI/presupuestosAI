@@ -1,10 +1,28 @@
 <div class="page">
   <div class="clientes-container">
-    <p-confirmDialog></p-confirmDialog>
+    <!-- Modal Confirm Eliminación -->
+    <div *ngIf="confirmVisible" class="sbx-confirm">
+      <div class="sbx-overlay" (click)="cerrarConfirm()"></div>
+      <div class="sbx-card" role="dialog" aria-modal="true" aria-labelledby="sbx-title">
+        <div class="sbx-head">
+          <span class="sbx-trash">🗑️</span>
+          <h4 id="sbx-title">Eliminar Cliente</h4>
+        </div>
+        <p class="sbx-question">
+          ¿Seguro que querés borrar <strong>“{{ clienteAEliminar?.nombre }}”</strong>?
+        </p>
+        <p class="sbx-hint">Esta acción no se puede deshacer.</p>
+        <div class="sbx-actions">
+          <button type="button" class="sbx-btn cancel" (click)="cerrarConfirm()">Cancelar</button>
+          <button type="button" class="sbx-btn danger" (click)="confirmarEliminar()">Sí, borrar</button>
+        </div>
+      </div>
+    </div>
+
     <p-toast></p-toast>
 
     <div class="clientes-header" *ngIf="!creando">
-      <h2> Lista de Clientes</h2>
+      <h2>Lista de Clientes</h2>
       <button class="btn-crear" (click)="abrirFormularioCrear()">
         <i class="pi pi-plus"></i> Nuevo cliente
       </button>
@@ -44,7 +62,6 @@
     </div>
 
     <div class="tabla-clientes" *ngIf="!creando">
-      <!-- 👇 wrapper para scroll horizontal en pantallas chicas -->
       <div class="table-wrap">
         <table class="tabla-presupuestos-custom">
           <thead>
@@ -73,13 +90,12 @@
                         (click)="editarCliente(cliente)"></button>
                 <button pButton icon="pi pi-trash"
                         class="p-button-rounded p-button-danger p-button-sm"
-                        (click)="eliminarCliente(cliente.id)"></button>
+                        (click)="pedirEliminar(cliente)"></button>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-      <!-- ☝️ único cambio dentro de la tabla -->
     </div>
 
     <app-chatbot></app-chatbot>

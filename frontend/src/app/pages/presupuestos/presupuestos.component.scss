@@ -1,6 +1,36 @@
+/* ===== PrimeNG Toast – estilo sólido (verde app) ===== */
+::ng-deep .p-toast {
+  top: 1rem !important;
+  right: 1rem !important;
+  z-index: 20000 !important;
+  font-family: 'Helvetica Neue', sans-serif;
+}
+::ng-deep .p-toast .p-toast-message {
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0,0,0,.18);
+  padding: 1rem 1.25rem;
+  backdrop-filter: none;
+  opacity: 1; /* sin transparencia */
+}
+::ng-deep .p-toast .p-toast-message .p-toast-message-content {
+  gap: .75rem;
+}
+::ng-deep .p-toast .p-toast-message .p-toast-summary { font-weight: 700; }
+::ng-deep .p-toast .p-toast-message .p-toast-detail { opacity: .95; }
+
+/* variantes (usá la que quieras: success/info/warn/error) */
+::ng-deep .p-toast .p-toast-message-success { background: #0a3d2e; color: #fff; }
+::ng-deep .p-toast .p-toast-message-info    { background: #00754a; color: #fff; }
+::ng-deep .p-toast .p-toast-message-warn    { background: #f59e0b; color: #1a1a1a; }
+::ng-deep .p-toast .p-toast-message-error   { background: #c0392b; color: #fff; }
+::ng-deep .p-toast .p-toast-icon-close      { color: #fff; opacity: .9; }
+::ng-deep .p-toast .p-toast-icon-close:hover{ opacity: 1; }
+
+/* ====== (resto de tus estilos existentes) ====== */
+
 .p-toast { z-index: 9999; }
 
-/* Contenedor de página (por si no lo tenés global) */
+/* Contenedor de página */
 .page {
   max-width: 1200px;
   margin-inline: auto;
@@ -8,7 +38,7 @@
 }
 
 .presupuesto-container {
-  padding: 0; /* ya lo da .page */
+  padding: 0;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 
   h2, h3 { margin-bottom: 1rem; color: #1e3932; }
@@ -64,13 +94,13 @@
     }
   }
 
-  /* 🛒 BOTÓN flotante (visible solo en mobile/tablet) */
+  /* 🛒 BOTÓN flotante */
   .carrito-toggle {
     position: fixed; bottom: 1.5rem; right: 1.5rem; background:#00754a; color:#fff; border:none;
-    border-radius: 50%; width:56px; height:56px; font-size:1.2rem; box-shadow:0 4px 12px rgba(0,0,0,.2); z-index:1000;
+    border-radius: 50%; width:56px; height:56px; font-size:1.2rem; box-shadow:0 4px 12px rgba(0,0,0,.2); z-index:12000;
   }
 
-  /* 🧾 SIDEBAR (desktop) / BOTTOM-SHEET (mobile) */
+  /* 🧾 SIDEBAR */
   .carrito-lateral {
     position: fixed; top: 96px; right: 24px; width: 380px;
     max-height: calc(100dvh - 120px); overflow: auto; -webkit-overflow-scrolling: touch;
@@ -127,26 +157,14 @@
 /* Estado visual para el select sin elegir */
 .combo-cliente:invalid { color:#777; }
 
-/* ====== Breakpoints existentes + integraciones ====== */
-@media (min-width: 993px) {
-  /* Botón visible también en desktop */
-  .carrito-toggle { display: inline-flex !important; }
-}
-
+/* ====== Breakpoints ====== */
+@media (min-width: 993px) { .carrito-toggle { display: inline-flex !important; } }
 @media (max-width: 992px) {
-  /* Panel como bottom-sheet en mobile/tablet */
   .carrito-lateral {
-    inset: auto 0 0 0;
-    width: 100%;
-    max-height: 70dvh;
-    top: auto;
-    right: 0;
-    border-radius: 16px 16px 0 0;
-    border-left: 0;
-    border-right: 0;
+    inset: auto 0 0 0; width: 100%; max-height: 70dvh; top: auto; right: 0;
+    border-radius: 16px 16px 0 0; border-left: 0; border-right: 0;
   }
 }
-
 @media (max-width: 576px) {
   .presupuesto-container .producto-card { padding: 12px; }
   .presupuesto-container .producto-header .producto-nombre { font-size: 1rem; }
@@ -154,131 +172,22 @@
   .presupuesto-container .cantidad-input { width: 100%; flex: 1; }
 }
 
-
-/* ====== Botón flotante del carrito (siempre visible) ====== */
-.carrito-toggle {
-  position: fixed;
-  bottom: 1.5rem;
-  right: 1.5rem;
-  background-color: #00754a;
-  color: #fff;
-  border: none;
-  border-radius: 50%;
-  width: 56px;
-  height: 56px;
-  display: inline-flex;        /* centra el contenido */
-  align-items: center;         /* centra el contenido */
-  justify-content: center;     /* centra el contenido */
-  font-size: 1.2rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,.2);
-  z-index: 12000;              /* por encima del contenido */
-}
-
-.carrito-toggle i {
-  line-height: 1;
-  font-size: 1.25rem;
-}
-
-.carrito-toggle .badge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  border-radius: 999px;
-  background: #1e3932;
-  color: #fff;
-  font-size: 11px;
-  line-height: 18px;
+/* ===== Modal Starbucks ===== */
+.sbx-confirm { position: fixed; inset: 0; z-index: 20000; }
+.sbx-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.45); backdrop-filter: blur(2px); }
+.sbx-card{
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: min(92vw, 520px); background: #f6f0e8; color: #0a3d2e;
+  border-radius: 16px; padding: 22px 24px; box-shadow: 0 18px 50px rgba(0,0,0,.28);
   text-align: center;
-  font-weight: 800;
 }
-
-.carrito-toggle:disabled {
-  opacity: .45;
-  cursor: not-allowed;
-}
-
-
-/* ====== Panel lateral del carrito ====== */
-.carrito-lateral {
-  position: fixed;
-  top: 130px;                 /* altura de tu navbar */
-  right: 24px;
-  width: 380px;
-  max-height: calc(100dvh - 150px);
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
-  background: #fff;
-  border: 1px solid #e5e5e5;
-  box-shadow: 0 16px 40px rgba(0,0,0,.08);
-  padding: 1.25rem;
-  border-radius: 16px;
-  z-index: 11000;             /* debajo del botón pero sobre contenido */
-
-  h3 {
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: #1e3932;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-  }
-}
-
-/* Wrapper de scroll horizontal (NO poner display:block en la tabla) */
-.table-wrap { overflow-x: auto; }
-
-/* ====== Tabla del carrito ====== */
-.tabla-carrito {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;        /* columnas estables */
-  font-size: 0.95rem;
-}
-
-.tabla-carrito thead {
-  background-color: #00754a;
-  color: #fff;
-}
-
-.tabla-carrito th,
-.tabla-carrito td {
-  text-align: left;
-  padding: 0.75rem 1rem;
-  white-space: nowrap;
-  color: #1e3932;
-}
-
-.tabla-carrito tbody tr {
-  border-bottom: 1px solid #eee;
-}
-
-.tabla-carrito tbody tr:hover {
-  background: #f9f9f9;
-}
-
-/* Acciones dentro del panel */
-.btn-eliminar {
-  background-color: #dc2626;
-  color: #fff;
-  border: none;
-  padding: 0.4rem;
-  border-radius: 8px;
-  cursor: pointer;
-}
-.btn-eliminar:hover { background-color: #b91c1c; }
-
-.btn-continuar {
-  margin-top: 1rem;
-  background-color: #00754a;
-  color: #fff;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 10px;
-  font-weight: 600;
-  cursor: pointer;
-}
-.btn-continuar:hover { background-color: #005f3c; }
+.sbx-head{ display:flex; align-items:center; justify-content:center; gap:.5rem; margin-bottom:.25rem; }
+.sbx-trash{ font-size:1.2rem; line-height:1; }
+.sbx-question{ margin:.25rem 0 .25rem; font-size:1.05rem; }
+.sbx-hint{ margin:0 0 1rem; color:#6b7280; font-size:.9rem; }
+.sbx-actions{ display:flex; justify-content:center; gap:12px; }
+.sbx-btn{ border:none; border-radius:999px; padding:10px 18px; font-weight:700; cursor:pointer; transition:filter .15s ease; }
+.sbx-btn.cancel{ background:#fff; color:#0a3d2e; border:2px solid #0a3d2e; }
+.sbx-btn.cancel:hover{ filter:brightness(.96); }
+.sbx-btn.danger{ background:#c0392b; color:#fff; }
+.sbx-btn.danger:hover{ filter:brightness(.96); }

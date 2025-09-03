@@ -23,6 +23,7 @@ actualizarPresupuesto(id: number, dto: PresupuestoRequest): Observable<any> {
   return this.http.put(`${this.url}/${id}`, dto, { withCredentials: true });
 }
 eliminarPresupuesto(id: number): Observable<void> {
-  return this.http.delete<void>(`http://localhost:8081/api/presupuestos/${id}`);
+  return this.http.delete<void>(`${this.url}/${id}`, { withCredentials: true });
 }
+
 }

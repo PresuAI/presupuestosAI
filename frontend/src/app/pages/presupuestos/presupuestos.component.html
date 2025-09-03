@@ -2,6 +2,30 @@
 
 <div class="page">
   <div class="presupuesto-container">
+
+    <!-- ===== Modal Confirmación (Starbucks) ===== -->
+    <div *ngIf="confirmVisible" class="sbx-confirm">
+      <div class="sbx-overlay" (click)="cerrarConfirm()"></div>
+      <div class="sbx-card" role="dialog" aria-modal="true" aria-labelledby="sbx-title">
+        <div class="sbx-head">
+          <span class="sbx-trash">🗑️</span>
+          <h4 id="sbx-title">Eliminar Presupuesto</h4>
+        </div>
+
+        <p class="sbx-question">
+          ¿Seguro que querés borrar
+          <strong>“{{ presupuestoAEliminar?.id }}”</strong>?
+        </p>
+        <p class="sbx-hint">Esta acción no se puede deshacer.</p>
+
+        <div class="sbx-actions">
+          <button type="button" class="sbx-btn cancel" (click)="cerrarConfirm()">Cancelar</button>
+          <button type="button" class="sbx-btn danger" (click)="confirmarEliminar()">Sí, borrar</button>
+        </div>
+      </div>
+    </div>
+    <!-- ===== /Modal ===== -->
+
     <!-- 📁 Tabs -->
     <div class="tabs" *ngIf="!mostrarFormularioFinal">
       <button [class.active]="vista === 'productos'" (click)="vista = 'productos'">Productos</button>
@@ -213,7 +237,7 @@
                 <button class="editar-btn" (click)="cargarPresupuestoParaEditar(pres)">
                   <i class="pi pi-pencil"></i>
                 </button>
-                <button class="eliminar-btn" (click)="eliminarPresupuesto(pres.id)">
+                <button class="eliminar-btn" (click)="pedirEliminarPresupuesto(pres)">
                   <i class="pi pi-trash"></i>
                 </button>
               </td>

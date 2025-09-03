@@ -44,6 +44,10 @@ export class PresupuestosComponent implements OnInit {
   presupuestoEditandoId: number | null = null;
   modoEdicion = false;
 
+  // Confirmación de borrado (modal Starbucks)
+  confirmVisible = false;
+  presupuestoAEliminar?: { id: number };
+
   // Form
   formPresupuesto!: FormGroup;
 
@@ -53,7 +57,6 @@ export class PresupuestosComponent implements OnInit {
     { value: 'APROBADO', label: 'Aprobado' },
     { value: 'RECHAZADO', label: 'Rechazado' },
   ];
-
   tiposEvento = [
     { value: 'Cumpleaños', label: 'Cumpleaños' },
     { value: 'Casamiento', label: 'Casamiento' },
@@ -116,7 +119,7 @@ export class PresupuestosComponent implements OnInit {
     this.presupuestoEditandoId = pres.id;
     this.vista = 'productos';
     this.mostrarFormularioFinal = true;
-    this.carritoAbierto = false; // que no tape el form
+    this.carritoAbierto = false;
 
     // Items del presupuesto
     this.items = (pres.items || []).map((item: any) => ({
@@ -126,7 +129,7 @@ export class PresupuestosComponent implements OnInit {
       totalItem: +item.totalItem,
     }));
 
-    // Normalizar valores para los selects y numéricos
+    // Normalizar valores
     const clienteId = pres.clienteId != null ? +pres.clienteId : null;
     const estado = this.normalizeEstado(pres.estado) ?? null;
     const tipoEventoRaw = pres.tipoEvento ?? null;
@@ -145,7 +148,7 @@ export class PresupuestosComponent implements OnInit {
       gananciaEstimada: ganancia,
     });
 
-    // Llevar al usuario al form
+    // Llevar al form
     setTimeout(() => {
       document
         .getElementById('form-presupuesto-top')
@@ -158,8 +161,7 @@ export class PresupuestosComponent implements OnInit {
       !this.presupuestoEditandoId ||
       this.formPresupuesto.invalid ||
       this.items.length === 0
-    )
-      return;
+    ) return;
 
     const dto: PresupuestoRequest = {
       clienteId: this.formPresupuesto.value.clienteId,
@@ -170,12 +172,11 @@ export class PresupuestosComponent implements OnInit {
       items: this.items,
     };
 
-    this.presupuestoService
-      .actualizarPresupuesto(this.presupuestoEditandoId, dto)
+    this.presupuestoService.actualizarPresupuesto(this.presupuestoEditandoId, dto)
       .subscribe({
         next: () => {
           this.messageService.add({
-            severity: 'success',
+            severity: 'success', // <- usa variantes definidas en el SCSS
             summary: 'Presupuesto actualizado',
             detail: 'Se editó correctamente el presupuesto.',
           });
@@ -245,17 +246,25 @@ export class PresupuestosComponent implements OnInit {
   }
 
   obtenerTotal(presupuesto: any): number {
-    return (
-      presupuesto.items?.reduce(
-        (acc: number, i: any) => acc + i.totalItem,
-        0
-      ) || 0
-    );
+    return presupuesto.items?.reduce((acc: number, i: any) => acc + i.totalItem, 0) || 0;
   }
 
-  eliminarPresupuesto(id: number): void {
-    if (!confirm('¿Estás seguro de que querés eliminar este presupuesto?'))
-      return;
+  /* ===== Confirmación de borrado (Starbucks) ===== */
+  pedirEliminarPresupuesto(pres: any): void {
+    this.presupuestoAEliminar = { id: pres.id };
+    this.confirmVisible = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  cerrarConfirm(): void {
+    this.confirmVisible = false;
+    this.presupuestoAEliminar = undefined;
+    document.body.style.overflow = '';
+  }
+
+  confirmarEliminar(): void {
+    if (!this.presupuestoAEliminar) return;
+    const id = this.presupuestoAEliminar.id;
 
     this.presupuestoService.eliminarPresupuesto(id).subscribe({
       next: () => {
@@ -264,6 +273,7 @@ export class PresupuestosComponent implements OnInit {
           summary: 'Presupuesto eliminado',
           detail: `Se eliminó correctamente el presupuesto ID ${id}`,
         });
+        this.cerrarConfirm();
         this.obtenerPresupuestos();
       },
       error: (err) => {
@@ -282,9 +292,7 @@ export class PresupuestosComponent implements OnInit {
   handleClickOutside(event: MouseEvent) {
     if (!this.carritoAbierto || !this.carritoRef) return;
     const clickedInside = this.carritoRef.nativeElement.contains(event.target);
-    const clickedToggle = (event.target as HTMLElement).closest(
-      '.carrito-toggle'
-    );
+    const clickedToggle = (event.target as HTMLElement).closest('.carrito-toggle');
     if (!clickedInside && !clickedToggle) this.carritoAbierto = false;
   }
 
@@ -292,8 +300,7 @@ export class PresupuestosComponent implements OnInit {
     const itemExistente = this.items.find((i) => i.productoId === producto.id);
     if (itemExistente) {
       itemExistente.cantidad += cantidad;
-      itemExistente.totalItem =
-        itemExistente.cantidad * itemExistente.precioUnitario;
+      itemExistente.totalItem = itemExistente.cantidad * itemExistente.precioUnitario;
     } else {
       const item: PresupuestoItem = {
         productoId: producto.id,
@@ -313,16 +320,9 @@ export class PresupuestosComponent implements OnInit {
     });
   }
 
-  eliminarItem(index: number): void {
-    this.items.splice(index, 1);
-  }
-
-  continuar(): void {
-    this.mostrarFormularioFinal = true;
-  }
-  volver(): void {
-    this.mostrarFormularioFinal = false;
-  }
+  eliminarItem(index: number): void { this.items.splice(index, 1); }
+  continuar(): void { this.mostrarFormularioFinal = true; }
+  volver(): void { this.mostrarFormularioFinal = false; }
 
   // helpers del carrito
   toggleCarrito(): void { this.carritoAbierto = !this.carritoAbierto; }
