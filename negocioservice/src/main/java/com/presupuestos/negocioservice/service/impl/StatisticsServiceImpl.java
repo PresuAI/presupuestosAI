@@ -32,7 +32,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Override
     public BigDecimal calcularIngresoTotalUltimoMes() {
         LocalDateTime haceUnMes = LocalDateTime.now().minusMonths(1);
-        List<Presupuesto> presupuestos = presupuestoRepository.findByEstadoAndFechaCreacionAfter("ACEPTADO", haceUnMes);
+        List<Presupuesto> presupuestos = presupuestoRepository.findByEstadoAndFechaCreacionAfter("APROBADO", haceUnMes);
 
         return presupuestos.stream()
                 .flatMap(p -> p.getItems().stream())
@@ -43,7 +43,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Override
     public List<ProductoEstadisticaDTO> obtenerTopProductosVendidosUltimoMes() {
         LocalDateTime haceUnMes = LocalDateTime.now().minusMonths(1);
-        List<Presupuesto> presupuestos = presupuestoRepository.findByEstadoAndFechaCreacionAfter("ACEPTADO", haceUnMes);
+        List<Presupuesto> presupuestos = presupuestoRepository.findByEstadoAndFechaCreacionAfter("APROBADO", haceUnMes);
 
         Map<Long, Integer> cantidadPorProducto = new HashMap<>();
 
@@ -73,7 +73,6 @@ public class StatisticsServiceImpl implements StatisticsService {
 
             ProductoResponseDTO[] productos = response.getBody();
             if (productos == null) return Collections.emptyMap();
-
             return Arrays.stream(productos)
                     .collect(Collectors.toMap(ProductoResponseDTO::getId, ProductoResponseDTO::getNombre));
 
@@ -86,7 +85,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Override
     public List<TotalPorClienteDTO> obtenerIngresosPorClienteUltimoMes() {
         LocalDateTime haceUnMes = LocalDateTime.now().minusMonths(1);
-        List<Presupuesto> presupuestos = presupuestoRepository.findByEstadoAndFechaCreacionAfter("ACEPTADO", haceUnMes);
+        List<Presupuesto> presupuestos = presupuestoRepository.findByEstadoAndFechaCreacionAfter("APROBADO", haceUnMes);
 
         Map<Long, BigDecimal> ingresosPorCliente = new HashMap<>();
 
