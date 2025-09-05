@@ -156,14 +156,10 @@ export class UsuariosComponent implements OnInit {
   }
 
   guardar() {
-    // Si estamos EDITANDO: solo actualizar el rol
     if (this.editando && this.editId != null) {
       const nuevoRol = this.form.get('rol')?.value as Rol;
-      console.log('[USUARIOS][EDITAR ROL] id=', this.editId, 'rol=', nuevoRol);
-
       this.usuarioService.actualizarRol(this.editId, nuevoRol).subscribe({
         next: () => {
-          // reflejar el cambio en la tabla
           const i = this.usuarios.findIndex((u) => u.id === this.editId);
           if (i !== -1)
             this.usuarios[i] = { ...this.usuarios[i], rol: nuevoRol };
@@ -176,19 +172,40 @@ export class UsuariosComponent implements OnInit {
           this.showToast('No se pudo actualizar el rol.', 'error');
         },
       });
-      return; // ← muy importante
+      return;
     }
 
-    // Si NO estamos editando: CREAR usuario
+    const nombre = (this.form.get('nombre')?.value || '').trim();
+    const email = (this.form.get('email')?.value || '').trim();
+    const pass = this.form.get('password')?.value || '';
+
+    if (!nombre) {
+      this.showToast('El nombre es obligatorio.', 'error');
+      return;
+    }
+    if (!email) {
+      this.showToast('El email es obligatorio.', 'error');
+      return;
+    }
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+      this.showToast('El email no es válido.', 'error');
+      return;
+    }
+    if (pass.length < 6) {
+      this.showToast(
+        'La contraseña debe tener al menos 6 caracteres.',
+        'error'
+      );
+      return;
+    }
+
     const dto = {
       nombre: this.form.get('nombre')?.value,
       email: (this.form.get('email')?.value || '').toLowerCase(),
       password: this.form.get('password')?.value,
-      rol: 'USUARIO',
-      activo: true,
+      rol: this.form.get('rol')?.value,
+      activo: this.form.get('activo')?.value,
     };
-
-    console.log('[USUARIOS][CREAR] dto a enviar', dto);
 
     this.usuarioService.crearUsuario(dto).subscribe({
       next: (nuevo: Usuario) => {
@@ -197,12 +214,8 @@ export class UsuariosComponent implements OnInit {
         this.cancelar();
       },
       error: (err) => {
-        console.error('[ERROR RAW]', err);
-        console.error('[ERROR BODY]', err.error);
-        this.showToast(
-          err?.error?.message || 'No se pudo crear el usuario.',
-          'error'
-        );
+        const friendly = this.extractBackendMessage(err);
+        this.showToast(friendly, 'error');
       },
     });
   }
@@ -250,5 +263,15 @@ export class UsuariosComponent implements OnInit {
     fetch(this.logoutUrl, { method: 'POST', credentials: 'include' })
       .then(() => this.router.navigate(['/login']))
       .catch(() => this.showToast('No se pudo cerrar sesión.', 'error'));
+  }
+
+  private extractBackendMessage(err: any): string {
+    const status = err?.status;
+
+    if (status === 400 || status === 409) {
+      return 'Ya existe un usuario registrado con ese email.';
+    }
+
+    return 'No se pudo crear el usuario.';
   }
 }

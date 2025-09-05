@@ -32,10 +32,11 @@
       <div class="formulario-card">
         <h3>{{ editando ? 'Editar cliente' : 'Crear nuevo cliente' }}</h3>
 
-        <form [formGroup]="formulario"
-              (ngSubmit)="editando ? actualizarCliente() : crearCliente()"
-              class="formulario">
-
+        <form
+          [formGroup]="formulario"
+          (ngSubmit)="editando ? actualizarCliente() : crearCliente()"
+          class="formulario"
+        >
           <label for="rut">RUT:</label>
           <input id="rut" type="text" pInputText formControlName="rut" [readonly]="editando" />
 
@@ -54,7 +55,8 @@
           </div>
 
           <div class="form-buttons">
-            <button type="submit" class="btn-guardar" [disabled]="formulario.invalid">Guardar</button>
+            <!-- Botón SIEMPRE habilitado para poder enviar y ver errores -->
+            <button type="submit" class="btn-guardar">Guardar</button>
             <button type="button" class="btn-cancelar" (click)="cancelarCreacion()">Cancelar</button>
           </div>
         </form>
@@ -81,16 +83,24 @@
               <td>{{ cliente.email }}</td>
               <td>{{ cliente.telefono }}</td>
               <td>
-                <p-tag [value]="cliente.activo ? 'Sí' : 'No'"
-                       [severity]="cliente.activo ? 'success' : 'danger'"></p-tag>
+                <p-tag
+                  [value]="cliente.activo ? 'Sí' : 'No'"
+                  [severity]="cliente.activo ? 'success' : 'danger'">
+                </p-tag>
               </td>
               <td>
-                <button pButton icon="pi pi-pencil"
-                        class="p-button-rounded p-button-success p-button-sm"
-                        (click)="editarCliente(cliente)"></button>
-                <button pButton icon="pi pi-trash"
-                        class="p-button-rounded p-button-danger p-button-sm"
-                        (click)="pedirEliminar(cliente)"></button>
+                <button
+                  pButton
+                  icon="pi pi-pencil"
+                  class="p-button-rounded p-button-success p-button-sm"
+                  (click)="editarCliente(cliente)">
+                </button>
+                <button
+                  pButton
+                  icon="pi pi-trash"
+                  class="p-button-rounded p-button-danger p-button-sm"
+                  (click)="pedirEliminar(cliente)">
+                </button>
               </td>
             </tr>
           </tbody>

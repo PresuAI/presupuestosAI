@@ -13,11 +13,7 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   templateUrl: './presupuestos-ai.component.html',
   styleUrls: ['./presupuestos-ai.component.scss'],
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    FormsModule
-  ]
+  imports: [CommonModule, ReactiveFormsModule, FormsModule]
 })
 export class PresupuestosAiComponent implements OnInit {
   form!: FormGroup;
@@ -28,7 +24,11 @@ export class PresupuestosAiComponent implements OnInit {
   prompt: string = '';
   totalGlobal: number = 0;
   formularioVisible: boolean = false;
+
+  // ✅ Toast con severidad
   toastMensaje: string | null = null;
+  toastTipo: 'success' | 'error' | 'info' = 'info';
+  private toastTimer: any;
 
   tiposEvento = [
     { label: 'Cumpleaños', value: 'Cumpleaños' },
@@ -46,12 +46,13 @@ export class PresupuestosAiComponent implements OnInit {
     private productoService: ProductoService,
     private presupuestoService: PresupuestoService,
     private presupuestoAiService: PresupuestoAiService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
+    // Iniciar selects en null para que el placeholder quede seleccionado
     this.form = this.fb.group({
       clienteId: [null, Validators.required],
-      tipoEvento: ['', Validators.required],
+      tipoEvento: [null, Validators.required],
       comentarios: ['']
     });
 
@@ -59,92 +60,63 @@ export class PresupuestosAiComponent implements OnInit {
     this.productoService.obtenerProductos().subscribe(data => this.productos = data);
   }
 
-  mostrarToast(mensaje: string) {
+  // ===== Toast helpers =====
+  mostrarToast(mensaje: string, tipo: 'success' | 'error' | 'info' = 'info', ms = 3000) {
     this.toastMensaje = mensaje;
-    setTimeout(() => {
-      this.toastMensaje = null;
-    }, 3000);
+    this.toastTipo = tipo;
+    clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => (this.toastMensaje = null), ms);
   }
 
-  // 🔹 Normalizar operación en caso de incoherencias
+  // ===== IA helpers =====
   private normalizarOperacion(respuesta: any): 'CREAR' | 'AGREGAR' | 'MODIFICAR' | 'ELIMINAR' | 'REEMPLAZAR' | 'CONSULTAR' {
     const operacion = respuesta.operacion as string;
     const items = respuesta.presupuesto?.items || [];
-
-    if (items.length > 0 && operacion === 'CONSULTAR' && this.items.length === 0) {
-      console.warn('[IA] Corregido: CONSULTAR -> CREAR porque vinieron items nuevos');
-      return 'CREAR';
-    }
-
-    if (items.length > 0 && operacion === 'CONSULTAR' && this.items.length > 0) {
-      console.warn('[IA] Corregido: CONSULTAR -> MODIFICAR porque ya existían items');
-      return 'MODIFICAR';
-    }
-
-    if (items.length === 0 && operacion !== 'CONSULTAR') {
-      console.warn('[IA] Corregido: Operación -> CONSULTAR porque no vinieron items');
-      return 'CONSULTAR';
-    }
-
+    if (items.length > 0 && operacion === 'CONSULTAR' && this.items.length === 0) return 'CREAR';
+    if (items.length > 0 && operacion === 'CONSULTAR' && this.items.length > 0) return 'MODIFICAR';
+    if (items.length === 0 && operacion !== 'CONSULTAR') return 'CONSULTAR';
     return operacion as any;
   }
 
-  // 🔹 Merge inteligente de items según la operación
   private mergeItems(previos: PresupuestoItem[], nuevos: PresupuestoItem[], modo: string): PresupuestoItem[] {
-    console.log('[mergeItems] Modo:', modo);
-    console.log('[mergeItems] Previos:', previos);
-    console.log('[mergeItems] Nuevos:', nuevos);
-
     switch (modo) {
       case 'CREAR':
       case 'REEMPLAZAR':
         return [...nuevos];
-
-      case 'AGREGAR':
+      case 'AGREGAR': {
         const agregados = [...previos];
         nuevos.forEach(nuevo => {
           const existente = agregados.find(i => i.productoId === nuevo.productoId);
           if (existente) {
             existente.cantidad += nuevo.cantidad;
-            existente.totalItem = existente.precioUnitario * existente.cantidad;
+            existente.totalItem = existente.cantidad * existente.precioUnitario;
           } else {
             agregados.push(nuevo);
           }
         });
         return agregados;
-
+      }
       case 'MODIFICAR':
         return previos.map(item => {
           const modificado = nuevos.find(n => n.productoId === item.productoId);
-          if (modificado) {
-            return {
-              ...item,
-              cantidad: modificado.cantidad,
-              totalItem: modificado.precioUnitario * modificado.cantidad
-            };
-          }
-          return item;
+          return modificado
+            ? { ...item, cantidad: modificado.cantidad, totalItem: modificado.precioUnitario * modificado.cantidad }
+            : item;
         });
-
       case 'ELIMINAR':
         return previos.filter(item => !nuevos.some(n => n.productoId === item.productoId));
-
       case 'CONSULTAR':
-        return [...previos];
-
       default:
-        console.warn('[mergeItems] ⚠️ Operación no reconocida');
         return [...previos];
     }
   }
 
-  // 🔹 Enviar prompt a IA
   enviarPromptAI(): void {
     const clienteId = this.form.value.clienteId;
     const tipoEvento = this.form.value.tipoEvento;
 
     if (!clienteId || !tipoEvento || !this.prompt) {
-      this.mostrarToast('Seleccioná cliente, tipo de evento y escribí un mensaje.');
+      this.mostrarToast('Seleccioná cliente, tipo de evento y escribí un mensaje.', 'error');
       this.agregarMensajeBot('⚠️ Seleccioná cliente, tipo de evento y escribí un mensaje.');
       return;
     }
@@ -165,8 +137,6 @@ export class PresupuestosAiComponent implements OnInit {
     this.agregarMensajeUsuario(this.prompt);
     this.prompt = '';
 
-    console.log('[PresupuestoAI Service] Enviando DTO a Gemini:', dto);
-
     this.presupuestoAiService.generarPresupuestoAI(dto).subscribe({
       next: (response) => {
         let clean = typeof response === 'string' ? response.trim() : response;
@@ -174,27 +144,15 @@ export class PresupuestosAiComponent implements OnInit {
         if (clean.endsWith('```')) clean = clean.slice(0, -3);
 
         const respuesta = JSON.parse(clean);
-        console.log('[IA] Respuesta completa:', respuesta);
-        console.log('[IA] Items previos:', this.items);
-
         this.agregarMensajeBot(respuesta.mensaje);
 
-        // 🚩 Corregimos operación si vino incoherente
         const operacion = this.normalizarOperacion(respuesta);
-        console.log('[IA] Operación recibida (normalizada):', operacion);
-
         const itemsIA = (respuesta.presupuesto?.items || []) as any[];
-        console.log('[IA] Items nuevos:', itemsIA);
-
         if (!Array.isArray(itemsIA) || itemsIA.length === 0) {
-          if (operacion !== 'CONSULTAR') {
-            console.warn('[IA] ❌ La IA no devolvió productos válidos para la operación:', operacion);
-            this.mostrarToast('La IA no devolvió productos válidos.');
-          }
+          if (operacion !== 'CONSULTAR') this.mostrarToast('La IA no devolvió productos válidos.', 'error');
           return;
         }
 
-        // 🔹 Normalizamos a PresupuestoItem[]
         const itemsNormalizados: PresupuestoItem[] = itemsIA.map((item: any) => {
           const nombre = item.producto || item.nombre;
           const producto = this.productos.find(p => p.nombre === nombre);
@@ -206,19 +164,18 @@ export class PresupuestosAiComponent implements OnInit {
           };
         });
 
-        // 🔹 Aplicamos merge según la operación recibida
         this.items = this.mergeItems(this.items, itemsNormalizados, operacion);
         this.actualizarTotalGlobal();
         this.formularioVisible = true;
       },
       error: () => {
         console.error('[enviarPromptAI] ERROR');
-        this.mostrarToast('No se pudo generar el presupuesto AI.');
+        this.mostrarToast('No se pudo generar el presupuesto AI.', 'error');
       }
     });
   }
 
-  // 🔹 Utilidades
+  // ===== Utilidades =====
   setPrecioUnitario() {
     const producto = this.productos.find(p => p.id === this.nuevoItem.productoId);
     if (producto) {
@@ -240,7 +197,7 @@ export class PresupuestosAiComponent implements OnInit {
 
   agregarItem() {
     if (!this.nuevoItem.productoId || this.nuevoItem.cantidad <= 0) {
-      this.mostrarToast('Seleccioná un producto y cantidad válida.');
+      this.mostrarToast('Seleccioná un producto y cantidad válida.', 'error');
       return;
     }
     const producto = this.productos.find(p => p.id === this.nuevoItem.productoId);
@@ -257,7 +214,7 @@ export class PresupuestosAiComponent implements OnInit {
         totalItem: producto.precioUnitario * this.nuevoItem.cantidad
       });
     }
-    this.mostrarToast(`${producto.nombre} x${this.nuevoItem.cantidad} agregado`);
+    this.mostrarToast(`${producto.nombre} x${this.nuevoItem.cantidad} agregado`, 'success');
     this.nuevoItem = { productoId: null, cantidad: 1, precioUnitario: 0, totalItem: 0 };
     this.actualizarTotalGlobal();
   }
@@ -265,12 +222,12 @@ export class PresupuestosAiComponent implements OnInit {
   eliminarItem(index: number): void {
     this.items.splice(index, 1);
     this.actualizarTotalGlobal();
-    this.mostrarToast('Ítem removido.');
+    this.mostrarToast('Ítem removido.', 'info');
   }
 
   crearPresupuesto(): void {
     if (this.form.invalid || this.items.length === 0) {
-      this.mostrarToast('Completá los datos y agrega al menos un producto.');
+      this.mostrarToast('Completá los datos y agregá al menos un producto.', 'error');
       return;
     }
 
@@ -283,20 +240,23 @@ export class PresupuestosAiComponent implements OnInit {
       items: this.items
     };
 
-    this.presupuestoService.crearPresupuesto(dto).subscribe(() => {
-      this.mostrarToast('Presupuesto guardado correctamente.');
-      this.resetFormulario();
+    this.presupuestoService.crearPresupuesto(dto).subscribe({
+      next: () => {
+        this.mostrarToast('Presupuesto guardado correctamente.', 'success');
+        this.resetFormulario();
+      },
+      error: () => {
+        this.mostrarToast('No se pudo guardar el presupuesto.', 'error');
+      }
     });
   }
 
   resetFormulario() {
-    this.form.reset();
+    this.form.reset({ clienteId: null, tipoEvento: null, comentarios: '' });
     this.items = [];
     this.totalGlobal = 0;
     this.formularioVisible = false;
-    this.chatMensajes = [
-      { texto: 'Hola 👋 ¿En qué puedo ayudarte hoy?', tipo: 'bot' }
-    ];
+    this.chatMensajes = [{ texto: 'Hola 👋 ¿En qué puedo ayudarte hoy?', tipo: 'bot' }];
     this.prompt = '';
   }
 
@@ -313,9 +273,7 @@ export class PresupuestosAiComponent implements OnInit {
   private scrollChat() {
     setTimeout(() => {
       const contenedor = document.querySelector('.chat-mensajes');
-      if (contenedor) {
-        contenedor.scrollTop = contenedor.scrollHeight;
-      }
+      if (contenedor) (contenedor as HTMLElement).scrollTop = (contenedor as HTMLElement).scrollHeight;
     }, 100);
   }
 }
