@@ -284,3 +284,20 @@
   background:#c0392b; color:#fff;
 }
 .sbx-btn.danger:hover { filter:brightness(.96); }
+/* === Estilos específicos para errores (PrimeNG Toast) === */
+::ng-deep .p-toast .p-toast-message-error {
+  background-color: #c0392b !important; /* rojo fuerte */
+  color: #fff !important;
+  border-radius: 12px;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(192, 57, 43, 0.35);
+}
+
+/* Ícono de cierre en errores */
+::ng-deep .p-toast .p-toast-message-error .p-toast-icon-close {
+  color: #fff !important;
+  opacity: 0.9;
+}
+::ng-deep .p-toast .p-toast-message-error .p-toast-icon-close:hover {
+  opacity: 1;
+}

@@ -239,3 +239,12 @@
 .sbx-btn.cancel:hover{ filter:brightness(.96); }
 .sbx-btn.danger{ background:#c0392b; color:#fff; }
 .sbx-btn.danger:hover{ filter:brightness(.96); }
+
+:host ::ng-deep .p-toast .p-toast-message.p-toast-message-warn {
+  background: #c0392b;      
+  border-color: #a93226;
+  color: #fff;
+}
+:host ::ng-deep .p-toast .p-toast-message.p-toast-message-warn .p-toast-message-icon {
+  color: #fff;
+}
