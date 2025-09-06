@@ -248,3 +248,49 @@
 :host ::ng-deep .p-toast .p-toast-message.p-toast-message-warn .p-toast-message-icon {
   color: #fff;
 }
+/* === Fix: texto del formulario en negro === */
+.formulario-card {
+  /* textos principales */
+  label,
+  .hint,
+  input,
+  textarea,
+  select {
+    color: #111 !important;
+  }
+
+  /* placeholders */
+  input::placeholder,
+  textarea::placeholder {
+    color: #666 !important;
+    opacity: 1;
+  }
+
+  /* selects y sus opciones */
+  select {
+    color: #111 !important;
+    background: #fff;
+  }
+  select option {
+    color: #111 !important;
+    background: #fff;
+  }
+  /* opción placeholder de los selects */
+  select option[disabled] {
+    color: #666 !important;
+  }
+
+  /* campos deshabilitados (Safari/WebKit incluido) */
+  input:disabled,
+  textarea:disabled,
+  select:disabled {
+    color: #111 !important;
+    -webkit-text-fill-color: #111 !important;
+    opacity: 1; /* evita que se vean “lavados” */
+  }
+
+  /* mantener los botones con texto blanco */
+  .guardar, .cancelar {
+    color: #fff !important;
+  }
+}

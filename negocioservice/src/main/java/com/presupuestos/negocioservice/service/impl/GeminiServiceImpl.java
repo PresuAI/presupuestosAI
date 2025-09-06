@@ -1,19 +1,25 @@
 package com.presupuestos.negocioservice.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.presupuestos.negocioservice.dto.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.presupuestos.negocioservice.dto.GeminiPresupuestoRequestDTO;
+import com.presupuestos.negocioservice.dto.PresupuestoItemDTO;
+import com.presupuestos.negocioservice.dto.PresupuestoRequestDTO;
+import com.presupuestos.negocioservice.dto.PresupuestoResponseDTO;
+import com.presupuestos.negocioservice.dto.ProductoResponseDTO;
 import com.presupuestos.negocioservice.service.GeminiService;
+import com.presupuestos.negocioservice.service.PresupuestoService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import com.presupuestos.negocioservice.service.PresupuestoService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class GeminiServiceImpl implements GeminiService {
@@ -23,55 +29,128 @@ public class GeminiServiceImpl implements GeminiService {
     @Value("${gemini.api.key}")
     private String apiKey;
 
-    private final String URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+    private static final String GEMINI_URL =
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 
     public GeminiServiceImpl(PresupuestoService presupuestoService) {
         this.presupuestoService = presupuestoService;
     }
 
+    /* =======================
+       Helpers comunes
+       ======================= */
+
+    private static BigDecimal toBD(Object v) {
+        if (v == null) return BigDecimal.ZERO;
+        if (v instanceof BigDecimal bd) return bd;
+        if (v instanceof Number n) return BigDecimal.valueOf(n.doubleValue());
+        try {
+            return new BigDecimal(v.toString());
+        } catch (Exception e) {
+            return BigDecimal.ZERO;
+        }
+    }
+
+    private static String inferAction(String msg) {
+        if (msg == null) return "CONSULTAR";
+        String m = msg.toLowerCase();
+        if (m.matches(".*(agrega|agreg|sum|añad).*")) return "AGREGAR";
+        if (m.matches(".*(elimin|quit|sac).*")) return "ELIMINAR";
+        if (m.matches(".*(modific|cambi|ajust|actualiz).*")) return "MODIFICAR";
+        if (m.matches(".*(reemplaz|nuevo presupuesto).*")) return "REEMPLAZAR";
+        if (m.matches(".*(crea|gener|arm|hacer).*")) return "CREAR";
+        return "CONSULTAR";
+    }
+
+    private static ProductoResponseDTO findByName(List<ProductoResponseDTO> catalog, String name) {
+        if (name == null) return null;
+        for (var p : catalog) if (name.equals(p.getNombre())) return p;
+        for (var p : catalog) if (name.equalsIgnoreCase(p.getNombre())) return p;
+        return null;
+    }
+
+    /* =======================
+       Llamado a Gemini con schema JSON
+       ======================= */
+
     @Override
-    public String obtenerRespuesta(String mensaje) {
+    public String obtenerRespuesta(String prompt) {
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("X-goog-api-key", apiKey);
 
-        ObjectMapper mapper = new ObjectMapper();
-        String requestJson;
+        // JSON Schema para asegurar estructura
+        Map<String, Object> schema = Map.of(
+                "type", "object",
+                "properties", Map.of(
+                        "mensaje", Map.of("type", "string"),
+                        "presupuesto", Map.of(
+                                "type", "object",
+                                "properties", Map.of(
+                                        "items", Map.of(
+                                                "type", "array",
+                                                "minItems", 1,
+                                                "items", Map.of(
+                                                        "type", "object",
+                                                        "properties", Map.of(
+                                                                "producto", Map.of("type", "string"),
+                                                                "cantidad", Map.of("type", "integer", "minimum", 1),
+                                                                "precio_unitario", Map.of("type", "number", "minimum", 0),
+                                                                "total", Map.of("type", "number", "minimum", 0)
+                                                        ),
+                                                        "required", List.of("producto", "cantidad", "precio_unitario", "total")
+                                                )
+                                        ),
+                                        "total", Map.of("type", "number", "minimum", 0)
+                                ),
+                                "required", List.of("items", "total")
+                        )
+                ),
+                "required", List.of("presupuesto")
+        );
 
-        try {
-            Map<String, Object> requestMap = Map.of(
-                    "contents", List.of(
-                            Map.of("parts", List.of(
-                                    Map.of("text", mensaje)
-                            ))
-                    )
-            );
-            requestJson = mapper.writeValueAsString(requestMap);
-        } catch (JsonProcessingException e) {
-            return "Error al construir el prompt para Gemini: " + e.getMessage();
-        }
+        Map<String, Object> payload = Map.of(
+                "contents", List.of(
+                        Map.of(
+                                "role", "user",
+                                "parts", List.of(Map.of("text", prompt))
+                        )
+                ),
+                "generationConfig", Map.of(
+                        "response_mime_type", "application/json",
+                        "response_schema", schema
+                )
+        );
 
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
+        ResponseEntity<Map> response = restTemplate.postForEntity(GEMINI_URL, request, Map.class);
 
-        HttpEntity<String> request = new HttpEntity<>(requestJson, headers);
-
-        ResponseEntity<Map> response = restTemplate.postForEntity(URL, request, Map.class);
-
-        if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
             try {
-                var candidates = ((Map) ((java.util.List<?>) response.getBody().get("candidates")).get(0));
-                var content = (Map<?, ?>) candidates.get("content");
-                var parts = (java.util.List<?>) content.get("parts");
-                var textPart = (Map<?, ?>) parts.get(0);
-                return textPart.get("text").toString();
+                Map<?, ?> candidates = ((List<Map<?, ?>>) response.getBody().get("candidates")).get(0);
+                Map<?, ?> content = (Map<?, ?>) candidates.get("content");
+                List<?> parts = (List<?>) content.get("parts");
+                Map<?, ?> textPart = (Map<?, ?>) parts.get(0);
+                return String.valueOf(textPart.get("text")); // JSON validado por schema
             } catch (Exception e) {
-                return "Error al procesar la respuesta de Gemini.";
+                return """
+                        {"mensaje":"No pude leer la respuesta",
+                         "presupuesto":{"items":[{"producto":"_","cantidad":1,"precio_unitario":0,"total":0}],
+                         "total":0}}""";
             }
         }
 
-        return "No se pudo obtener respuesta de Gemini.";
+        return """
+                {"mensaje":"Sin respuesta de Gemini",
+                 "presupuesto":{"items":[{"producto":"_","cantidad":1,"precio_unitario":0,"total":0}],
+                 "total":0}}""";
     }
+
+    /* =======================
+       Orquestación pública
+       ======================= */
 
     @Override
     public String generarPresupuestoConAI(GeminiPresupuestoRequestDTO dto) {
@@ -80,122 +159,225 @@ public class GeminiServiceImpl implements GeminiService {
         String comentarios = dto.getComentarios();
         String mensaje = dto.getMensaje();
 
-        List<PresupuestoResponseDTO> historico = presupuestoService.findTop10ByClienteIdOrderByFechaCreacionDesc(clienteId);
+        // (Opcional) historial, hoy no lo usamos en el prompt reforzado
+        List<PresupuestoResponseDTO> historico =
+                presupuestoService.findTop10ByClienteIdOrderByFechaCreacionDesc(clienteId);
+
         List<ProductoResponseDTO> productos = obtenerProductosDeServicio();
 
-        String rawPrompt = construirPrompt(historico, productos, presupuestoActual, comentarios, mensaje);
+        String actionHint = inferAction(mensaje);
+        String rawPrompt = construirPrompt(productos, presupuestoActual, comentarios, mensaje, actionHint);
 
-        try {
-            return obtenerRespuesta(rawPrompt);
-        } catch (Exception e) {
-            return "Error al construir el prompt para Gemini: " + e.getMessage();
-        }
+        String aiJson = obtenerRespuesta(rawPrompt);
+
+        // Guard-rails: fusionar duplicados, y si es AGREGAR unir BASE + NUEVOS
+        return normalizeAndGuardrails(aiJson, productos, presupuestoActual, actionHint);
     }
+
+    /* =======================
+       Integración catálogo productos
+       ======================= */
 
     private List<ProductoResponseDTO> obtenerProductosDeServicio() {
         try {
             ResponseEntity<ProductoResponseDTO[]> response = new RestTemplate()
                     .getForEntity("http://productoservice:8082/api/productos", ProductoResponseDTO[].class);
-
-            return Arrays.asList(response.getBody());
+            ProductoResponseDTO[] body = response.getBody();
+            return body == null ? Collections.emptyList() : Arrays.asList(body);
         } catch (Exception e) {
             return Collections.emptyList();
         }
     }
 
-    private String construirPrompt(List<PresupuestoResponseDTO> historico,
-                                   List<ProductoResponseDTO> productos,
-                                   PresupuestoRequestDTO actual,
-                                   String comentarios,
-                                   String mensajeUsuario) {
+    /* =======================
+       Prompt reforzado (con BASE JSON + ACTION_HINT)
+       ======================= */
 
-        StringBuilder prompt = new StringBuilder();
+    private String construirPrompt(
+            List<ProductoResponseDTO> productos,
+            PresupuestoRequestDTO actual,
+            String comentarios,
+            String mensajeUsuario,
+            String actionHint
+    ) {
+        // Construimos BASE como JSON por nombre (usando catálogo cuando hay)
+        StringBuilder baseJson = new StringBuilder();
+        Map<Long, ProductoResponseDTO> idToProdMap = productos.stream()
+                .collect(Collectors.toMap(ProductoResponseDTO::getId, p -> p, (a, b) -> a));
 
-        prompt.append("Eres un asistente experto en presupuestos de catering.\n")
-                .append("⚠️ DEVUELVE SIEMPRE SOLO UN JSON válido, sin explicaciones fuera del JSON.\n")
-                .append("El JSON debe tener exactamente estas claves:\n\n")
-                .append("{\n")
-                .append("  \"operacion\": \"CREAR | AGREGAR | MODIFICAR | ELIMINAR | REEMPLAZAR | CONSULTAR\",\n")
-                .append("  \"presupuesto\": {\n")
-                .append("    \"items\": [\n")
-                .append("      { \"producto\": \"NOMBRE\", \"cantidad\": X, \"precio_unitario\": Y, \"total\": Z }\n")
-                .append("    ],\n")
-                .append("    \"total\": NUM\n")
-                .append("  },\n")
-                .append("  \"mensaje\": \"Texto breve para el usuario\"\n")
-                .append("}\n\n")
-                .append("⚠️ REGLAS OBLIGATORIAS:\n")
-                .append("- Necesitas prestar atencion a los productos. Hay productos que no tienen sentido en desayuno o almuerzo. Por favor presta suma atencion y se variado, no elijas siempre las mismas cosas.\n")
-                .append("- Ten en cuenta el historial quee te pasare de presupuestos, para no estar repitiendo productos, asi logramos variaciones buenas.\n")
-                .append("- Usa solo las claves 'operacion', 'presupuesto', 'items', 'total', 'mensaje'.\n")
-                .append("- Nunca inventes otras claves como 'Evento', 'Comentarios', 'productos', 'total_presupuesto'.\n")
-                .append("- 'items' nunca puede estar vacío. Si es una consulta, copia los items actuales.\n")
-                .append("- Si devuelves 'CONSULTAR', igual debes incluir los items actuales (aunque sean los mismos), pero NO inventes nuevos.\n")
-                .append("- Si el mensaje del usuario pide explícitamente 'crear', 'generar', 'armar' o similar, NUNCA devuelvas 'CONSULTAR'. Debes devolver 'CREAR'.\n")
-                .append("- Si devuelves items diferentes de los actuales, la operación NO puede ser 'CONSULTAR'. Usa 'CREAR', 'AGREGAR', 'MODIFICAR' o 'REEMPLAZAR'.\n")
-                .append("- Usa los nombres EXACTOS de los productos listados abajo.\n\n")
+        BigDecimal totalBase = BigDecimal.ZERO;
+        baseJson.append("{\"items\":[");
 
-                .append("=== PALABRAS CLAVE ===\n")
-                .append("* agregar, sumar, añadir → operacion=AGREGAR\n")
-                .append("* modificar, cambiar, ajustar → operacion=MODIFICAR\n")
-                .append("* eliminar, quitar, sacar → operacion=ELIMINAR\n")
-                .append("* crear, armar, hacer un presupuesto → operacion=CREAR\n")
-                .append("* reemplazar, nuevo presupuesto → operacion=REEMPLAZAR\n")
-                .append("* consultar, cuánto, mostrar → operacion=CONSULTAR (pero items debe incluirse)\n\n")
+        for (int i = 0; i < actual.getItems().size(); i++) {
+            PresupuestoItemDTO it = actual.getItems().get(i);
 
-                .append("=== EJEMPLO CORRECTO ===\n")
-                .append("{\n")
-                .append("  \"operacion\": \"AGREGAR\",\n")
-                .append("  \"presupuesto\": {\n")
-                .append("    \"items\": [\n")
-                .append("      { \"producto\": \"Croissant de manteca\", \"cantidad\": 10, \"precio_unitario\": 75, \"total\": 750 },\n")
-                .append("      { \"producto\": \"Chipa de queso\", \"cantidad\": 5, \"precio_unitario\": 60, \"total\": 300 }\n")
-                .append("    ],\n")
-                .append("    \"total\": 1050\n")
-                .append("  },\n")
-                .append("  \"mensaje\": \"Agregué croissants y chipas a tu presupuesto.\"\n")
-                .append("}\n\n")
+            int cant = (it.getCantidad() == null ? 0 : it.getCantidad());
+            BigDecimal cantBD = BigDecimal.valueOf(cant);
 
-                .append("=== DATOS DEL USUARIO ===\n")
-                .append("Mensaje: ").append(mensajeUsuario).append("\n")
-                .append("Comentarios: ").append(comentarios).append("\n\n")
+            ProductoResponseDTO prod = idToProdMap.get(it.getProductoId());
+            String nombre = ((prod != null ? prod.getNombre() : ("#" + it.getProductoId())))
+                    .replace("\"", "\\\"");
 
-                .append("=== PRODUCTOS DISPONIBLES ===\n");
-        for (ProductoResponseDTO prod : productos) {
-            prompt.append("- ").append(prod.getNombre())
-                    .append(": ").append(prod.getDescripcion())
-                    .append(" | $").append(prod.getPrecioUnitario()).append("\n");
-        }
-
-        prompt.append("\n=== HISTORIAL DE PRESUPUESTOS ===\n");
-        if (historico.isEmpty()) {
-            prompt.append("No hay presupuestos anteriores.\n");
-        } else {
-            for (PresupuestoResponseDTO pre : historico) {
-                prompt.append("- Evento: ").append(pre.getTipoEvento())
-                        .append(" | Comentarios: ").append(pre.getComentarios())
-                        .append(" | Ganancia: $").append(pre.getGananciaEstimada()).append("\n");
-
-                for (PresupuestoItemDTO item : pre.getItems()) {
-                    prompt.append("  · Producto ID ").append(item.getProductoId())
-                            .append(", cantidad ").append(item.getCantidad())
-                            .append(", total $").append(item.getTotalItem()).append("\n");
-                }
+            BigDecimal puBD;
+            if (prod != null && prod.getPrecioUnitario() != null) {
+                puBD = toBD(prod.getPrecioUnitario());
+            } else {
+                BigDecimal totalItemFromDto = toBD(it.getTotalItem());
+                puBD = (cant > 0)
+                        ? totalItemFromDto.divide(cantBD, 2, RoundingMode.HALF_UP)
+                        : BigDecimal.ZERO;
             }
+
+            BigDecimal totalItemBD = puBD.multiply(cantBD);
+            totalBase = totalBase.add(totalItemBD);
+
+            baseJson.append("{")
+                    .append("\"producto\":\"").append(nombre).append("\",")
+                    .append("\"cantidad\":").append(cant).append(",")
+                    .append("\"precio_unitario\":").append(puBD.stripTrailingZeros().toPlainString()).append(",")
+                    .append("\"total\":").append(totalItemBD.stripTrailingZeros().toPlainString())
+                    .append("}");
+
+            if (i < actual.getItems().size() - 1) baseJson.append(",");
         }
 
-        prompt.append("\n=== PRESUPUESTO ACTUAL ===\n");
-        if (actual.getItems().isEmpty()) {
-            prompt.append("Sin productos cargados.\n");
-        } else {
-            for (PresupuestoItemDTO item : actual.getItems()) {
-                prompt.append("· Producto ID ").append(item.getProductoId())
-                        .append(", cantidad ").append(item.getCantidad())
-                        .append(", total $").append(item.getTotalItem()).append("\n");
-            }
+        baseJson.append("],\"total\":")
+                .append(totalBase.stripTrailingZeros().toPlainString())
+                .append("}");
+
+        // Prompt reforzado
+        StringBuilder p = new StringBuilder();
+        p.append("Eres un asistente experto en presupuestos de catering.\n")
+                .append("Debes APLICAR la instrucción del usuario sobre el PRESUPUESTO BASE y devolver el PRESUPUESTO RESULTANTE COMPLETO en JSON.\n\n")
+                .append("ACTION_HINT: ").append(actionHint).append("\n")
+                .append("REGLAS:\n")
+                .append("- Si ACTION_HINT=AGREGAR: el resultado = BASE + NUEVOS (no borres lo anterior).\n")
+                .append("- Si ACTION_HINT=ELIMINAR: remueve de BASE lo pedido.\n")
+                .append("- Si ACTION_HINT=MODIFICAR: parte de BASE y ajusta cantidades/precios.\n")
+                .append("- NUNCA devuelvas solo los cambios; siempre la lista final completa.\n")
+                .append("- Fusiona nombres idénticos sumando cantidades y recalcula cada 'total' (cantidad*precio_unitario) y 'total' global.\n")
+                .append("- Usa únicamente los nombres EXACTOS del catálogo.\n")
+                .append("- Salida: SOLO JSON con {\"presupuesto\":{\"items\":[...],\"total\":NUM},\"mensaje\":\"...\"}\n\n");
+
+        p.append("=== CATÁLOGO ===\n");
+        for (var prod : productos) {
+            p.append("- ").append(prod.getNombre())
+                    .append(" | $").append(prod.getPrecioUnitario())
+                    .append(" | ").append(prod.getDescripcion() == null ? "" : prod.getDescripcion())
+                    .append("\n");
         }
 
-        return prompt.toString();
+        p.append("\n=== PRESUPUESTO BASE (JSON) ===\n").append(baseJson).append("\n");
+        p.append("\n=== INSTRUCCIÓN DEL USUARIO ===\n").append(mensajeUsuario).append("\n");
+        p.append("Comentarios: ").append(comentarios == null ? "" : comentarios).append("\n");
+
+        return p.toString();
     }
 
+    /* =======================
+       Guard-rails: merge + BASE+NUEVOS si AGREGAR
+       ======================= */
+
+    private String normalizeAndGuardrails(
+            String aiJson,
+            List<ProductoResponseDTO> catalog,
+            PresupuestoRequestDTO base,
+            String actionHint
+    ) {
+        try {
+            ObjectMapper om = new ObjectMapper();
+            ObjectNode root = (ObjectNode) om.readTree(aiJson);
+            ObjectNode presupuesto = (ObjectNode) root.with("presupuesto");
+            ArrayNode itemsNode = (ArrayNode) presupuesto.withArray("items");
+
+            // 1) Acumular por nombre lo que vino de la IA
+            Map<String, ObjectNode> acc = new LinkedHashMap<>();
+            for (JsonNode n : itemsNode) {
+                String nombre = n.path("producto").asText(null);
+                if (nombre == null || nombre.isBlank()) continue;
+
+                int cant = Math.max(0, n.path("cantidad").asInt(0));
+                BigDecimal pu = toBD(n.get("precio_unitario"));
+                if (pu.compareTo(BigDecimal.ZERO) <= 0) {
+                    var cat = findByName(catalog, nombre);
+                    if (cat != null && cat.getPrecioUnitario() != null) {
+                        pu = toBD(cat.getPrecioUnitario());
+                    }
+                }
+                if (cant == 0) continue;
+
+                ObjectNode row = acc.get(nombre);
+                if (row == null) {
+                    row = om.createObjectNode();
+                    row.put("producto", nombre);
+                    row.put("cantidad", cant);
+                    row.put("precio_unitario", pu.stripTrailingZeros().toPlainString());
+                    acc.put(nombre, row);
+                } else {
+                    int prev = row.path("cantidad").asInt(0);
+                    row.put("cantidad", prev + cant);
+                    // mantenemos PU (catálogo o el primero válido que tengamos)
+                }
+            }
+
+            // 2) Si es AGREGAR: unir BASE con lo devuelto por la IA (por nombre)
+            if ("AGREGAR".equalsIgnoreCase(actionHint)) {
+                Map<Long, ProductoResponseDTO> idToProd = catalog.stream()
+                        .collect(Collectors.toMap(ProductoResponseDTO::getId, p -> p, (a, b) -> a));
+
+                for (var it : base.getItems()) {
+                    ProductoResponseDTO cat = idToProd.get(it.getProductoId());
+                    String nombre = (cat != null ? cat.getNombre() : ("#" + it.getProductoId()));
+                    int cant = it.getCantidad() == null ? 0 : it.getCantidad();
+                    if (cant <= 0) continue;
+
+                    BigDecimal pu = (cat != null && cat.getPrecioUnitario() != null)
+                            ? toBD(cat.getPrecioUnitario())
+                            : (it.getCantidad() != null && it.getCantidad() > 0
+                            ? toBD(it.getTotalItem()).divide(BigDecimal.valueOf(it.getCantidad()), 2, RoundingMode.HALF_UP)
+                            : BigDecimal.ZERO);
+
+                    ObjectNode row = acc.get(nombre);
+                    if (row == null) {
+                        row = om.createObjectNode();
+                        row.put("producto", nombre);
+                        row.put("cantidad", cant);
+                        row.put("precio_unitario", pu.stripTrailingZeros().toPlainString());
+                        acc.put(nombre, row);
+                    } else {
+                        int prev = row.path("cantidad").asInt(0);
+                        row.put("cantidad", prev + cant);
+                    }
+                }
+            }
+
+            // 3) Recalcular totales y total global
+            ArrayNode rebuilt = om.createArrayNode();
+            BigDecimal totalGlobal = BigDecimal.ZERO;
+
+            for (var row : acc.values()) {
+                String nombre = row.path("producto").asText();
+                int cant = row.path("cantidad").asInt(0);
+                BigDecimal pu = toBD(row.get("precio_unitario"));
+                BigDecimal total = pu.multiply(BigDecimal.valueOf(cant));
+
+                ObjectNode out = om.createObjectNode();
+                out.put("producto", nombre);
+                out.put("cantidad", cant);
+                out.put("precio_unitario", pu.stripTrailingZeros().toPlainString());
+                out.put("total", total.stripTrailingZeros().toPlainString());
+                rebuilt.add(out);
+
+                totalGlobal = totalGlobal.add(total);
+            }
+
+            presupuesto.set("items", rebuilt);
+            presupuesto.put("total", totalGlobal.stripTrailingZeros().toPlainString());
+            return om.writeValueAsString(root);
+
+        } catch (Exception e) {
+            // Si algo falla, devolvemos el JSON tal como vino
+            return aiJson;
+        }
+    }
 }
