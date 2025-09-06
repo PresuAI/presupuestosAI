@@ -46,7 +46,7 @@ export class PresupuestosAiComponent implements OnInit {
     private productoService: ProductoService,
     private presupuestoService: PresupuestoService,
     private presupuestoAiService: PresupuestoAiService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // Iniciar selects en null para que el placeholder quede seleccionado
