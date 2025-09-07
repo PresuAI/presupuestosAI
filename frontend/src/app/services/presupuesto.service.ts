@@ -9,7 +9,7 @@ import { PresupuestoResponse } from '../types/presupuesto';
   providedIn: 'root'
 })
 export class PresupuestoService {
-  private url = 'http://localhost:8081/api/presupuestos';
+  private url = environment.presupuestosApi;
 
   constructor(private http: HttpClient) {}
 
@@ -23,6 +23,7 @@ actualizarPresupuesto(id: number, dto: PresupuestoRequest): Observable<any> {
   return this.http.put(`${this.url}/${id}`, dto, { withCredentials: true });
 }
 eliminarPresupuesto(id: number): Observable<void> {
-  return this.http.delete<void>(`http://localhost:8081/api/presupuestos/${id}`);
+  return this.http.delete<void>(`${this.url}/${id}`, { withCredentials: true });
 }
+
 }

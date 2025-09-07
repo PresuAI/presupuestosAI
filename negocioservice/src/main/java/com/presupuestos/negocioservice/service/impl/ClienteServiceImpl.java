@@ -30,11 +30,15 @@ public class ClienteServiceImpl implements ClienteService {
         if (clienteRepository.existsByRut(dto.getRut())) {
             throw new IllegalArgumentException("Ya existe un cliente con ese RUT.");
         }
+        if (clienteRepository.existsByEmail(dto.getEmail())) {
+            throw new IllegalArgumentException("Ya existe un cliente con ese email.");
+        }
 
         Cliente cliente = ClienteMapper.toEntity(dto);
         cliente = clienteRepository.save(cliente);
         return clienteMapper.toDTO(cliente);
     }
+
 
     @Override
     public List<ClienteResponseDTO> obtenerTodos() {

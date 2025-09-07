@@ -20,7 +20,6 @@
     min-height: 330px; // ← corregido
     height: 100%;
 
-
     &:hover {
       transform: translateY(-4px);
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
@@ -54,9 +53,7 @@
       color: #444;
       margin-top: 0.5rem;
 
-      p {
-        margin-bottom: 0.25rem;
-      }
+      p { margin-bottom: 0.25rem; }
 
       small {
         font-size: 0.85rem;
@@ -75,17 +72,9 @@
         color: white;
       }
 
-      .etiqueta-vegano {
-        background-color: #22c55e;
-      }
-
-      .etiqueta-vegetariano {
-        background-color: #60a5fa;
-      }
-
-      .etiqueta-otro {
-        background-color: #f59e0b;
-      }
+      .etiqueta-vegano { background-color: #22c55e; }
+      .etiqueta-vegetariano { background-color: #60a5fa; }
+      .etiqueta-otro { background-color: #f59e0b; }
     }
 
     .ver-mas-btn {
@@ -101,16 +90,10 @@
       cursor: pointer;
       transition: background-color 0.2s;
 
-      i {
-        margin-right: 0.5rem;
-      }
-
-      &:hover {
-        background-color: #005f3c;
-      }
+      i { margin-right: 0.5rem; }
+      &:hover { background-color: #005f3c; }
     }
   }
-
 
   .dialog-body {
     display: flex;
@@ -167,10 +150,7 @@
     border: none;
     border-radius: 8px;
   }
-
-  ::ng-deep .p-button-cancel:hover {
-    background-color: #d0e4dc;
-  }
+  ::ng-deep .p-button-cancel:hover { background-color: #d0e4dc; }
 
   ::ng-deep .p-button-save {
     background-color: #88c09e;
@@ -179,11 +159,9 @@
     border-radius: 8px;
     font-weight: 600;
   }
-
-  ::ng-deep .p-button-save:hover {
-    background-color: #6ca78b;
-  }
+  ::ng-deep .p-button-save:hover { background-color: #6ca78b; }
 }
+
 .producto-form-centrado {
   display: flex;
   justify-content: center;
@@ -211,11 +189,7 @@
     flex-direction: column;
     gap: 1rem;
 
-    label {
-      font-weight: 600;
-      color: #1e3932;
-      margin-bottom: 0.3rem;
-    }
+    label { font-weight: 600; color: #1e3932; margin-bottom: 0.3rem; }
 
     input,
     p-inputnumber {
@@ -248,15 +222,8 @@
         font-weight: 600;
         font-size: 1rem;
         cursor: pointer;
-
-        &:hover {
-          background-color: #005f3c;
-        }
-
-        &:disabled {
-          background-color: #ccc;
-          cursor: not-allowed;
-        }
+        &:hover { background-color: #005f3c; }
+        &:disabled { background-color: #ccc; cursor: not-allowed; }
       }
 
       .btn-cancelar {
@@ -268,14 +235,12 @@
         font-weight: 600;
         font-size: 1rem;
         cursor: pointer;
-
-        &:hover {
-          background-color: #999;
-        }
+        &:hover { background-color: #999; }
       }
     }
   }
 }
+
 .barra-superior-productos {
   display: flex;
   justify-content: space-between;
@@ -323,19 +288,123 @@
     align-items: center;
     gap: 0.5rem;
 
-    &:hover {
-      background-color: #005f3c;
-    }
-
-    i {
-      font-size: 1rem;
-    }
+    &:hover { background-color: #005f3c; }
+    i { font-size: 1rem; }
   }
 }
+
 .orden-select {
   color: #1e3932;
-
-  &:invalid {
-    color: #999;
-  }
+  &:invalid { color: #999; }
 }
+
+.borrar-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  background: #242323;
+  color: #fff;
+  transition: filter .15s ease, transform .02s ease;
+}
+.borrar-btn:hover { filter: brightness(0.95); }
+.borrar-btn:active { transform: translateY(1px); }
+.borrar-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+/* Paleta Starbucks */
+$sbx-green: #006241;
+$sbx-green-dark: #0a3d2e;
+$sbx-cream: #f6f0e8;
+$danger: #c0392b;
+
+/* Overlay */
+.sbx-confirm {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+.sbx-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+/* Tarjeta del modal */
+.sbx-card {
+  position: relative;
+  background: $sbx-cream;
+  border-radius: 14px;
+  padding: 20px 22px;
+  max-width: 380px;
+  width: 90%;
+  z-index: 2001;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  animation: popIn 0.15s ease-out;
+  text-align: center;
+}
+.sbx-card h4 { margin: 0 0 10px; color: $sbx-green-dark; font-weight: 700; }
+.sbx-card p { color: #333; margin: 0 0 16px; line-height: 1.4; }
+.sbx-card small { color: #6b7280; }
+
+/* Botones */
+.sbx-actions { display: flex; justify-content: center; gap: 12px; }
+.sbx-btn {
+  border: none; border-radius: 999px; padding: 8px 16px; font-weight: 600; cursor: pointer; transition: all 0.15s ease;
+}
+.sbx-btn.cancel { background: transparent; border: 2px solid $sbx-green; color: $sbx-green-dark; }
+.sbx-btn.cancel:hover { background: rgba($sbx-green, 0.08); }
+.sbx-btn.danger { background: $danger; color: #fff; }
+.sbx-btn.danger:hover { background: darken($danger, 8%); }
+
+/* Animación */
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Toast */
+.custom-toast {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  background: #1e3932;
+  color: #fff;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  font-size: 1rem;
+  animation: fadein 0.3s ease-in-out;
+}
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.productos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.productos-header h2 {
+  margin: 0;
+  font-size: 1.6rem;
+  color: #1e3932;   /* antes: color: $text; */
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+

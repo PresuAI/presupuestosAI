@@ -1,34 +1,48 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
+
 import { ClienteService, Cliente } from '../../services/cliente.service';
 import { ProductoService, Producto } from '../../services/producto.service';
 import { PresupuestoService } from '../../services/presupuesto.service';
-import { PresupuestoItem, PresupuestoRequest } from '../../types/presupuesto';
 import { PresupuestoAiService } from '../../services/presupuesto-ai.service';
-import { FormsModule } from '@angular/forms';
+import { PresupuestoItem, PresupuestoRequest } from '../../types/presupuesto';
 
 @Component({
   selector: 'app-presupuestos-ai',
   standalone: true,
   templateUrl: './presupuestos-ai.component.html',
   styleUrls: ['./presupuestos-ai.component.scss'],
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    FormsModule
-  ]
+  imports: [CommonModule, ReactiveFormsModule, FormsModule]
 })
 export class PresupuestosAiComponent implements OnInit {
   form!: FormGroup;
+
   clientes: Cliente[] = [];
   productos: Producto[] = [];
+
+  // Presupuesto mostrado (reemplazado por la IA)
   items: PresupuestoItem[] = [];
-  nuevoItem: PresupuestoItem = { productoId: null, cantidad: 1, precioUnitario: 0, totalItem: 0 };
-  prompt: string = '';
-  totalGlobal: number = 0;
-  formularioVisible: boolean = false;
+  totalGlobal = 0;
+
+  // UI
+  formularioVisible = false;
+  prompt = '';
+  enProceso = false;
+
+  // Memoria por presupuesto (OpenAI thread)
+  private threadId: string | null = null;
+
+  // Toast
   toastMensaje: string | null = null;
+  toastTipo: 'success' | 'error' | 'info' = 'info';
+  private toastTimer: any;
+
+  // Chat
+  chatMensajes: { texto: string; tipo: 'bot' | 'usuario'; timestamp?: Date }[] = [
+    { texto: 'Hola 👋 ¿En qué puedo ayudarte hoy?', tipo: 'bot', timestamp: new Date() }
+  ];
 
   tiposEvento = [
     { label: 'Cumpleaños', value: 'Cumpleaños' },
@@ -36,9 +50,22 @@ export class PresupuestosAiComponent implements OnInit {
     { label: 'Corporativo', value: 'Corporativo' }
   ];
 
-  chatMensajes: { texto: string, tipo: 'bot' | 'usuario', timestamp?: Date }[] = [
-    { texto: 'Hola 👋 ¿En qué puedo ayudarte hoy?', tipo: 'bot', timestamp: new Date() }
-  ];
+  // ---- STUBS para la fila "nueva-fila" del template ----
+  nuevoItem: PresupuestoItem = { productoId: null, cantidad: 1, precioUnitario: 0, totalItem: 0 };
+  setPrecioUnitario(): void {
+    const p = this.productos.find(x => x.id === this.nuevoItem.productoId);
+    const precio = Number(p?.precioUnitario ?? 0);
+    this.nuevoItem.precioUnitario = precio;
+    this.nuevoItem.totalItem = precio * Number(this.nuevoItem.cantidad ?? 1);
+  }
+  onCantidadChange(): void {
+    const cant = Number(this.nuevoItem.cantidad ?? 0);
+    const precio = Number(this.nuevoItem.precioUnitario ?? 0);
+    this.nuevoItem.totalItem = cant * precio;
+  }
+  agregarItem(): void {
+    this.showToast('Para agregar o modificar productos, pedíselo a la IA. Podés borrar con 🗑️.', 'info');
+  }
 
   constructor(
     private fb: FormBuilder,
@@ -46,258 +73,148 @@ export class PresupuestosAiComponent implements OnInit {
     private productoService: ProductoService,
     private presupuestoService: PresupuestoService,
     private presupuestoAiService: PresupuestoAiService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.form = this.fb.group({
       clienteId: [null, Validators.required],
-      tipoEvento: ['', Validators.required],
+      tipoEvento: [null, Validators.required],
       comentarios: ['']
     });
 
-    this.clienteService.getClientes().subscribe(data => this.clientes = data);
-    this.productoService.obtenerProductos().subscribe(data => this.productos = data);
+    this.clienteService.getClientes().subscribe(data => (this.clientes = data));
+    this.productoService.obtenerProductos().subscribe(data => (this.productos = data));
   }
 
-  mostrarToast(mensaje: string) {
-    this.toastMensaje = mensaje;
-    setTimeout(() => {
-      this.toastMensaje = null;
-    }, 3000);
+  /* ====== TOAST ====== */
+  private showToast(msg: string, kind: 'success' | 'error' | 'info' = 'info', ms = 3000) {
+    this.toastMensaje = msg;
+    this.toastTipo = kind;
+    clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => (this.toastMensaje = null), ms);
   }
 
-  // 🔹 Normalizar operación en caso de incoherencias
-  private normalizarOperacion(respuesta: any): 'CREAR' | 'AGREGAR' | 'MODIFICAR' | 'ELIMINAR' | 'REEMPLAZAR' | 'CONSULTAR' {
-    const operacion = respuesta.operacion as string;
-    const items = respuesta.presupuesto?.items || [];
-
-    if (items.length > 0 && operacion === 'CONSULTAR' && this.items.length === 0) {
-      console.warn('[IA] Corregido: CONSULTAR -> CREAR porque vinieron items nuevos');
-      return 'CREAR';
-    }
-
-    if (items.length > 0 && operacion === 'CONSULTAR' && this.items.length > 0) {
-      console.warn('[IA] Corregido: CONSULTAR -> MODIFICAR porque ya existían items');
-      return 'MODIFICAR';
-    }
-
-    if (items.length === 0 && operacion !== 'CONSULTAR') {
-      console.warn('[IA] Corregido: Operación -> CONSULTAR porque no vinieron items');
-      return 'CONSULTAR';
-    }
-
-    return operacion as any;
-  }
-
-  // 🔹 Merge inteligente de items según la operación
-  private mergeItems(previos: PresupuestoItem[], nuevos: PresupuestoItem[], modo: string): PresupuestoItem[] {
-    console.log('[mergeItems] Modo:', modo);
-    console.log('[mergeItems] Previos:', previos);
-    console.log('[mergeItems] Nuevos:', nuevos);
-
-    switch (modo) {
-      case 'CREAR':
-      case 'REEMPLAZAR':
-        return [...nuevos];
-
-      case 'AGREGAR':
-        const agregados = [...previos];
-        nuevos.forEach(nuevo => {
-          const existente = agregados.find(i => i.productoId === nuevo.productoId);
-          if (existente) {
-            existente.cantidad += nuevo.cantidad;
-            existente.totalItem = existente.precioUnitario * existente.cantidad;
-          } else {
-            agregados.push(nuevo);
-          }
-        });
-        return agregados;
-
-      case 'MODIFICAR':
-        return previos.map(item => {
-          const modificado = nuevos.find(n => n.productoId === item.productoId);
-          if (modificado) {
-            return {
-              ...item,
-              cantidad: modificado.cantidad,
-              totalItem: modificado.precioUnitario * modificado.cantidad
-            };
-          }
-          return item;
-        });
-
-      case 'ELIMINAR':
-        return previos.filter(item => !nuevos.some(n => n.productoId === item.productoId));
-
-      case 'CONSULTAR':
-        return [...previos];
-
-      default:
-        console.warn('[mergeItems] ⚠️ Operación no reconocida');
-        return [...previos];
-    }
-  }
-
-  // 🔹 Enviar prompt a IA
+  /* ====== CHAT / IA ====== */
   enviarPromptAI(): void {
     const clienteId = this.form.value.clienteId;
     const tipoEvento = this.form.value.tipoEvento;
+    const comentarios = this.form.value.comentarios || '';
+    const promptOriginal = (this.prompt || '').trim();
 
-    if (!clienteId || !tipoEvento || !this.prompt) {
-      this.mostrarToast('Seleccioná cliente, tipo de evento y escribí un mensaje.');
-      this.agregarMensajeBot('⚠️ Seleccioná cliente, tipo de evento y escribí un mensaje.');
+    if (!clienteId || !tipoEvento || !promptOriginal) {
+      this.showToast('Completá cliente, tipo de evento y escribí un mensaje.', 'error');
       return;
     }
 
     const dto = {
       clienteId,
-      comentarios: this.prompt,
+      mensaje: promptOriginal,
+      comentarios,
       presupuestoActual: {
         clienteId,
         estado: 'PENDIENTE',
         tipoEvento,
-        comentarios: '',
+        comentarios,
         gananciaEstimada: 0,
-        items: this.items
-      }
+        items: this.items, // lo que ya haya en pantalla
+      },
     };
 
-    this.agregarMensajeUsuario(this.prompt);
+    this.agregarMensajeUsuario(promptOriginal);
     this.prompt = '';
+    this.enProceso = true;
 
-    console.log('[PresupuestoAI Service] Enviando DTO a Gemini:', dto);
+    this.presupuestoAiService.generarPresupuestoAI(dto, this.threadId).subscribe({
+      next: ({ threadId, payload }) => {
+        this.enProceso = false;
 
-    this.presupuestoAiService.generarPresupuestoAI(dto).subscribe({
-      next: (response) => {
-        let clean = typeof response === 'string' ? response.trim() : response;
-        if (clean.startsWith('```json')) clean = clean.slice(7);
-        if (clean.endsWith('```')) clean = clean.slice(0, -3);
+        // Guardamos/actualizamos el hilo
+        this.threadId = threadId ?? this.threadId;
 
-        const respuesta = JSON.parse(clean);
-        console.log('[IA] Respuesta completa:', respuesta);
-        console.log('[IA] Items previos:', this.items);
-
-        this.agregarMensajeBot(respuesta.mensaje);
-
-        // 🚩 Corregimos operación si vino incoherente
-        const operacion = this.normalizarOperacion(respuesta);
-        console.log('[IA] Operación recibida (normalizada):', operacion);
-
-        const itemsIA = (respuesta.presupuesto?.items || []) as any[];
-        console.log('[IA] Items nuevos:', itemsIA);
-
+        // Esperamos: { presupuesto: { items:[{producto, cantidad, precio_unitario, total}], total }, mensaje }
+        const itemsIA = (payload?.presupuesto?.items || []) as any[];
         if (!Array.isArray(itemsIA) || itemsIA.length === 0) {
-          if (operacion !== 'CONSULTAR') {
-            console.warn('[IA] ❌ La IA no devolvió productos válidos para la operación:', operacion);
-            this.mostrarToast('La IA no devolvió productos válidos.');
-          }
+          this.showToast('La IA no devolvió ítems. Probá reformular el pedido.', 'info');
+          if (payload?.mensaje) this.agregarMensajeBot(payload.mensaje);
           return;
         }
 
-        // 🔹 Normalizamos a PresupuestoItem[]
-        const itemsNormalizados: PresupuestoItem[] = itemsIA.map((item: any) => {
-          const nombre = item.producto || item.nombre;
-          const producto = this.productos.find(p => p.nombre === nombre);
+        // Normalizar nombre → id según catálogo
+        const normalizados = itemsIA.map((it: any) => {
+          const nombre = it.producto || it.nombre || '';
+          const p = this.productos.find(x => x.nombre === nombre);
+          const cant = Number(it.cantidad || 1);
+          const pu = Number(it.precio_unitario || p?.precioUnitario || 0);
           return {
-            productoId: producto?.id || item.id || item.producto_id || null,
-            cantidad: item.cantidad || 1,
-            precioUnitario: item.precio_unitario || producto?.precioUnitario || 0,
-            totalItem: item.total || ((item.precio_unitario || producto?.precioUnitario || 0) * (item.cantidad || 1))
-          };
+            productoId: p?.id ?? it.producto_id ?? null,
+            cantidad: cant,
+            precioUnitario: pu,
+            totalItem: Number(it.total ?? cant * pu),
+          } as PresupuestoItem;
         });
 
-        // 🔹 Aplicamos merge según la operación recibida
-        this.items = this.mergeItems(this.items, itemsNormalizados, operacion);
+        this.items = normalizados;
         this.actualizarTotalGlobal();
         this.formularioVisible = true;
+
+        if (payload?.mensaje) this.agregarMensajeBot(payload.mensaje);
       },
-      error: () => {
-        console.error('[enviarPromptAI] ERROR');
-        this.mostrarToast('No se pudo generar el presupuesto AI.');
-      }
+      error: (e) => {
+        this.enProceso = false;
+        this.showToast('No se pudo contactar a la IA: ' + (e?.message ?? ''), 'error');
+      },
     });
   }
 
-  // 🔹 Utilidades
-  setPrecioUnitario() {
-    const producto = this.productos.find(p => p.id === this.nuevoItem.productoId);
-    if (producto) {
-      this.nuevoItem.precioUnitario = producto.precioUnitario;
-      this.nuevoItem.totalItem = producto.precioUnitario * this.nuevoItem.cantidad;
-      this.onCantidadChange();
-    }
-  }
-
-  onCantidadChange() {
-    this.nuevoItem.totalItem = this.nuevoItem.cantidad * this.nuevoItem.precioUnitario;
-    this.actualizarTotalGlobal();
-  }
-
-  actualizarTotalGlobal() {
-    const totalItems = this.items.reduce((acc, item) => acc + item.totalItem, 0);
-    this.totalGlobal = totalItems + this.nuevoItem.totalItem;
-  }
-
-  agregarItem() {
-    if (!this.nuevoItem.productoId || this.nuevoItem.cantidad <= 0) {
-      this.mostrarToast('Seleccioná un producto y cantidad válida.');
-      return;
-    }
-    const producto = this.productos.find(p => p.id === this.nuevoItem.productoId);
-    if (!producto) return;
-    const existente = this.items.find(i => i.productoId === producto.id);
-    if (existente) {
-      existente.cantidad += this.nuevoItem.cantidad;
-      existente.totalItem = existente.cantidad * existente.precioUnitario;
-    } else {
-      this.items.push({
-        productoId: producto.id,
-        cantidad: this.nuevoItem.cantidad,
-        precioUnitario: producto.precioUnitario,
-        totalItem: producto.precioUnitario * this.nuevoItem.cantidad
-      });
-    }
-    this.mostrarToast(`${producto.nombre} x${this.nuevoItem.cantidad} agregado`);
-    this.nuevoItem = { productoId: null, cantidad: 1, precioUnitario: 0, totalItem: 0 };
-    this.actualizarTotalGlobal();
-  }
-
-  eliminarItem(index: number): void {
-    this.items.splice(index, 1);
-    this.actualizarTotalGlobal();
-    this.mostrarToast('Ítem removido.');
-  }
-
+  /* ====== Guardar en backend ====== */
   crearPresupuesto(): void {
     if (this.form.invalid || this.items.length === 0) {
-      this.mostrarToast('Completá los datos y agrega al menos un producto.');
+      this.showToast('Completá los datos y agregá productos con la IA.', 'error');
       return;
     }
 
     const dto: PresupuestoRequest = {
       clienteId: this.form.value.clienteId,
-      estado: 'Propuesta',
+      estado: 'PROPUESTO',
       tipoEvento: this.form.value.tipoEvento,
       comentarios: this.form.value.comentarios,
       gananciaEstimada: 0,
       items: this.items
     };
 
-    this.presupuestoService.crearPresupuesto(dto).subscribe(() => {
-      this.mostrarToast('Presupuesto guardado correctamente.');
-      this.resetFormulario();
+    this.presupuestoService.crearPresupuesto(dto).subscribe({
+      next: () => {
+        this.showToast('Presupuesto guardado correctamente.', 'success');
+        // 🔑 Cortar memoria: cada presupuesto con su historia
+        this.threadId = null;
+        this.resetFormulario();
+      },
+      error: () => this.showToast('No se pudo guardar el presupuesto.', 'error')
     });
   }
 
+  /* ====== Acciones manuales mínimas ====== */
+  eliminarItem(index: number): void {
+    if (index < 0 || index >= this.items.length) return;
+    this.items.splice(index, 1);
+    this.actualizarTotalGlobal();
+    this.showToast('Ítem removido.', 'info');
+  }
+
+  /* ====== Utilidades UI ====== */
+  private actualizarTotalGlobal() {
+    this.totalGlobal = this.items.reduce((acc, it) => acc + Number(it.totalItem || 0), 0);
+  }
+
   resetFormulario() {
-    this.form.reset();
+    this.form.reset({ clienteId: null, tipoEvento: null, comentarios: '' });
     this.items = [];
     this.totalGlobal = 0;
     this.formularioVisible = false;
-    this.chatMensajes = [
-      { texto: 'Hola 👋 ¿En qué puedo ayudarte hoy?', tipo: 'bot' }
-    ];
+    this.chatMensajes = [{ texto: 'Hola 👋 ¿En qué puedo ayudarte hoy?', tipo: 'bot' }];
     this.prompt = '';
+    this.enProceso = false;
+    this.threadId = null;
   }
 
   agregarMensajeUsuario(texto: string) {
@@ -312,10 +229,8 @@ export class PresupuestosAiComponent implements OnInit {
 
   private scrollChat() {
     setTimeout(() => {
-      const contenedor = document.querySelector('.chat-mensajes');
-      if (contenedor) {
-        contenedor.scrollTop = contenedor.scrollHeight;
-      }
+      const el = document.querySelector('.chat-mensajes') as HTMLElement | null;
+      if (el) el.scrollTop = el.scrollHeight;
     }, 100);
   }
 }

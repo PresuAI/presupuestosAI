@@ -16,9 +16,9 @@ export interface Cliente {
   providedIn: 'root'
 })
 export class ClienteService {
-  private baseUrl = 'http://localhost:8081/api/clientes';
+  private baseUrl = environment.clientesApi;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getClientes(): Observable<Cliente[]> {
     return this.http.get<Cliente[]>(this.baseUrl, { withCredentials: true });
@@ -32,6 +32,6 @@ export class ClienteService {
     return this.http.delete<void>(`${this.baseUrl}/${id}`, { withCredentials: true });
   }
   actualizarCliente(id: number, cliente: Partial<Cliente>): Observable<Cliente> {
-  return this.http.put<Cliente>(`${this.baseUrl}/${id}`, cliente, { withCredentials: true });
-}
+    return this.http.put<Cliente>(`${this.baseUrl}/${id}`, cliente, { withCredentials: true });
+  }
 }

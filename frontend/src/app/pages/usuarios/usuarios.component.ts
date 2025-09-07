@@ -1,163 +1,277 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UsuarioService } from '../../services/usuario.service';
-import { AuthService } from '../../services/auth.service';
 import { environment } from '../../../environments/environment';
 import { ChatbotComponent } from '../../shared/chatbot/chatbot.component';
 
-import { TableModule } from 'primeng/table';
-import { ButtonModule } from 'primeng/button';
-import { InputTextModule } from 'primeng/inputtext';
-import { DropdownModule } from 'primeng/dropdown';
-import { TagModule } from 'primeng/tag';
-import { CheckboxModule } from 'primeng/checkbox';
-import { CardModule } from 'primeng/card';
-import { DialogModule } from 'primeng/dialog';
-import { FormsModule } from '@angular/forms';
+type Rol = 'SUPERADMIN' | 'ADMIN' | 'USUARIO';
 
+interface Usuario {
+  id: number;
+  nombre: string;
+  email: string;
+  rol: Rol;
+  activo: boolean;
+}
 
 @Component({
   selector: 'app-usuarios',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    TableModule,
-    ButtonModule,
-    InputTextModule,
-    DropdownModule,
-    TagModule,
-    CheckboxModule,
-    CardModule,
-    DialogModule,
-    FormsModule,
-    ChatbotComponent,
-  ],
+  imports: [CommonModule, ReactiveFormsModule, ChatbotComponent],
   templateUrl: './usuarios.component.html',
-  styleUrls: ['./usuarios.component.scss']
+  styleUrls: ['./usuarios.component.scss'],
 })
 export class UsuariosComponent implements OnInit {
-  usuarios: any[] = [];
-  puedeCrear = false;
-  creando = false;
-  formulario: FormGroup;
-  rolesDisponibles: string[] = [];
+  usuarios: Usuario[] = [];
 
-  @ViewChild('formularioCrear') formularioCrearRef!: ElementRef;
+  creando = false;
+  editando = false;
+  form!: FormGroup;
+  editId: number | null = null;
+
+  rolesDisponibles: Rol[] = [];
+
+  confirmVisible = false;
+  usuarioAEliminarId: number | null = null;
+  usuarioAEliminar?: { id: number; nombre: string };
+
+  toastMsg: string | null = null;
+  toastKind: 'success' | 'error' | 'info' = 'success';
+  private toastTimer: any;
 
   private logoutUrl = `${environment.apiUrlBase}/api/auth/logout`;
 
-  constructor(
-    private fb: FormBuilder,
-    private http: HttpClient,
-    private router: Router,
-    private usuarioService: UsuarioService,
-    public authService: AuthService
-  ) {
-    this.formulario = this.fb.group({
-      nombre: ['', [
-        Validators.required,
-        Validators.minLength(2),
-        Validators.maxLength(50),
-        Validators.pattern(/^[a-zA-ZÁÉÍÓÚáéíóúñÑ\s]+$/)
-      ]],
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [
-        Validators.required,
-        Validators.minLength(6),
-        Validators.maxLength(100)
-      ]],
-      rol: ['', Validators.required],
-      activo: [true]
-    });
+  rolActual: Rol = 'USUARIO';
+  get isSuperAdmin() {
+    return this.rolActual === 'SUPERADMIN';
+  }
+  get isAdmin() {
+    return this.rolActual === 'ADMIN';
+  }
+  get isUsuario() {
+    return this.rolActual === 'USUARIO';
   }
 
+  get canCreate() {
+    return this.isSuperAdmin;
+  }
+  get canEdit() {
+    return this.isSuperAdmin || this.isAdmin;
+  }
+  get canDelete() {
+    return this.isSuperAdmin;
+  }
+
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private usuarioService: UsuarioService
+  ) {}
+
   ngOnInit(): void {
-    this.authService.cargarUsuario().subscribe({
-      next: () => {
-        this.puedeCrear = this.authService.puedeCrearUsuarios();
+    this.usuarioService.validarSesion().subscribe({
+      next: (s) => {
+        const raw = String(s?.rol ?? '').toUpperCase();
+        this.rolActual =
+          raw === 'SUPERADMIN'
+            ? 'SUPERADMIN'
+            : raw === 'ADMIN'
+            ? 'ADMIN'
+            : 'USUARIO';
+
+        this.rolesDisponibles = this.isSuperAdmin
+          ? ['SUPERADMIN', 'ADMIN', 'USUARIO']
+          : this.isAdmin
+          ? ['ADMIN', 'USUARIO']
+          : [];
+
+        this.initForm();
         this.cargarUsuarios();
       },
       error: () => {
-        console.error('🔒 No autenticado. Redirigiendo...');
-        this.router.navigate(['/login']);
-      }
+        this.rolesDisponibles = [];
+        this.initForm();
+        this.cargarUsuarios();
+      },
     });
   }
 
-  cargarUsuarios(): void {
+  private initForm() {
+    this.form = this.fb.group({
+      nombre: [''],
+      email: [''],
+      password: [''],
+      rol: ['USUARIO'],
+      activo: [true],
+    });
+  }
+
+  cargarUsuarios() {
     this.usuarioService.getUsuarios().subscribe({
-      next: data => this.usuarios = data,
-      error: err => console.error('Error al obtener usuarios:', err)
+      next: (list: Usuario[]) => {
+        this.usuarios = list;
+      },
+      error: () =>
+        this.showToast('No se pudieron cargar los usuarios.', 'error'),
     });
   }
 
-  abrirFormularioCrearUsuario(): void {
+  abrirCrear() {
+    if (!this.canCreate) return;
     this.creando = true;
-    this.rolesDisponibles = this.authService.getRolesDisponiblesParaCrear();
-    setTimeout(() => {
-      this.formularioCrearRef.nativeElement
-        .scrollIntoView({ behavior: 'smooth' });
-    }, 100);
+    this.editando = false;
+    this.editId = null;
+
+    this.form.reset({
+      nombre: '',
+      email: '',
+      password: '',
+      rol: 'USUARIO',
+      activo: true,
+    });
   }
 
-  cancelarCreacion(): void {
+  abrirEditarRol(u: Usuario) {
+    if (!this.canEdit) return;
+    this.creando = true;
+    this.editando = true;
+    this.editId = u.id;
+
+    this.form.reset({
+      nombre: u.nombre,
+      email: u.email,
+      password: '',
+      rol: u.rol,
+      activo: u.activo,
+    });
+  }
+
+  cancelar() {
     this.creando = false;
-    this.formulario.reset({ activo: true });
+    this.editando = false;
+    this.editId = null;
+    this.form.reset({ activo: true });
   }
 
-  crearUsuario(): void {
-    if (this.formulario.invalid) {
-      this.formulario.markAllAsTouched();
+  guardar() {
+    if (this.editando && this.editId != null) {
+      const nuevoRol = this.form.get('rol')?.value as Rol;
+      this.usuarioService.actualizarRol(this.editId, nuevoRol).subscribe({
+        next: () => {
+          const i = this.usuarios.findIndex((u) => u.id === this.editId);
+          if (i !== -1)
+            this.usuarios[i] = { ...this.usuarios[i], rol: nuevoRol };
+
+          this.showToast('Rol actualizado correctamente.', 'success');
+          this.cancelar();
+        },
+        error: (err) => {
+          console.error('[USUARIOS][EDITAR ROL] error', err);
+          this.showToast('No se pudo actualizar el rol.', 'error');
+        },
+      });
       return;
     }
-    this.usuarioService.crearUsuario(this.formulario.value).subscribe({
-      next: nuevo => {
-        this.usuarios.push(nuevo);
-        this.creando = false;
-        this.formulario.reset({ activo: true });
-        alert('✅ Usuario creado exitosamente');
+
+    const nombre = (this.form.get('nombre')?.value || '').trim();
+    const email = (this.form.get('email')?.value || '').trim();
+    const pass = this.form.get('password')?.value || '';
+
+    if (!nombre) {
+      this.showToast('El nombre es obligatorio.', 'error');
+      return;
+    }
+    if (!email) {
+      this.showToast('El email es obligatorio.', 'error');
+      return;
+    }
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+      this.showToast('El email no es válido.', 'error');
+      return;
+    }
+    if (pass.length < 6) {
+      this.showToast(
+        'La contraseña debe tener al menos 6 caracteres.',
+        'error'
+      );
+      return;
+    }
+
+    const dto = {
+      nombre: this.form.get('nombre')?.value,
+      email: (this.form.get('email')?.value || '').toLowerCase(),
+      password: this.form.get('password')?.value,
+      rol: this.form.get('rol')?.value,
+      activo: this.form.get('activo')?.value,
+    };
+
+    this.usuarioService.crearUsuario(dto).subscribe({
+      next: (nuevo: Usuario) => {
+        this.usuarios.unshift(nuevo);
+        this.showToast('Usuario creado correctamente.', 'success');
+        this.cancelar();
       },
-      error: err => {
-        console.error('Error al crear usuario', err);
-        alert('❌ Error al crear usuario: ' +
-          (err.error?.message || 'Error desconocido'));
-      }
+      error: (err) => {
+        const friendly = this.extractBackendMessage(err);
+        this.showToast(friendly, 'error');
+      },
     });
   }
 
-  editarRol(usuario: any): void {
-    const nuevoRol = prompt(
-      'Nuevo rol (ADMIN, USUARIO o SUPERADMIN):',
-      usuario.rol
-    );
-    if (nuevoRol && nuevoRol !== usuario.rol) {
-      this.usuarioService.actualizarRol(usuario.id, nuevoRol).subscribe({
-        next: () => usuario.rol = nuevoRol,
-        error: err => console.error('Error al actualizar rol', err)
-      });
+  pedirEliminar(u: Usuario) {
+    if (!this.canDelete) return;
+    this.usuarioAEliminarId = u.id;
+    this.usuarioAEliminar = { id: u.id, nombre: u.nombre };
+    this.confirmVisible = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  cerrarConfirm() {
+    this.confirmVisible = false;
+    this.usuarioAEliminarId = null;
+    this.usuarioAEliminar = undefined;
+    document.body.style.overflow = '';
+  }
+
+  confirmarEliminar() {
+    if (!this.canDelete || this.usuarioAEliminarId == null) return;
+    const id = this.usuarioAEliminarId;
+    this.usuarioService.eliminarUsuario(id).subscribe({
+      next: () => {
+        this.usuarios = this.usuarios.filter((x) => x.id !== id);
+        this.showToast('Usuario eliminado correctamente.', 'success');
+        this.cerrarConfirm();
+      },
+      error: () => this.showToast('No se pudo eliminar el usuario.', 'error'),
+    });
+  }
+
+  showToast(
+    msg: string,
+    kind: 'success' | 'error' | 'info' = 'success',
+    ms = 3000
+  ) {
+    this.toastMsg = msg;
+    this.toastKind = kind;
+    clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => (this.toastMsg = null), ms);
+  }
+
+  cerrarSesion() {
+    fetch(this.logoutUrl, { method: 'POST', credentials: 'include' })
+      .then(() => this.router.navigate(['/login']))
+      .catch(() => this.showToast('No se pudo cerrar sesión.', 'error'));
+  }
+
+  private extractBackendMessage(err: any): string {
+    const status = err?.status;
+
+    if (status === 400 || status === 409) {
+      return 'Ya existe un usuario registrado con ese email.';
     }
-  }
 
-  eliminarUsuario(id: number): void {
-    if (confirm('¿Estás seguro de que querés eliminar este usuario?')) {
-      this.usuarioService.eliminarUsuario(id).subscribe({
-        next: () =>
-          this.usuarios = this.usuarios.filter(u => u.id !== id),
-        error: err => console.error('Error al eliminar usuario', err)
-      });
-    }
+    return 'No se pudo crear el usuario.';
   }
-
-  cerrarSesion(): void {
-    this.http.post(this.logoutUrl, {}, { withCredentials: true })
-      .subscribe({
-        next: () => this.router.navigate(['/login']),
-        error: err => console.error('Error al cerrar sesión', err)
-      });
-  }
-
 }

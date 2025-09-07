@@ -8,49 +8,59 @@ import { PanelMenuModule } from 'primeng/panelmenu';
 import { ButtonModule } from 'primeng/button';
 import { AuthService } from '../../services/auth.service';
 
-
 @Component({
   selector: 'app-navbar',
   standalone: true,
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss'],
-  imports: [MenubarModule, CommonModule, SidebarModule, PanelMenuModule, ButtonModule]
+  imports: [
+    MenubarModule,
+    CommonModule,
+    SidebarModule,
+    PanelMenuModule,
+    ButtonModule,
+  ],
 })
 export class NavbarComponent implements OnInit {
   menuVisible = false;
-iaOpen: boolean = false;
+  iaOpen: boolean = false;
   desktopItems: MenuItem[] = [];
   mobileItems: MenuItem[] = [];
 
-  constructor(private router: Router,private authService: AuthService) { }
+  constructor(private router: Router, private authService: AuthService) {}
 
   ngOnInit(): void {
     const items: MenuItem[] = [
       {
         label: 'Usuarios',
         icon: 'pi pi-users',
-        command: () => this.navegar('/usuarios')
+        command: () => this.navegar('/usuarios'),
       },
       {
         label: 'Productos',
         icon: 'pi pi-shopping-cart',
-        command: () => this.navegar('/productos')
+        command: () => this.navegar('/productos'),
       },
       {
         label: 'Clientes',
         icon: 'pi pi-id-card',
-        command: () => this.navegar('/clientes')
+        command: () => this.navegar('/clientes'),
       },
       {
         label: 'Presupuestos',
         icon: 'pi pi-file-edit',
-        command: () => this.navegar('/presupuestos')
+        command: () => this.navegar('/presupuestos'),
       },
       {
         label: 'Presupuestos AI',
         icon: 'pi pi-android',
-        command: () => this.navegar('/presupuestos-ai')
-      }
+        command: () => this.navegar('/presupuestos-ai'),
+      },
+      {
+        label: 'Estadísticas', 
+        icon: 'pi pi-chart-bar',
+        command: () => this.navegar('/estadisticas'),
+      },
     ];
 
     // Mismo menú para ambas vistas; podés diferenciarlos si querés.
@@ -69,7 +79,7 @@ iaOpen: boolean = false;
       },
       error: () => {
         // opcional: mostrar toast si falla
-      }
+      },
     });
   }
 }

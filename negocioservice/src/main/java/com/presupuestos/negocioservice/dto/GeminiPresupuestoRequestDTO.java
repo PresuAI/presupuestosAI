@@ -5,6 +5,7 @@ public class GeminiPresupuestoRequestDTO {
     private PresupuestoRequestDTO presupuestoActual;
     private String comentarios;
     private String mensaje;
+    private String threadId;
 
     public Long getClienteId() {
         return clienteId;
@@ -37,4 +38,7 @@ public class GeminiPresupuestoRequestDTO {
     public void setMensaje(String mensaje) {
         this.mensaje = mensaje;
     }
+
+    public String getThreadId() { return threadId; }
+    public void setThreadId(String threadId) { this.threadId = threadId; }
 }
