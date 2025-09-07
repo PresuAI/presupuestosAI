@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+// src/app/shared/chatbot/chatbot.component.ts
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -21,22 +22,39 @@ export class ChatbotComponent {
   historialMensajes: Mensaje[] = [];
   cargando = false;
 
-  // Memoria de conversación con Assistants
   private threadId: string | null = null;
+
+  // Contenedor que scrollea
+  @ViewChild('mensajesRef') private mensajesRef?: ElementRef<HTMLDivElement>;
 
   constructor(private http: HttpClient) {}
 
-  enviarMensaje(): void {
-    const mensaje = (this.mensajeUsuario || '').trim();
-    if (!mensaje || this.cargando) return;
+  abrir(): void {
+    this.mostrarChat = true;
+    this.scrollToEnd(false);
+  }
 
-    // UI: muestro mi mensaje y limpio input
-    this.historialMensajes.push({ origen: 'yo', texto: mensaje });
+  cerrar(): void {
+    this.mostrarChat = false;
+  }
+
+  nuevaConversacion(): void {
+    this.threadId = null;
+    this.historialMensajes = [];
     this.mensajeUsuario = '';
-    this.cargando = true;
+    this.scrollToEnd(false);
+  }
 
-    // Body que espera el back: { mensaje, threadId }
-    const body = { mensaje, threadId: this.threadId };
+  enviarMensaje(): void {
+    const texto = (this.mensajeUsuario || '').trim();
+    if (!texto || this.cargando) return;
+
+    this.historialMensajes.push({ origen: 'yo', texto });
+    this.mensajeUsuario = '';
+    this.scrollToEnd(); // tras mi mensaje
+
+    this.cargando = true;
+    const body = { mensaje: texto, threadId: this.threadId };
 
     this.http.post(`${environment.openAIBase}/mensaje`, body, {
       withCredentials: true,
@@ -45,46 +63,33 @@ export class ChatbotComponent {
       next: (raw) => {
         this.cargando = false;
 
-        // Parseo del wrapper { threadId, data }
         const { threadId, payload } = this.parseWrapper(raw || '');
         if (threadId) this.threadId = threadId;
 
-        // payload puede ser { mensaje: "..." } o string llano
         const textoIA = this.extraerMensaje(payload);
         this.historialMensajes.push({ origen: 'ia', texto: textoIA });
+        this.scrollToEnd(); // tras respuesta
       },
       error: () => {
         this.cargando = false;
-        this.historialMensajes.push({
-          origen: 'ia',
-          texto: '❌ Error al conectar con la IA.'
-        });
+        this.historialMensajes.push({ origen: 'ia', texto: '❌ Error al conectar con la IA.' });
+        this.scrollToEnd(); // también en error
       }
     });
   }
 
-  nuevaConversacion(): void {
-    this.threadId = null;              // resetea memoria del assistant
-    this.historialMensajes = [];       // limpia chat
-    this.mensajeUsuario = '';
-  }
-
-  // ===== Helpers =====
+  // ========== Helpers ==========
+  /** El back responde { threadId, data } (data puede venir string por safeJson). */
   private parseWrapper(raw: string): { threadId: string | null; payload: any } {
     const outer = JSON.parse(raw.trim());
-
-    if (outer?.error) {
-      throw new Error(String(outer.error));
-    }
+    if (outer?.error) throw new Error(String(outer.error));
 
     const threadId: string | null = outer?.threadId ?? null;
     let data = outer?.data;
 
-    // El back puede devolver data como string (por safeJson)
     if (typeof data === 'string') {
       const cleaned = this.stripFences(data.trim());
-      try { data = JSON.parse(cleaned); }
-      catch { data = { mensaje: cleaned }; }
+      try { data = JSON.parse(cleaned); } catch { data = { mensaje: cleaned }; }
     }
     return { threadId, payload: data };
   }
@@ -93,7 +98,6 @@ export class ChatbotComponent {
     if (!payload) return '⚠️ Sin respuesta.';
     if (typeof payload === 'string') return payload;
     if (payload?.mensaje) return String(payload.mensaje);
-    // fallback por si el assistant devolviera un objeto distinto
     try { return '```json\n' + JSON.stringify(payload, null, 2) + '\n```'; }
     catch { return String(payload); }
   }
@@ -104,5 +108,23 @@ export class ChatbotComponent {
     else if (out.startsWith('```')) out = out.slice(3);
     if (out.endsWith('```')) out = out.slice(0, -3);
     return out.trim();
+  }
+
+  /** Desplaza el contenedor de mensajes al fondo (sin type narrowing raro). */
+  private scrollToEnd(smooth = true) {
+    // Doble RAF para asegurar que el DOM ya pintó el último mensaje
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const el = this.mensajesRef?.nativeElement as HTMLDivElement | null;
+      if (!el) return;
+      const top = el.scrollHeight - el.clientHeight;
+
+      // usa scrollTo si está (suave), si no, scrollTop directo
+      const anyEl = el as any;
+      if (smooth && typeof anyEl.scrollTo === 'function') {
+        anyEl.scrollTo({ top, behavior: 'smooth' });
+      } else {
+        el.scrollTop = top;
+      }
+    }));
   }
 }

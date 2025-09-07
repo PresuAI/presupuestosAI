@@ -3,7 +3,7 @@
   class="chatbot-boton"
   pButton
   icon="pi pi-comments"
-  (click)="mostrarChat = true"
+  (click)="abrir()"
   label="IA">
 </button>
 
@@ -25,7 +25,7 @@
       <button
         class="chatbot-close"
         type="button"
-        (click)="mostrarChat = false"
+        (click)="cerrar()"
         aria-label="Minimizar">−</button>
     </div>
   </div>
@@ -33,7 +33,7 @@
   <!-- Caja principal -->
   <div class="chat-box">
     <!-- Mensajes -->
-    <div class="mensajes">
+    <div class="mensajes" #mensajesRef>
       <div *ngFor="let mensaje of historialMensajes">
         <div
           [ngClass]="mensaje.origen === 'yo' ? 'mensaje-yo' : 'mensaje-ia'"
@@ -41,7 +41,6 @@
         </div>
       </div>
 
-      <!-- Indicador de escritura opcional -->
       <div *ngIf="cargando" class="mensaje-ia">
         <em>La IA está escribiendo…</em>
       </div>
