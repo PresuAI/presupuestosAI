@@ -127,3 +127,33 @@ $sbx-cream-2: #f6f0e8;
 
 /* Fallbacks */
 .chat-box .mensaje-yo, .chat-box .mensaje-ia { text-align: left; }
+/* Contenedor de acciones a la derecha del header */
+.chatbot-header .acciones {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+/* Botón "Nueva conversación" con estilo de chip/link */
+.chatbot-new {
+  background: transparent;
+  border: none;
+  color: #cdefe4;              /* tono claro sobre el verde oscuro */
+  font-weight: 700;
+  letter-spacing: .2px;
+  padding: .25rem .5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease;
+
+  &:hover { background: rgba(255,255,255,.12); color: #fff; }
+  &:disabled { opacity: .6; cursor: not-allowed; }
+}
+
+/* El botón minimizar ya usa .chatbot-close (lo dejé igual que tu diseño) */
+/* Si querés que quede un toque más centrado visualmente en altura: */
+.chatbot-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
