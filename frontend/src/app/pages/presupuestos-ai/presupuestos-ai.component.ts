@@ -276,7 +276,7 @@ export class PresupuestosAiComponent implements OnInit {
 
     const dto: PresupuestoRequest = {
       clienteId: this.form.value.clienteId,
-      estado: 'Propuesta',
+      estado: 'PROPUESTO',
       tipoEvento: this.form.value.tipoEvento,
       comentarios: this.form.value.comentarios,
       gananciaEstimada: 0,
