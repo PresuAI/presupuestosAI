@@ -8,4 +8,5 @@ export const environment = {
     estadisticasApi: 'https://app.confiteriamalu.com/api/estadisticas',
     clientesApi: 'https://app.confiteriamalu.com/api/clientes',
     presupuestosApi: 'https://app.confiteriamalu.com/api/presupuestos',
+    openAIBase: 'https://app.confiteriamalu.com/api/openAI',
 };
