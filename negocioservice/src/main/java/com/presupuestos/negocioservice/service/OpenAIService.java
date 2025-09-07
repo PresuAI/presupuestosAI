@@ -2,8 +2,8 @@ package com.presupuestos.negocioservice.service;
 
 import com.presupuestos.negocioservice.dto.GeminiPresupuestoRequestDTO;
 
-public interface GeminiService {
-    String obtenerRespuesta(String mensaje);
+public interface OpenAIService {
+    String enviarPrompt(String mensaje, String threadId);
 
     String generarPresupuestoConAI(GeminiPresupuestoRequestDTO dto);
 }

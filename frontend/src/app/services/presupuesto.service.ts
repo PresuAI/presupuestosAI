@@ -9,7 +9,7 @@ import { PresupuestoResponse } from '../types/presupuesto';
   providedIn: 'root'
 })
 export class PresupuestoService {
-  private url = 'http://localhost:8081/api/presupuestos';
+  private url = environment.presupuestosApi;
 
   constructor(private http: HttpClient) {}
 

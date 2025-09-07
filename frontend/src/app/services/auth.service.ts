@@ -19,6 +19,7 @@ export class AuthService {
   usuarioActual$ = this.usuarioActualSubject.asObservable();
 
   private baseUrl = `${environment.usuarioApi}`;
+  private base = `${environment.apiUrlBase}`;
 
   constructor(private http: HttpClient) { }
 
@@ -46,7 +47,7 @@ export class AuthService {
     return [];
   }
   logout(): Observable<void> {
-    return this.http.post<void>(`${this.baseUrl}/logout`, {}, { withCredentials: true }).pipe(
+    return this.http.post<void>(`${this.base}/api/auth/logout`, {}, { withCredentials: true }).pipe(
       tap(() => this.usuarioActualSubject.next(null))
     );
   }

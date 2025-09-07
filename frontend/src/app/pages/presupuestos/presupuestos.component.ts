@@ -344,6 +344,50 @@ productoNombre = (id: number | null | undefined): string => {
       life: 2000,
     });
   }
+  onGuardarClick(): void {
+  // 1) Validación de items
+  if (this.items.length === 0) {
+    this.messageService.add({
+      severity: 'warn',
+      summary: 'Carrito vacío',
+      detail: 'Agregá al menos un producto al presupuesto.',
+      life: 3000,
+    });
+    // lleva al panel de productos por UX (opcional)
+    this.mostrarFormularioFinal = false;
+    this.carritoAbierto = true;
+    return;
+  }
+
+  // 2) Validación de formulario
+  if (this.formPresupuesto.invalid) {
+    this.formPresupuesto.markAllAsTouched();
+
+    // construir un mensaje corto de faltantes
+    const faltantes: string[] = [];
+    if (this.formPresupuesto.get('clienteId')?.invalid) faltantes.push('Cliente');
+    if (this.formPresupuesto.get('estado')?.invalid)     faltantes.push('Estado');
+    if (this.formPresupuesto.get('tipoEvento')?.invalid) faltantes.push('Tipo de evento');
+
+    this.messageService.add({
+      severity: 'warn',
+      summary: 'Completá los datos',
+      detail: faltantes.length
+        ? `Faltan: ${faltantes.join(', ')}.`
+        : 'Revisá los campos obligatorios.',
+      life: 3500,
+    });
+
+    // scrollear al inicio del form para que el usuario vea dónde falta
+    document.getElementById('form-presupuesto-top')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return;
+  }
+
+  // 3) Si todo OK, delega a crear/editar
+  this.presupuestoEditandoId ? this.editarPresupuesto() : this.crearPresupuesto();
+}
+
 
   eliminarItem(index: number): void { this.items.splice(index, 1); }
   continuar(): void { this.mostrarFormularioFinal = true; }

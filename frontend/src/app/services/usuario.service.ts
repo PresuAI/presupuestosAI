@@ -33,7 +33,7 @@ export class UsuarioService {
   return this.http.put<string>(
     `${this.base}/${id}/rol`,
     { nuevoRol },
-    { withCredentials: true, responseType: 'text' as 'json' } // <- clave
+    { withCredentials: true, responseType: 'text' as 'json' } 
   );
 }
 

@@ -18,7 +18,7 @@ export interface TotalPorCliente {
 export class EstadisticasService {
   private base = environment.estadisticasApi
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   ingresosMensuales(): Observable<number | string> {
     return this.http.get<number | string>(`${this.base}/ingresos-mensuales`, { withCredentials: true });

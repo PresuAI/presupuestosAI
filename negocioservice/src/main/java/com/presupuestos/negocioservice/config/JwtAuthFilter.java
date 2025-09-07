@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import java.io.IOException;
 import java.util.Collections;
 
+// JwtAuthFilter.java
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
@@ -32,9 +33,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                     HttpServletResponse res,
                                     FilterChain chain)
             throws ServletException, IOException {
+
+        // ✅ Dejá pasar el preflight sin tocar nada
+        if ("OPTIONS".equalsIgnoreCase(req.getMethod())) {
+            res.setStatus(HttpServletResponse.SC_OK);
+            chain.doFilter(req, res);
+            return;
+        }
+
         String token = null;
 
-        // 1) busca cookie "token"
         if (req.getCookies() != null) {
             for (Cookie c : req.getCookies()) {
                 if ("token".equals(c.getName())) {
@@ -43,12 +51,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 }
             }
         }
-        // 2) si no, busca header Authorization
         if (token == null) {
             String h = req.getHeader("Authorization");
-            if (h != null && h.startsWith("Bearer ")) {
-                token = h.substring(7);
-            }
+            if (h != null && h.startsWith("Bearer ")) token = h.substring(7);
         }
 
         if (token != null) {
@@ -60,16 +65,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
                 if (email != null) {
                     var auth = new UsernamePasswordAuthenticationToken(
-                            email,
-                            null,
-                            Collections.emptyList()
-                    );
+                            email, null, Collections.emptyList());
                     auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
             } catch (Exception e) {
+                // ⚠️ Importante: NO cierres la conexión abruptamente.
+                res.resetBuffer();
                 res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                res.setContentType("text/plain;charset=UTF-8");
                 res.getWriter().write("Token inválido o expirado");
+                res.flushBuffer();
                 return;
             }
         }
@@ -77,3 +83,4 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         chain.doFilter(req, res);
     }
 }
+
