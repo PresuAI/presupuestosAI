@@ -1,29 +1,68 @@
-<button class="chatbot-boton" pButton icon="pi pi-comments" (click)="mostrarChat = true" label="IA"></button>
+<!-- Botón flotante para abrir el chat -->
+<button
+  class="chatbot-boton"
+  pButton
+  icon="pi pi-comments"
+  (click)="abrir()"
+  label="IA">
+</button>
 
+<!-- Popup del chat -->
 <div class="chatbot-popup" *ngIf="mostrarChat">
+  <!-- Header -->
   <div class="chatbot-header">
     <span>🤖 Chat con la IA</span>
-    <button (click)="mostrarChat = false" class="chatbot-close" aria-label="Cerrar">−</button>
+
+    <div class="acciones">
+      <button
+        class="chatbot-new"
+        type="button"
+        (click)="nuevaConversacion()"
+        [disabled]="cargando">
+        Nueva conversación
+      </button>
+
+      <button
+        class="chatbot-close"
+        type="button"
+        (click)="cerrar()"
+        aria-label="Minimizar">−</button>
+    </div>
   </div>
 
+  <!-- Caja principal -->
   <div class="chat-box">
-    <div class="mensajes">
+    <!-- Mensajes -->
+    <div class="mensajes" #mensajesRef>
       <div *ngFor="let mensaje of historialMensajes">
         <div
           [ngClass]="mensaje.origen === 'yo' ? 'mensaje-yo' : 'mensaje-ia'"
           [innerHTML]="mensaje.texto | markdownHtml">
         </div>
       </div>
+
+      <div *ngIf="cargando" class="mensaje-ia">
+        <em>La IA está escribiendo…</em>
+      </div>
     </div>
 
+    <!-- Input + Enviar -->
     <div class="chat-input">
       <input
         type="text"
         [(ngModel)]="mensajeUsuario"
         (keyup.enter)="enviarMensaje()"
         placeholder="Escribí tu mensaje..."
-        class="p-inputtext" />
-      <button pButton icon="pi pi-send" class="p-button-sm p-button-rounded" (click)="enviarMensaje()" [disabled]="!mensajeUsuario.trim()"></button>
+        class="p-inputtext"
+        [disabled]="cargando" />
+
+      <button
+        pButton
+        icon="pi pi-send"
+        class="p-button-sm p-button-rounded"
+        (click)="enviarMensaje()"
+        [disabled]="!mensajeUsuario.trim() || cargando">
+      </button>
     </div>
   </div>
 </div>

@@ -8,4 +8,5 @@ export const environment = {
     estadisticasApi: 'http://localhost:8081/api/estadisticas',
     clientesApi: 'http://localhost:8081/api/clientes',
     presupuestosApi: 'http://localhost:8081/api/presupuestos',
+    openAIBase: 'http://localhost:8081/api/openAI',
 };
